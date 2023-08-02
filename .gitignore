@@ -42,3 +42,20 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated code
+/noheva-api/*
+!noheva-api/pubspec.yaml
+*.g.dart
+
+# Environment variables
+.env
+
+# Metrics
+metrics
+
+# Android Keystore
+android/key.properties
+
+# Flutter version manager
+.fvm/flutter_sdk
