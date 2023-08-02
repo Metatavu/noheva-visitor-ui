@@ -56,3 +56,6 @@ metrics
 
 # Android Keystore
 android/key.properties
+
+# Flutter version manager
+.fvm/flutter_sdk
