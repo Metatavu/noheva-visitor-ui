@@ -1,8 +1,4 @@
-# noheva-visitor-ui
-
-HOX!
-Hyphens are invalid characters for Dart project name and even tho the name is described within pubspec.yaml, Flutter is interpreting the project name from the directory name.
-Use `flutter create . --project-name noheva_visitor_ui --platforms=...` and replace ... with platforms, seperated by comma.
+# noheva_visitor_ui
 
 A new Flutter project.
 
