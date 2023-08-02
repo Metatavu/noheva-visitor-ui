@@ -1,6 +1,6 @@
 # noheva_visitor_ui
 
-A new Flutter project.
+Noheva visitor UI project
 
 ## Getting Started
 
