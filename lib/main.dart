@@ -33,11 +33,9 @@ void main() async {
 }
 
 void _initPeriodicStatusMessage() {
-  Timer.periodic(const Duration(seconds: 30), (_) async {
-    try {
-      await mqttClient.onConnected();
-    } catch (exception) {
-      SimpleLogger().shout("Status message error: $exception");
+  Timer.periodic(const Duration(seconds: 30), (_) {
+    if (mqttClient.isConnected) {
+      mqttClient.sendStatusMessage(true);
     }
   });
 }
