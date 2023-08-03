@@ -32,6 +32,16 @@ void main() async {
   runApp(const MyApp());
 }
 
+void _initPeriodicStatusMessage() {
+  Timer.periodic(const Duration(seconds: 30), (_) async {
+    try {
+      await mqttClient.onConnected();
+    } catch (exception) {
+      SimpleLogger().shout("Status message error: $exception");
+    }
+  });
+}
+
 Future<void> _initializeMqttClient() async {
   final String? serialNumber = await DeviceInfo.getSerialNumber();
 
@@ -42,6 +52,7 @@ Future<void> _initializeMqttClient() async {
   } else {
     SimpleLogger().info("Device ID: $serialNumber");
     await mqttClient.connect(serialNumber);
+    _initPeriodicStatusMessage();
   }
 }
 
