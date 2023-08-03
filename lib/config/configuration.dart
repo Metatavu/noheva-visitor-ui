@@ -8,6 +8,10 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 class Configuration {
   static const String API_BASE_PATH = "API_BASE_PATH";
   static const String ENVIRONMENT = "ENVIRONMENT";
+  static const String MQTT_USERNAME = "MQTT_USERNAME";
+  static const String MQTT_PASSWORD = "MQTT_PASSWORD";
+  static const String MQTT_URL = "MQTT_URL";
+  static const String MQTT_PORT = "MQTT_PORT";
 
   static final Configuration _instance = Configuration._();
   factory Configuration() => _instance;
@@ -22,6 +26,10 @@ class Configuration {
     List<String> keys = [
       API_BASE_PATH,
       ENVIRONMENT,
+      MQTT_USERNAME,
+      MQTT_PASSWORD,
+      MQTT_URL,
+      MQTT_PORT
     ];
 
     for (final key in keys) {
@@ -41,4 +49,8 @@ class Configuration {
 
   String getApiBasePath() => get(API_BASE_PATH);
   String getEnvironment() => get(ENVIRONMENT);
+  String getMqttUsername() => get(MQTT_USERNAME);
+  String getMqttPassword() => get(MQTT_PASSWORD);
+  String getMqttUrl() => get(MQTT_URL);
+  String getMqttPort() => get(MQTT_PORT);
 }

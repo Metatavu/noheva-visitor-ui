@@ -1,10 +1,12 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
+import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
+import "utils/device_info.dart";
 
 late final Configuration configuration;
 late final String environment;
@@ -23,7 +25,24 @@ void main() async {
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
 
+  SimpleLogger().info("Connecting to MQTT broker...");
+
+  await _initializeMqttClient();
+
   runApp(const MyApp());
+}
+
+Future<void> _initializeMqttClient() async {
+  final String? serialNumber = await DeviceInfo.getSerialNumber();
+
+  if (serialNumber == null) {
+    SimpleLogger().warning("Device ID not found, cannot connect to MQTT.");
+
+    return;
+  } else {
+    SimpleLogger().info("Device ID: $serialNumber");
+    await mqttClient.connect(serialNumber);
+  }
 }
 
 /// Configures logger to use [logLevel] and formats log messages to be cleaner than by default.
