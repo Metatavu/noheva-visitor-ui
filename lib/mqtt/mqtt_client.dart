@@ -138,7 +138,7 @@ class MqttClient {
 
   /// Disconnects MQTT Client
   void disconnect() {
-    SimpleLogger().info("Disconnecting...");
+    SimpleLogger().info("Disconnecting MQTT Client...");
     _client?.disconnect();
   }
 
