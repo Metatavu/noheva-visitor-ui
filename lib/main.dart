@@ -6,6 +6,7 @@ import "package:openapi_generator_annotations/openapi_generator_annotations.dart
 import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
+import "screens/device_setup.dart";
 import "utils/device_info.dart";
 
 late final Configuration configuration;
@@ -90,6 +91,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _pong = "";
 
+  /// Navigates to [DeviceSetupScreen].
+  Future _navigateToSetupScreen(BuildContext context) async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeviceSetupScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   apiFactory.getSystemApi().then(
                         (api) => api.ping().then((value) {
                           setState(() => _pong = value.toString());
-                          Timer.periodic(const Duration(seconds: 5), (_) {
+                          Timer.periodic(const Duration(seconds: 10), (_) {
                             setState(() => _pong = "");
                           });
                         }),
@@ -134,6 +145,25 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               _pong,
               style: const TextStyle(fontSize: 50),
+            ),
+            ElevatedButton(
+              style: ButtonStyle(
+                padding: MaterialStateProperty.all(
+                  EdgeInsetsGeometry.lerp(
+                    const EdgeInsets.all(20),
+                    const EdgeInsets.all(30),
+                    0.5,
+                  ),
+                ),
+              ),
+              onPressed: () async {
+                SimpleLogger().info("navigate");
+                await _navigateToSetupScreen(context);
+              },
+              child: const Text(
+                "Navigate",
+                style: TextStyle(fontSize: 50),
+              ),
             ),
           ],
         ),
