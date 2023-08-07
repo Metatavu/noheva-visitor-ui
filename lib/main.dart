@@ -48,7 +48,7 @@ Future<void> _initializeMqttClient() async {
 
     return;
   } else {
-    SimpleLogger().info("Device ID: $serialNumber");
+    SimpleLogger().info("Serial number: $serialNumber");
     await mqttClient.connect(serialNumber);
     _initPeriodicStatusMessage();
   }
