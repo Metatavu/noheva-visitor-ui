@@ -233,8 +233,6 @@ class MqttClient {
   }
 
   /// Reconnects MQTT Client.
-  ///
-  /// Reports Sentry issue every 100th failure.
   Future<void> _reconnect({failureCount = 0}) async {
     SimpleLogger().info("Attempting to reconnect MQTT Client...");
     try {
