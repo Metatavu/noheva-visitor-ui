@@ -117,7 +117,7 @@ class MqttClient {
   ///
   /// Attempts to reconnect the client.
   void onDisconnected() {
-    SimpleLogger().info("Disconnected");
+    SimpleLogger().info("MQTT Client disconnected");
     _reconnect();
   }
 
