@@ -95,7 +95,7 @@ class MqttClient {
 
   /// Handler for successful connections event.
   ///
-  /// Will send resend status message periodically
+  /// Sends status message to status topic
   Future onConnected() async {
     StatusMessage? statusMessage = await _buildStatusMessage(true);
 
