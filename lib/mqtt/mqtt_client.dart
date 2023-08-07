@@ -43,12 +43,6 @@ class MqttClient {
       return;
     }
 
-    if (await DeviceInfo.getSerialNumber() == null) {
-      SimpleLogger().warning("Device ID not found, cannot connect to MQTT.");
-
-      return;
-    }
-
     client.logging(on: false);
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
@@ -70,7 +64,8 @@ class MqttClient {
         mqttPassword,
       );
     } catch (exception) {
-      SimpleLogger().shout("Exception while connecting MQTT Client: $exception");
+      SimpleLogger()
+          .shout("Exception while connecting MQTT Client: $exception");
       client.disconnect();
     }
 

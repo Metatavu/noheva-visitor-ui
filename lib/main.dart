@@ -44,7 +44,8 @@ Future<void> _initializeMqttClient() async {
   final String? serialNumber = await DeviceInfo.getSerialNumber();
 
   if (serialNumber == null) {
-    SimpleLogger().warning("Device ID not found, cannot connect to MQTT.");
+    SimpleLogger()
+        .warning("Device serial number not found, cannot connect to MQTT.");
 
     return;
   } else {

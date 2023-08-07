@@ -1,5 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
-import 'package:noheva_visitor_ui/mqtt/model/abstract_message.dart';
+import "package:json_annotation/json_annotation.dart";
+import "package:noheva_visitor_ui/mqtt/model/abstract_message.dart";
 
 part "status_message.g.dart";
 
