@@ -70,7 +70,7 @@ class MqttClient {
         mqttPassword,
       );
     } catch (exception) {
-      SimpleLogger().shout("Exception: $exception");
+      SimpleLogger().shout("Exception while connecting MQTT Client: $exception");
       client.disconnect();
     }
 
