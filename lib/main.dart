@@ -2,16 +2,19 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
+import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
-import "screens/device_setup.dart";
+import "database/dao/keys_dao.dart";
+import 'screens/device_setup_screen.dart';
 import "utils/device_info.dart";
 
 late final Configuration configuration;
 late final String environment;
 final apiFactory = ApiFactory();
+late String? hasDeviceId;
 
 void main() async {
   _configureLogger();
@@ -29,6 +32,12 @@ void main() async {
   SimpleLogger().info("Connecting to MQTT broker...");
 
   await _initializeMqttClient();
+
+  SimpleLogger().info("Checking if device has Id...");
+  // TODO: Currently will always be null
+  hasDeviceId = await keysDao.getDeviceId();
+
+  SimpleLogger().info("Device Id is: $hasDeviceId");
 
   runApp(const MyApp());
 }
@@ -74,105 +83,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: "Noheva visitor UI Home Page"),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  String _pong = "";
-
-  /// Navigates to [DeviceSetupScreen].
-  Future _navigateToSetupScreen(BuildContext context) async {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DeviceSetupScreen(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              "You have pushed the button this many times:",
-            ),
-            SizedBox(
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  padding: MaterialStateProperty.all(
-                    EdgeInsetsGeometry.lerp(
-                      const EdgeInsets.all(20),
-                      const EdgeInsets.all(30),
-                      0.5,
-                    ),
-                  ),
-                ),
-                onPressed: () async {
-                  apiFactory.getSystemApi().then(
-                        (api) => api.ping().then((value) {
-                          setState(() => _pong = value.toString());
-                          Timer.periodic(const Duration(seconds: 10), (_) {
-                            setState(() => _pong = "");
-                          });
-                        }),
-                      );
-                },
-                child: const Text(
-                  "ping",
-                  style: TextStyle(fontSize: 50),
-                ),
-              ),
-            ),
-            Text(
-              _pong,
-              style: const TextStyle(fontSize: 50),
-            ),
-            ElevatedButton(
-              style: ButtonStyle(
-                padding: MaterialStateProperty.all(
-                  EdgeInsetsGeometry.lerp(
-                    const EdgeInsets.all(20),
-                    const EdgeInsets.all(30),
-                    0.5,
-                  ),
-                ),
-              ),
-              onPressed: () async {
-                SimpleLogger().info("navigate");
-                await _navigateToSetupScreen(context);
-              },
-              child: const Text(
-                "Navigate",
-                style: TextStyle(fontSize: 50),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        tooltip: "Increment",
-        child: Icon(Icons.add),
-      ),
+      // Change this to idle screen
+      home: hasDeviceId != null
+          ? const DefaultScreen(title: "Noheva visitor UI Home Page")
+          : const DeviceSetupScreen(),
     );
   }
 }
