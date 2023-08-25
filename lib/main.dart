@@ -10,6 +10,7 @@ import "config/configuration.dart";
 import "database/dao/keys_dao.dart";
 import 'screens/device_setup_screen.dart';
 import "utils/device_info.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
 late final String environment;
@@ -78,6 +79,7 @@ class MyApp extends StatelessWidget {
     SimpleLogger().info("Building app...");
     return MaterialApp(
       title: "Noheva visitor UI",
+      localizationsDelegates: const [AppLocalizations.delegate],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

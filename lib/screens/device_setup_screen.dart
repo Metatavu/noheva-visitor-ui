@@ -3,6 +3,7 @@ import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/utils/device_info.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 /// Device Setup Screen
 class DeviceSetupScreen extends StatefulWidget {
@@ -54,19 +55,28 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Device setup"),
+            Text(
+              AppLocalizations.of(context)!.deviceSetupTitle,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   TextField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: "Name"),
+                    decoration: InputDecoration(
+                      labelText:
+                          AppLocalizations.of(context)!.deviceSetupNameLabel,
+                    ),
                   ),
                   const SizedBox(height: 16.0),
                   TextField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(labelText: "Description"),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!
+                          .deviceSetupDescriptionLabel,
+                    ),
                   ),
                   const SizedBox(height: 16.0),
                   Row(
@@ -74,11 +84,13 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
                     children: [
                       ElevatedButton(
                         onPressed: _submitForm,
-                        child: const Text("Submit"),
+                        child: Text(AppLocalizations.of(context)!
+                            .deviceSetupSubmitButton),
                       ),
                       ElevatedButton(
                         onPressed: _skipSetup,
-                        child: const Text("Skip setup"),
+                        child: Text(AppLocalizations.of(context)!
+                            .deviceSetupSkipButton),
                       ),
                     ],
                   )
