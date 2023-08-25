@@ -14,12 +14,12 @@ import "utils/device_info.dart";
 late final Configuration configuration;
 late final String environment;
 final apiFactory = ApiFactory();
-late String? hasDeviceId;
+String? deviceId;
 
 void main() async {
   _configureLogger();
 
-  SimpleLogger().info("Starting OSS Surveys Customer App...");
+  SimpleLogger().info("Starting Noheva Visitor UI App...");
 
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
@@ -35,9 +35,9 @@ void main() async {
 
   SimpleLogger().info("Checking if device has Id...");
   // TODO: Currently will always be null
-  hasDeviceId = await keysDao.getDeviceId();
+  deviceId = await keysDao.getDeviceId();
 
-  SimpleLogger().info("Device Id is: $hasDeviceId");
+  SimpleLogger().info("Device Id is: $deviceId");
 
   runApp(const MyApp());
 }
@@ -56,8 +56,6 @@ Future<void> _initializeMqttClient() async {
   if (serialNumber == null) {
     SimpleLogger()
         .warning("Device serial number not found, cannot connect to MQTT.");
-
-    return;
   } else {
     SimpleLogger().info("Serial number: $serialNumber");
     await mqttClient.connect(serialNumber);
@@ -77,6 +75,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SimpleLogger().info("Building app...");
     return MaterialApp(
       title: "Noheva visitor UI",
       theme: ThemeData(
@@ -84,9 +83,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Change this to idle screen
-      home: hasDeviceId != null
-          ? const DefaultScreen(title: "Noheva visitor UI Home Page")
-          : const DeviceSetupScreen(),
+      home: deviceId == null
+          ? const DeviceSetupScreen()
+          : const DefaultScreen(title: "Noheva visitor UI Home Page"),
     );
   }
 }
