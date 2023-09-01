@@ -4,5 +4,7 @@
   "deviceSetupDescriptionLabel": "Laitteen kuvaus",
   "deviceSetupInfoText": "Syötä laitteen nimi ja kuvaus ja paina lähetä aloittaaksesi laitteen käyttöönoton.\n Voit myös ohittaa tämän vaiheen ja määrittää laitteen nimen ja kuvauksen Noheva-hallinnassa.",
   "deviceSetupSubmitButton": "Jatka",
-  "deviceSetupSkipButton": "Ohita"
+  "deviceSetupSkipButton": "Ohita",
+  "deviceNotYetApproved": "Laitetta ei ole vielä otettu käyttöön.",
+  "deviceIsApproved": "Laite on otettu käyttöön."
 }
