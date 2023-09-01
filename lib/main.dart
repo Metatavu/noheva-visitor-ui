@@ -73,7 +73,7 @@ Future _pollDeviceApprovalStatus(Timer timer) async {
           .then((response) => response.data?.key);
       if (deviceKey != null) {
         SimpleLogger().info("Device is approved. Storing device key...");
-        await keysDao.persistDeviceKey(deviceKey);
+        await keysDao.storeDeviceKey(deviceKey);
         isDeviceApproved = true;
         SimpleLogger().info("Stored device key, stopping polling!");
         timer.cancel();

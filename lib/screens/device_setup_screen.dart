@@ -37,7 +37,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
       Device createdDevice =
           (await devicesApi.createDevice(deviceRequest: deviceRequest)).data!;
       SimpleLogger().info("Created device: $createdDevice");
-      await keysDao.persistDeviceId(createdDevice.id!);
+      await keysDao.storeDeviceId(createdDevice.id!);
       SimpleLogger().info("Connecting MQTT client...");
       await mqttClient.connect(createdDevice.id!);
       _navigateToDefaultScreen();

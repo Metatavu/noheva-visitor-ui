@@ -15,13 +15,13 @@ class KeysDao extends DatabaseAccessor<Database> with _$KeysDaoMixin {
         .then((value) => value != null && value.key != null);
   }
 
-  /// Persists given [deviceId] to database
-  Future<int> persistDeviceId(String deviceId) async {
+  /// Stores given [deviceId] to database
+  Future<int> storeDeviceId(String deviceId) async {
     return await into(keys).insert(KeysCompanion.insert(deviceId: deviceId));
   }
 
-  /// Persists given [deviceKey] to database
-  Future<int> persistDeviceKey(String deviceKey) async {
+  /// Stores given [deviceKey] to database
+  Future<int> storeDeviceKey(String deviceKey) async {
     int rowId = (await select(keys).getSingle()).id;
 
     return (update(keys)..where((row) => row.id.equals(rowId)))
