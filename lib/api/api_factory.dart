@@ -22,4 +22,9 @@ class ApiFactory {
   Future<noheva_api.SystemApi> getSystemApi() {
     return _getApi().then((api) => api.getSystemApi());
   }
+
+  /// Gets Devices API
+  Future<noheva_api.DevicesApi> getDevicesApi() {
+    return _getApi().then((api) => api.getDevicesApi());
+  }
 }

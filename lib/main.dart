@@ -1,20 +1,22 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
+import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/theme/theme.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
 import "database/dao/keys_dao.dart";
 import 'screens/device_setup_screen.dart';
-import "utils/device_info.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
 late final String environment;
 final apiFactory = ApiFactory();
+late bool isDeviceApproved;
 String? deviceId;
 
 void main() async {
@@ -30,37 +32,55 @@ void main() async {
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
 
-  SimpleLogger().info("Connecting to MQTT broker...");
-
-  await _initializeMqttClient();
-
-  SimpleLogger().info("Checking if device has Id...");
-  // TODO: Currently will always be null
   deviceId = await keysDao.getDeviceId();
 
-  SimpleLogger().info("Device Id is: $deviceId");
+  if (deviceId != null) {
+    SimpleLogger().info("Device Id is: $deviceId");
+    SimpleLogger().info("Connecting to MQTT broker...");
+    await mqttClient.connect(deviceId!);
+  } else {
+    SimpleLogger().info("Device ID not found, cannot connect to MQTT.");
+  }
+
+  SimpleLogger().info("Checking if device is approved...");
+  isDeviceApproved = await keysDao.checkIsDeviceApproved();
+
+  if (isDeviceApproved) {
+    SimpleLogger().info("Device is approved");
+  } else {
+    SimpleLogger().info("Device is not yet approved");
+    Timer.periodic(
+      const Duration(seconds: 30),
+      (timer) => _pollDeviceApprovalStatus(timer),
+    );
+  }
 
   runApp(const MyApp());
 }
 
-void _initPeriodicStatusMessage() {
-  Timer.periodic(const Duration(seconds: 30), (_) {
-    if (mqttClient.isConnected) {
-      mqttClient.sendStatusMessage(true);
+Future _pollDeviceApprovalStatus(Timer timer) async {
+  SimpleLogger().info("Polling device approval status...");
+  DevicesApi devicesApi = await apiFactory.getDevicesApi();
+
+  try {
+    deviceId = await keysDao.getDeviceId();
+    if (deviceId == null) {
+      SimpleLogger().info(
+          "Device ID not found, cannot poll device status. Waiting for setup...");
+    } else {
+      String? deviceKey = await devicesApi
+          .getDeviceKey(deviceId: deviceId!)
+          .then((response) => response.data?.key);
+      if (deviceKey != null) {
+        SimpleLogger().info("Device is approved. Storing device key...");
+        await keysDao.persistDeviceKey(deviceKey);
+        isDeviceApproved = true;
+        SimpleLogger().info("Stored device key, stopping polling!");
+        timer.cancel();
+      }
     }
-  });
-}
-
-Future<void> _initializeMqttClient() async {
-  final String? serialNumber = await DeviceInfo.getSerialNumber();
-
-  if (serialNumber == null) {
-    SimpleLogger()
-        .warning("Device serial number not found, cannot connect to MQTT.");
-  } else {
-    SimpleLogger().info("Serial number: $serialNumber");
-    await mqttClient.connect(serialNumber);
-    _initPeriodicStatusMessage();
+  } catch (exception) {
+    SimpleLogger().info("Error: $exception");
   }
 }
 
@@ -76,18 +96,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SimpleLogger().info("Building app...");
     return MaterialApp(
       title: "Noheva visitor UI",
+      theme: getApplicationTheme(),
       localizationsDelegates: const [AppLocalizations.delegate],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      // Change this to idle screen
-      home: deviceId == null
-          ? const DeviceSetupScreen()
-          : const DefaultScreen(title: "Noheva visitor UI Home Page"),
+      home:
+          deviceId == null ? const DeviceSetupScreen() : const DefaultScreen(),
     );
   }
 }

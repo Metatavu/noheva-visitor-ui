@@ -1,5 +1,9 @@
 import "package:flutter/material.dart";
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
+import "package:noheva_visitor_ui/main.dart";
+import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
+import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/utils/device_info.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -18,26 +22,53 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  void _navigateToDefaultScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DefaultScreen(),
+      ),
+    );
+  }
+
+  Future _createDevice(DeviceRequest deviceRequest) async {
+    DevicesApi devicesApi = await apiFactory.getDevicesApi();
+    try {
+      Device createdDevice =
+          (await devicesApi.createDevice(deviceRequest: deviceRequest)).data!;
+      SimpleLogger().info("Created device: $createdDevice");
+      await keysDao.persistDeviceId(createdDevice.id!);
+      SimpleLogger().info("Connecting MQTT client...");
+      await mqttClient.connect(createdDevice.id!);
+      _navigateToDefaultScreen();
+    } catch (exception) {
+      SimpleLogger().shout("Error creating device: $exception");
+    }
+  }
+
   Future _submitForm() async {
     String name = _nameController.text;
     String description = _descriptionController.text;
-    SimpleLogger().info(await _buildDeviceRequest(
+    DeviceRequest deviceRequest = await _buildDeviceRequest(
       name: name,
       description: description,
-    ));
+    );
+    _createDevice(deviceRequest);
   }
 
   Future _skipSetup() async {
-    SimpleLogger().info("Set up device on management UI");
-    SimpleLogger().info(await _buildDeviceRequest());
-    // TODO: API request/ change screen
+    DeviceRequest deviceRequest = await _buildDeviceRequest();
+    _createDevice(deviceRequest);
   }
 
-  Future<DeviceRequest?> _buildDeviceRequest({name, description}) async {
+  Future<DeviceRequest> _buildDeviceRequest({name, description}) async {
     String version = (await PackageInfo.fromPlatform()).version;
     String? serialNumber = await DeviceInfo.getSerialNumber();
 
-    if (serialNumber == null) return null;
+    if (serialNumber == null) {
+      throw "Serial number not found";
+    }
+    ;
 
     return DeviceRequest((builder) {
       builder.name = name;
@@ -50,14 +81,16 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      backgroundColor: const Color(0xffFCF7F7),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
               AppLocalizations.of(context)!.deviceSetupTitle,
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: const Color(0xff231F20),
+                  ),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -69,6 +102,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
                       labelText:
                           AppLocalizations.of(context)!.deviceSetupNameLabel,
                     ),
+                    cursorColor: const Color(0xff231F20),
                   ),
                   const SizedBox(height: 16.0),
                   TextField(
@@ -77,6 +111,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
                       labelText: AppLocalizations.of(context)!
                           .deviceSetupDescriptionLabel,
                     ),
+                    cursorColor: const Color(0xff231F20),
                   ),
                   const SizedBox(height: 16.0),
                   Row(

@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:typed_data";
 import "package:mqtt_client/mqtt_client.dart";
@@ -105,6 +106,8 @@ class MqttClient {
       await _statusTopic,
       createMessagePayload(jsonEncode(statusMessage)),
     );
+
+    _initPeriodicStatusMessage();
   }
 
   /// Handler for disconnection event.
@@ -254,6 +257,16 @@ class MqttClient {
     }
 
     return client.connectionStatus!.state.name;
+  }
+
+  void _initPeriodicStatusMessage() {
+    Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mqttClient.isConnected) {
+        mqttClient.sendStatusMessage(true);
+      } else {
+        timer.cancel();
+      }
+    });
   }
 }
 
