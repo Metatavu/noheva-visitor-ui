@@ -21,9 +21,7 @@ String? deviceId;
 
 void main() async {
   _configureLogger();
-
   SimpleLogger().info("Starting Noheva Visitor UI App...");
-
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
   SimpleLogger().info("Validating environment variables...");
@@ -58,6 +56,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+/// Polls device approval status and cancels [timer] when device is approved.
 Future _pollDeviceApprovalStatus(Timer timer) async {
   SimpleLogger().info("Polling device approval status...");
   DevicesApi devicesApi = await apiFactory.getDevicesApi();
