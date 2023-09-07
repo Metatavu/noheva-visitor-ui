@@ -49,6 +49,7 @@ class MqttClient {
     client.onUnsubscribed = onUnsubscribed;
     client.onSubscribed = onSubscribed;
     client.onSubscribeFail = onSubscribeFail;
+    client.secure = true;
 
     final connMessage = MqttConnectMessage()
         .keepAliveFor(60)
