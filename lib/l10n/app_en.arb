@@ -1,0 +1,10 @@
+{
+  "deviceSetupTitle": "Device setup",
+  "deviceSetupNameLabel": "Name of device",
+  "deviceSetupDescriptionLabel": "Description of device",
+  "deviceSetupInfoText": "Enter name and description of the device and press submit to initiate device setup.\n Optionally you can skip this step and configure devices name and description within the Noheva management.",
+  "deviceSetupSubmitButton": "Proceed",
+  "deviceSetupSkipButton": "Skip setup",
+  "deviceNotYetApproved": "Device has not yet been approved.",
+  "deviceIsApproved": "Device is approved and ready to use."
+}
