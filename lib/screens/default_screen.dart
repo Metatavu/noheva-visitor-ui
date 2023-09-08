@@ -13,6 +13,8 @@ class DefaultScreen extends StatefulWidget {
 }
 
 /// Default Screen State
+///
+/// TODO: Implement logic for retrieving devices data from backend and navigation to exhibition screen
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
 
