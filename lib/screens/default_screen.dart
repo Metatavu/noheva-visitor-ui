@@ -41,13 +41,17 @@ class _DefaultScreenState extends State<DefaultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(_isDeviceApproved
-            ? AppLocalizations.of(context)!.deviceIsApproved
-            : AppLocalizations.of(context)!.deviceNotYetApproved),
-      ],
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_isDeviceApproved
+                ? AppLocalizations.of(context)!.deviceIsApproved
+                : AppLocalizations.of(context)!.deviceNotYetApproved),
+          ],
+        ),
+      ),
     );
   }
 }
