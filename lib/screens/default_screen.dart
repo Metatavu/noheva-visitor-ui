@@ -1,11 +1,16 @@
 import "dart:async";
 import "dart:ui";
+import "package:flutter/rendering.dart";
+import "package:fwfh_chewie/fwfh_chewie.dart";
 import "package:html/parser.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:flutter_html/flutter_html.dart";
 import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
 import "package:simple_logger/simple_logger.dart";
+import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
+import "package:video_player/video_player.dart";
+
+class MyWidgetFactory extends WidgetFactory with ChewieFactory {}
 
 class DefaultScreen extends StatefulWidget {
   const DefaultScreen({super.key});
@@ -16,6 +21,8 @@ class DefaultScreen extends StatefulWidget {
 
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
+  VideoPlayerController? _controller;
+  Future<void>? _initializeVideoPlayerFuture;
 
   @override
   void initState() {
@@ -38,19 +45,99 @@ class _DefaultScreenState extends State<DefaultScreen> {
     );
   }
 
+  final testHtml = """
+    <div>
+      <video>
+        <source src="https://s3.eu-central-1.amazonaws.com/static.metatavu.io/noheva/uhd_29%2C97.mp4" type="video/mp4">
+      </video>
+    </div>
+  """;
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Html(
-      data: """
-<div id="e055703c-a710-4dd5-9818-f8ec5ec09d58" data-component-type="layout" name="Juurielementti" style="display: flex; flex-direction: column; width: 100%; height: 100%; background-color: rgb(173, 160, 160);"><div class="ylarivi" id="55deb0aa77334d7fbc1b4418bb83cbcd" data-component-type="layout" name="Ylärivi" style="display: flex; flex-direction: column; background-color: rgb(246, 97, 97); width: 100%; height: 10%; align-content: center; justify-content: center; align-items: center; justify-items: center;"><h4 id="f1e7b056-5bb1-4c8b-87b5-53b467bd28b4" data-component-type="text" name="Ylärivin teksti">@resources/024fe541-e3bb-41be-a840-f006b971de14</h4><button id="506d3c27-e925-4a79-a477-bdc74aa64785" data-component-type="button" name="Ylärivin nappula" style="height: 30px; width: 75%;">@resources/bf42bb04-669e-4023-ae65-a485c954977a</button></div><div id="a8196003-ad28-4f36-9a58-eed145571502" data-component-type="layout" name="Keskirivi" style="display: flex; flex-direction: row; width: 100%; height: 80%; background-color: rgb(68, 23, 23); align-content: center; justify-content: center; align-items: center; justify-items: center;"><img id="9417075c-89bd-46f2-9b27-59bf1cc8de33" data-component-type="image" name="Keskirivin kuva" src="https://t3.ftcdn.net/jpg/04/85/49/84/360_F_485498470_HPZ4hpLnyZdLqNs6r1nFsUz2Wvd50wXt.jpg" style="width: 540px; height: 630px;"></div><div id="b43e36bf-e73e-44a9-b533-006615450297" data-component-type="layout" name="Alarivi" style="display: flex; flex-direction: row; width: 100%; height: 10%; background-color: rgb(87, 21, 223); align-content: flex-end; justify-content: flex-end; align-items: flex-end; justify-items: flex-end;"><p id="a8c080dd-50d0-4eda-8188-50599b332ce7" data-component-type="text" name="Alarivin teksti">@resources/b0e2a023-4189-4c39-bd9c-48f2e98db264</p></div></div>
-""",
-      style: {
-        "body": Style(
-            margin: Margins.zero,
-            padding: HtmlPaddings.zero,
-            textDecoration: TextDecoration.none,
-            textTransform: ),
-      },
+    Size screenSize = MediaQuery.of(context).size;
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        body: Container(
+          width: screenSize.width,
+          height: screenSize.height,
+          child: HtmlWidget(
+            testHtml,
+            factoryBuilder: () => MyWidgetFactory(),
+            // customWidgetBuilder: (element) {
+            //   // if (element.localName == "video") {
+            //   //   final sourceElement = element.children
+            //   //       .firstWhere((element) => element.localName == "source");
+            //   //   final videoSrc = sourceElement.attributes["src"];
+            //   //   final videoUrl = Uri.parse(videoSrc ?? "");
+            //   //   _controller = VideoPlayerController.networkUrl(videoUrl)
+            //   //     ..initialize().then((_) => setState(() {}));
+            //   //   return Container(
+            //   //     width: 300,
+            //   //     height: 300,
+            //   //     child: _controller != null
+            //   //         ? _controller!.value.isInitialized
+            //   //             ? AspectRatio(
+            //   //                 aspectRatio: _controller!.value.aspectRatio,
+            //   //                 child: VideoPlayer(_controller!),
+            //   //               )
+            //   //             : Container()
+            //   //         : Container(),
+            //   //     // FutureBuilder(
+            //   //     //   future: _initializeVideoPlayerFuture,
+            //   //     //   builder: ((context, snapshot) {
+            //   //     //     if (snapshot.connectionState == ConnectionState.done &&
+            //   //     //         _controller != null) {
+            //   //     //       return Container(
+            //   //     //           color: Colors.red,
+            //   //     //           width: 300,
+            //   //     //           height: 300,
+            //   //     //           child: AspectRatio(
+            //   //     //             aspectRatio: _controller!.value.aspectRatio,
+            //   //     //             child: VideoPlayer(_controller!),
+            //   //     //           ));
+            //   //     //     } else {
+            //   //     //       return const Center(
+            //   //     //         child: Text("VIDEOTA EI OLE!!!!"),
+            //   //     //       );
+            //   //     //     }
+            //   //     //   }),
+            //   //     // ),
+            //   //   );
+            //   // }
+
+            //   if (element.localName == "img") {
+            //     var image = Image.network(element.attributes["src"]!);
+            //     return GestureDetector(
+            //       onTap: () {
+            //         print("Tapped");
+            //       },
+            //       child: image,
+            //     );
+            //   }
+
+            //   if (element.localName == "button") {
+            //     return ElevatedButton(
+            //       onPressed: () {
+            //         print("Pressed");
+            //       },
+            //       child: Text(element.text),
+            //     );
+            //   }
+
+            //   return null;
+            // },
+          ),
+        ),
+      ),
     );
     // Column(
     //   mainAxisAlignment: MainAxisAlignment.center,
