@@ -2,6 +2,13 @@
 
 Noheva visitor UI project
 
+## Activate RPS
+
+`dart pub global activate rps --version 0.7.0-dev.6`
+Used for running scrips in pubspec.yaml
+For example run code generation with
+`rps gen`
+
 ## Generate API client
 `flutter pub run build_runner build --delete-conflicting-outputs`
 

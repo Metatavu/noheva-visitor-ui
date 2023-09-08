@@ -9,10 +9,7 @@ environment:
   sdk: ">=3.0.6 <4.0.0"
 
 scripts:
-  generate:
-    client: >
-      flutter pub run build_runner build --delete-conflicting-outputs &&
-      flutter pub get noheva-api
+  gen: flutter pub run build_runner build --delete-conflicting-outputs
 
 dependencies:
   flutter:
