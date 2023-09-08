@@ -11,11 +11,11 @@ part "database.g.dart";
 ///
 /// Opens an in-file database, creating it if it doesn't exist.
 /// Add new migrations to [migration.onUpgrade] and bump the [schemaVersion].
-@DriftDatabase(tables: [
-  Keys,
-], include: {
-  "tables.drift"
-})
+@DriftDatabase(
+  tables: [
+    Keys,
+  ],
+)
 class Database extends _$Database {
   Database() : super(_openConnection());
 
