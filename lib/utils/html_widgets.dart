@@ -1,8 +1,9 @@
-import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:noheva_api/noheva_api.dart';
-import 'package:noheva_visitor_ui/widgets/video_widget.dart';
+import "package:collection/collection.dart";
+import "package:flutter/material.dart";
+import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
+import "package:html/dom.dart" as dom;
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/widgets/video_widget.dart";
 
 /// Html Widgets
 ///
@@ -36,10 +37,11 @@ class HtmlWidgets {
     List<ExhibitionPageEventTrigger> eventTriggers,
   ) {
     Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? foundEventTrigger =
-        _findEventTrigger(element, eventTriggers);
+    ExhibitionPageEventTrigger? clickViewEventTrigger =
+        _findClickViewEventTrigger(element, eventTriggers);
     String? foundResource = resources
-        .firstWhereOrNull((resource) => resource.id == element.innerHtml)
+        .firstWhereOrNull(
+            (resource) => resource.id == "@resources/${element.innerHtml}")
         ?.data;
 
     Widget imageWidget = Image.network(
@@ -48,9 +50,9 @@ class HtmlWidgets {
       height: size.height,
     );
 
-    if (foundEventTrigger != null) {
+    if (clickViewEventTrigger != null) {
       return GestureDetector(
-        onTap: _handleTapEvent(foundEventTrigger),
+        onTap: _handleTapEvent(clickViewEventTrigger),
         child: imageWidget,
       );
     }
@@ -65,17 +67,19 @@ class HtmlWidgets {
     List<ExhibitionPageEventTrigger> eventTriggers,
   ) {
     Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? foundEventTrigger =
-        _findEventTrigger(element, eventTriggers);
+    ExhibitionPageEventTrigger? clickViewEventTrigger =
+        _findClickViewEventTrigger(element, eventTriggers);
     String? foundResource = resources
-        .firstWhereOrNull((resource) => resource.id == element.innerHtml)
+        .firstWhereOrNull(
+            (resource) => resource.id == "@resources/${element.innerHtml}")
         ?.data;
 
+    // TODO: Parse styles from HTML
     return ElevatedButton(
         style: ButtonStyle(fixedSize: MaterialStateProperty.all(size)),
-        onPressed: foundEventTrigger != null
-            ? _handleTapEvent(foundEventTrigger)
-            : null,
+        onPressed: clickViewEventTrigger != null
+            ? _handleTapEvent(clickViewEventTrigger)
+            : () {},
         child: Text(foundResource ?? ""));
   }
 
@@ -86,13 +90,15 @@ class HtmlWidgets {
     List<ExhibitionPageEventTrigger> eventTriggers,
   ) {
     Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? foundEventTrigger =
-        _findEventTrigger(element, eventTriggers);
+    ExhibitionPageEventTrigger? clickViewEventTrigger =
+        _findClickViewEventTrigger(element, eventTriggers);
     String? source = element.children
-        .firstWhereOrNull((element) => element.localName == "source")
+        .firstWhereOrNull(
+            (element) => element.localName == CustomHtmlWidgets.SOURCE)
         ?.attributes[CustomHtmlWidgets.SRC];
-    String? foundResource =
-        resources.firstWhereOrNull((resource) => resource.id == source)?.data;
+    String? foundResource = resources
+        .firstWhereOrNull((resource) => resource.id == "@resources/$source")
+        ?.data;
 
     if (source != null) {
       return Container(
@@ -106,7 +112,7 @@ class HtmlWidgets {
   }
 
   /// Finds event trigger assigned to this [element] from [eventTriggers]
-  static ExhibitionPageEventTrigger? _findEventTrigger(
+  static ExhibitionPageEventTrigger? _findClickViewEventTrigger(
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
   ) {
@@ -124,20 +130,24 @@ class HtmlWidgets {
 
   /// Extracts elements width and height
   static Size _extractSize(dom.Element element) {
-    final width = double.tryParse(
-      _extractAttribute(element, CustomHtmlWidgets.WIDTH) ?? "200",
-    );
-    final height = double.tryParse(
-      _extractAttribute(element, CustomHtmlWidgets.WIDTH) ?? "200",
-    );
+    final width = _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH)
+        .replaceAll(RegExp(r'(px|%)\b'), "");
+    final height = _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT)
+        .replaceAll(RegExp(r'(px|%)\b'), "");
 
-    return Size(width ?? 200, height ?? 200);
+    return Size(double.tryParse(width) ?? 200, double.tryParse(height) ?? 200);
   }
 
-  /// Extracts given [attribute] from HTML [element] and applies [resources]
-  static String? _extractAttribute(dom.Element element, String attribute) {
-    return element.attributes[attribute];
-  }
+  /// Extracts given style [attribute] from HTML [element]
+  static String _extractStyleAttribute(
+    dom.Element element,
+    String attribute,
+  ) =>
+      element.styles
+          .firstWhereOrNull((style) => style.property == attribute)
+          ?.value
+          .toString() ??
+      "";
 }
 
 class CustomHtmlWidgets {
