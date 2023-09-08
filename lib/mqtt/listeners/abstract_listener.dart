@@ -1,19 +1,20 @@
-import "package:meta/meta.dart";
-import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
+import "dart:convert";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 
 /// Abstract MQTT Listener class
-abstract class AbstractListener<T> {
+abstract class AbstractListener {
   AbstractListener() {
     setListeners();
   }
 
+  abstract String baseTopic;
+
   /// Returns a map of topic:callback entries handled by this listener.
-  Future<Map<String, Function(String)>> getListeners() async => {
-        "${await baseTopic}/create": handleCreate,
-        "${await baseTopic}/update": handleUpdate,
-        "${await baseTopic}/delete": handleDelete
+  Map<String, Function(String)> getListeners() => {
+        "$baseTopic/create": handleCreate,
+        "$baseTopic/update": handleUpdate,
+        "$baseTopic/delete": handleDelete
       };
 
   /// Callback function for handling create messages
@@ -26,20 +27,12 @@ abstract class AbstractListener<T> {
   void handleDelete(String message);
 
   /// Sets listeners described here to MQTT Client
-  @protected
   Future setListeners() async {
-    mqttClient.addListeners(await getListeners());
+    mqttClient.addListeners(getListeners());
   }
 
-  /// Deserializes message into [T] object
-  T deserializeMessage(String message);
+  /// Decodes message into JSON string
+  Map<String, dynamic> decodeMessage(String message) => jsonDecode(message);
 
-  static Future<String> get baseTopic async {
-    String? deviceId = await keysDao.getDeviceId();
-    if (deviceId == null) {
-      throw Exception("Device id is null");
-    }
-
-    return "noheva/$environment/";
-  }
+  static final String BASE_TOPIC = environment;
 }
