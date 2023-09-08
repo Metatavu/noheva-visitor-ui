@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:noheva_api/noheva_api.dart';
 import 'package:noheva_visitor_ui/widgets/video_widget.dart';
