@@ -4,6 +4,7 @@ import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
 import "package:simple_logger/simple_logger.dart";
 
+/// Default Screen
 class DefaultScreen extends StatefulWidget {
   const DefaultScreen({super.key});
 
@@ -11,6 +12,7 @@ class DefaultScreen extends StatefulWidget {
   State<DefaultScreen> createState() => _DefaultScreenState();
 }
 
+/// Default Screen State
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
 

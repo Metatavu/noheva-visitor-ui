@@ -1,28 +1,28 @@
 import "dart:io";
 import "package:android_id/android_id.dart";
 import "package:device_info_plus/device_info_plus.dart";
-import "package:simple_logger/simple_logger.dart";
 
+/// Device Info
 class DeviceInfo {
-  static Future<String?> getSerialNumber() async {
+  /// Gets devices serial number
+  ///
+  /// If the serial number can't be retrieved, an exception is thrown.
+  static Future<String> getSerialNumber() async {
     DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    String? serialNumber;
 
     if (Platform.isAndroid) {
       const androidId = AndroidId();
-      String? deviceId = await androidId.getId();
-
-      if (deviceId == null) {
-        SimpleLogger().warning("Device ID not found.");
-
-        return null;
-      }
-
-      return deviceId;
+      serialNumber = await androidId.getId();
     }
     if (Platform.isMacOS) {
-      return (await deviceInfoPlugin.macOsInfo).systemGUID;
+      serialNumber = (await deviceInfoPlugin.macOsInfo).systemGUID;
     }
 
-    return null;
+    if (serialNumber == null) {
+      throw "Couldn't get devices serial number!";
+    }
+
+    return serialNumber;
   }
 }

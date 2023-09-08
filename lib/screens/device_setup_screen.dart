@@ -22,6 +22,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  /// Navigates to default screen
   void _navigateToDefaultScreen() {
     Navigator.push(
       context,
@@ -31,6 +32,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
     );
   }
 
+  /// Creates a device by [deviceRequest] in the backend and stores the device id in the database
   Future _createDevice(DeviceRequest deviceRequest) async {
     DevicesApi devicesApi = await apiFactory.getDevicesApi();
     try {
@@ -46,6 +48,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
     }
   }
 
+  /// Submits the form and creates a device
   Future _submitForm() async {
     String name = _nameController.text;
     String description = _descriptionController.text;
@@ -56,19 +59,16 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
     _createDevice(deviceRequest);
   }
 
+  /// Skips the setup and creates a device with default values
   Future _skipSetup() async {
     DeviceRequest deviceRequest = await _buildDeviceRequest();
     _createDevice(deviceRequest);
   }
 
+  /// Builds a device request with [name] and [description]
   Future<DeviceRequest> _buildDeviceRequest({name, description}) async {
     String version = (await PackageInfo.fromPlatform()).version;
-    String? serialNumber = await DeviceInfo.getSerialNumber();
-
-    if (serialNumber == null) {
-      throw "Serial number not found";
-    }
-    ;
+    String serialNumber = await DeviceInfo.getSerialNumber();
 
     return DeviceRequest((builder) {
       builder.name = name;

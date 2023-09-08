@@ -91,7 +91,7 @@ class MqttClient {
 
   /// Handler for successful connections event.
   ///
-  /// Sends status message to status topic
+  /// Initializes periodic status message.
   Future onConnected() async {
     StatusMessage? statusMessage = await _buildStatusMessage(true);
 
@@ -260,6 +260,7 @@ class MqttClient {
     return client.connectionStatus!.state.name;
   }
 
+  /// Initializes periodic status message.
   void _initPeriodicStatusMessage() {
     Timer.periodic(const Duration(seconds: 30), (timer) {
       if (mqttClient.isConnected) {
