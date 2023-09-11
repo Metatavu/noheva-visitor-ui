@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:drift/drift.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/converters/list_converter.dart";
@@ -16,7 +18,7 @@ class Pages extends Table {
   TextColumn get layoutId => text().references(Layouts, #id)();
   TextColumn get exhibitionId => text().references(Exhibitions, #id)();
   TextColumn get resources => text().map(
-        const ListConverter<ExhibitionPageResource>(),
+        const ExhibitionPageResourceConverter(),
       )();
   TextColumn get eventTriggers => text().map(
         const ListConverter<ExhibitionPageEventTrigger>(),
@@ -31,4 +33,24 @@ class Pages extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+}
+
+class ExhibitionPageResourceConverter
+    implements ListConverter<ExhibitionPageResource> {
+  const ExhibitionPageResourceConverter();
+  @override
+  List<ExhibitionPageResource> fromSql(String fromDb) => jsonDecode(fromDb)
+      .map((json) => ExhibitionPageResource((builder) {
+            builder.id = json["id"];
+            builder.type = json["type"];
+            builder.mode = json["mode"];
+            builder.data = json["data"];
+          }))
+      .toList();
+
+  @override
+  String toSql(List<ExhibitionPageResource> value) {
+    // TODO: implement toSql
+    throw UnimplementedError();
+  }
 }

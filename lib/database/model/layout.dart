@@ -4,8 +4,7 @@ import "package:drift/drift.dart";
 @DataClassName("Layout")
 class Layouts extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
-  IntColumn get orientation => integer()();
+  IntColumn get screenOrientation => integer()();
   TextColumn get data => text()();
   DateTimeColumn get modifiedAt => dateTime()();
 
