@@ -1,7 +1,11 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/database/dao/exhibition_dao.dart";
+import 'package:noheva_visitor_ui/database/dao/key_dao.dart';
+import "package:noheva_visitor_ui/main.dart";
+import "package:noheva_visitor_ui/screens/exhibition_screen.dart";
 import "package:simple_logger/simple_logger.dart";
 
 /// Default Screen
@@ -13,20 +17,38 @@ class DefaultScreen extends StatefulWidget {
 }
 
 /// Default Screen State
-///
-/// TODO: Implement logic for retrieving devices data from backend and navigation to exhibition screen
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
 
   @override
   void initState() {
     super.initState();
-    keysDao.checkIsDeviceApproved().then(
+    streamController.stream.listen((event) {
+      if (event != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExhibitionScreen(exhibitionId: event),
+          ),
+        );
+      }
+    });
+    // exhibitionDao.watchExhibition().listen((event) {
+    //   if (event != null) {
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (context) => ExhibitionScreen(exhibitionId: event.id),
+    //       ),
+    //     );
+    //   }
+    // });
+    keyDao.checkIsDeviceApproved().then(
       (value) {
         if (!value) {
           Timer.periodic(const Duration(seconds: 5), (timer) async {
             SimpleLogger().info("Checking whether device has been approved...");
-            bool isApproved = await keysDao.checkIsDeviceApproved();
+            bool isApproved = await keyDao.checkIsDeviceApproved();
             setState(() => _isDeviceApproved = isApproved);
             if (isApproved) {
               SimpleLogger().info("Device is approved!");

@@ -9,7 +9,7 @@ import "package:openapi_generator_annotations/openapi_generator_annotations.dart
 import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
-import "database/dao/keys_dao.dart";
+import "database/dao/key_dao.dart";
 import "screens/device_setup_screen.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
@@ -18,6 +18,8 @@ late final String environment;
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
+final StreamController streamController =
+    StreamController.broadcast(sync: true);
 
 void main() async {
   _configureLogger();
@@ -30,7 +32,7 @@ void main() async {
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
 
-  deviceId = await keysDao.getDeviceId();
+  deviceId = await keyDao.getDeviceId();
 
   if (deviceId != null) {
     SimpleLogger().info("Device Id is: $deviceId");
@@ -41,7 +43,7 @@ void main() async {
   }
 
   SimpleLogger().info("Checking if device is approved...");
-  isDeviceApproved = await keysDao.checkIsDeviceApproved();
+  isDeviceApproved = await keyDao.checkIsDeviceApproved();
 
   if (isDeviceApproved) {
     SimpleLogger().info("Device is approved");
@@ -62,7 +64,7 @@ Future _pollDeviceApprovalStatus(Timer timer) async {
   DevicesApi devicesApi = await apiFactory.getDevicesApi();
 
   try {
-    deviceId = await keysDao.getDeviceId();
+    deviceId = await keyDao.getDeviceId();
     if (deviceId == null) {
       SimpleLogger().info(
           "Device ID not found, cannot poll device status. Waiting for setup...");
@@ -72,7 +74,7 @@ Future _pollDeviceApprovalStatus(Timer timer) async {
           .then((response) => response.data?.key);
       if (deviceKey != null) {
         SimpleLogger().info("Device is approved. Storing device key...");
-        await keysDao.storeDeviceKey(deviceKey);
+        await keyDao.storeDeviceKey(deviceKey);
         isDeviceApproved = true;
         SimpleLogger().info("Stored device key, stopping polling!");
         timer.cancel();
