@@ -32,7 +32,8 @@ abstract class AbstractListener {
   }
 
   /// Decodes message into JSON string
-  Map<String, dynamic> decodeMessage(String message) => jsonDecode(message);
+  static Map<String, dynamic> decodeMessage(String message) =>
+      jsonDecode(message);
 
   static final String BASE_TOPIC = environment;
 }

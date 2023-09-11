@@ -1,12 +1,20 @@
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/database/dao/exhibition_dao.dart";
+import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
+import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
+import "package:simple_logger/simple_logger.dart";
 
 /// Exhibition Screen
 ///
-/// Displays Exhibition content
+/// Displays Exhibition [exhibitionId] content
 class ExhibitionScreen extends StatefulWidget {
-  const ExhibitionScreen({Key? key}) : super(key: key);
+  final String exhibitionId;
+
+  const ExhibitionScreen({Key? key, required this.exhibitionId})
+      : super(key: key);
 
   @override
   State<ExhibitionScreen> createState() => _ExhibitionScreenState();
@@ -14,12 +22,36 @@ class ExhibitionScreen extends StatefulWidget {
 
 /// Exhibition screen state
 class _ExhibitionScreenState extends State<ExhibitionScreen> {
-  late String _pageHtml;
+  String? _pageHtml;
+  final List<ExhibitionPageResource> _pageResources = [];
+  final List<ExhibitionPageEventTrigger> _eventTriggers = [];
+
+  /// TODO: Add docs
+  Future _loadExhibition(String exhibitionId) async {
+    SimpleLogger().info("Loading exhibition $exhibitionId...");
+    final exhibition = await exhibitionDao.getExhibition(exhibitionId);
+    SimpleLogger().info("Successfully loaded exhibition!");
+    SimpleLogger().info("Loading exhibition pages...");
+    final pages = await pageDao.listPages(exhibitionId);
+    SimpleLogger().info("Successfully loaded ${pages.length} pages!");
+    SimpleLogger().info("Loading page layouts...");
+    final layouts = [];
+    for (var page in pages) {
+      layouts.add(await layoutDao.findLayout(page.layoutId));
+    }
+    SimpleLogger().info("Successfully loaded ${layouts.length} layouts!");
+
+    setState(() {
+      _pageHtml = layouts[0]?.data ?? "";
+      _pageResources.addAll(pages[0].resources);
+      _eventTriggers.addAll(pages[0].eventTriggers);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    setState(() => _pageHtml = "");
+    _loadExhibition(widget.exhibitionId);
   }
 
   @override
@@ -33,11 +65,11 @@ class _ExhibitionScreenState extends State<ExhibitionScreen> {
           width: screenSize.width,
           height: screenSize.height,
           child: HtmlWidget(
-            _pageHtml,
+            _pageHtml ?? "",
             customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
               element,
-              List.empty(),
-              List.empty(),
+              _pageResources,
+              _eventTriggers,
             ),
           ),
         ),

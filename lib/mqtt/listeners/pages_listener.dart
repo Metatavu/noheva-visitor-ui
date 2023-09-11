@@ -9,7 +9,7 @@ class PagesListener extends AbstractListener {
 
   @override
   void handleCreate(String message) {
-    final json = decodeMessage(message);
+    final json = AbstractListener.decodeMessage(message);
     final createMessage = MqttExhibitionPageCreate((builder) {
       builder.exhibitionId = json["exhibitionId"];
       builder.id = json["id"];
@@ -20,7 +20,7 @@ class PagesListener extends AbstractListener {
 
   @override
   void handleDelete(String message) {
-    final json = decodeMessage(message);
+    final json = AbstractListener.decodeMessage(message);
     final deleteMessage = MqttExhibitionPageDelete((builder) {
       builder.exhibitionId = json["exhibitionId"];
       builder.id = json["id"];
@@ -31,7 +31,7 @@ class PagesListener extends AbstractListener {
 
   @override
   void handleUpdate(String message) {
-    final json = decodeMessage(message);
+    final json = AbstractListener.decodeMessage(message);
     final updateMessage = MqttExhibitionPageUpdate((builder) {
       builder.exhibitionId = json["exhibitionId"];
       builder.id = json["id"];
