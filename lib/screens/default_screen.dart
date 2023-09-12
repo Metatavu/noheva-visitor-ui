@@ -33,16 +33,6 @@ class _DefaultScreenState extends State<DefaultScreen> {
         );
       }
     });
-    // exhibitionDao.watchExhibition().listen((event) {
-    //   if (event != null) {
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => ExhibitionScreen(exhibitionId: event.id),
-    //       ),
-    //     );
-    //   }
-    // });
     keyDao.checkIsDeviceApproved().then(
       (value) {
         if (!value) {

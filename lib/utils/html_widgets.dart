@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
@@ -40,12 +42,12 @@ class HtmlWidgets {
     ExhibitionPageEventTrigger? clickViewEventTrigger =
         _findClickViewEventTrigger(element, eventTriggers);
     String? foundResource = resources
-        .firstWhereOrNull(
-            (resource) => "@resources/${resource.id}" == element.innerHtml)
+        .firstWhereOrNull((resource) =>
+            "@resources/${resource.id}" == element.attributes["src"])
         ?.data;
 
-    Widget imageWidget = Image.network(
-      foundResource ?? "",
+    Widget imageWidget = Image.file(
+      File(foundResource ?? ""),
       width: size.width,
       height: size.height,
     );

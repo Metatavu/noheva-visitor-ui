@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/widgets.dart";
 import "package:video_player/video_player.dart";
 
@@ -28,7 +30,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   ///
   /// TODO: Implement logic for loading video from local storage
   void _initializeVideoPlayer(String src) {
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.src))
+    _controller = VideoPlayerController.file(File(src))
       ..initialize().then((_) {
         _controller.setLooping(true);
         _controller.play();
