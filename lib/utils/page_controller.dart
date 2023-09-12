@@ -1,5 +1,4 @@
 import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/database/converters/list_converter.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
 import "package:noheva_visitor_ui/main.dart";
@@ -45,20 +44,16 @@ class PageController {
     }
     SimpleLogger().info("Successfully loaded ${pages.length} pages!");
     SimpleLogger().info("Persisting pages...");
-    await _deletePages();
+    await deletePages();
     final storedPages = [];
     for (var page in pages) {
-      print("---PAGE---");
-      page.resources.forEach((p0) {
-        print(p0.toJson());
-      });
       storedPages.add(await persistPage(page));
     }
     SimpleLogger().info("Successfully persisted ${storedPages.length} pages!");
   }
 
   /// Deletes existing Pages
-  static Future _deletePages() async {
+  static Future deletePages() async {
     SimpleLogger().info("Deleting existing pages...");
 
     await pageDao.deletePages();

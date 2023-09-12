@@ -33,6 +33,11 @@ class LayoutDao extends DatabaseAccessor<Database> with _$LayoutDaoMixin {
     return (select(layouts)..where((row) => row.id.equals(layoutId)))
         .getSingleOrNull();
   }
+
+  /// Lists all Layouts
+  Future<List<Layout>> listLayouts() async {
+    return select(layouts).get();
+  }
 }
 
 final layoutDao = LayoutDao(database);

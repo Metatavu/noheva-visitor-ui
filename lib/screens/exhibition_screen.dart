@@ -26,12 +26,9 @@ class _ExhibitionScreenState extends State<ExhibitionScreen> {
   final List<ExhibitionPageResource> _pageResources = [];
   final List<ExhibitionPageEventTrigger> _eventTriggers = [];
 
-  /// TODO: Add docs
+  /// Loads exhibition and its content by [exhibitionId]
   Future _loadExhibition(String exhibitionId) async {
-    SimpleLogger().info("Loading exhibition $exhibitionId...");
-    final exhibition = await exhibitionDao.getExhibition(exhibitionId);
-    SimpleLogger().info("Successfully loaded exhibition!");
-    SimpleLogger().info("Loading exhibition pages...");
+    SimpleLogger().info("Loading exhibition $exhibitionId pages...");
     final pages = await pageDao.listPages(exhibitionId);
     SimpleLogger().info("Successfully loaded ${pages.length} pages!");
     SimpleLogger().info("Loading page layouts...");

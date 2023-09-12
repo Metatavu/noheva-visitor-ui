@@ -42,6 +42,7 @@ dependencies:
   video_player_macos: ^2.0.1
   collection: ^1.17.2
   html: ^0.15.4
+  built_value: ^8.6.2
 
 dev_dependencies:
   flutter_test:

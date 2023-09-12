@@ -1,6 +1,7 @@
 import "dart:convert";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
+import "package:noheva_visitor_ui/utils/serialization_utils.dart";
 
 /// Abstract MQTT Listener class
 abstract class AbstractListener {
@@ -31,9 +32,9 @@ abstract class AbstractListener {
     mqttClient.addListeners(getListeners());
   }
 
-  /// Decodes message into JSON string
-  static Map<String, dynamic> decodeMessage(String message) =>
-      jsonDecode(message);
+  /// Decodes message into specified type
+  static T decodeMessage<T>(String message, Type specifiedType) =>
+      SerializationUtils.deserializeObject(jsonDecode(message), specifiedType);
 
   static final String BASE_TOPIC = environment;
 }

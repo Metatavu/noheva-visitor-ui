@@ -8,8 +8,7 @@ import "package:noheva_visitor_ui/database/model/page.dart";
 import "package:path_provider/path_provider.dart";
 import "package:path/path.dart" as p;
 import "package:noheva_api/noheva_api.dart";
-import "./converters/list_converter.dart";
-
+import "package:noheva_visitor_ui/database/converters/list_converter.dart";
 part "database.g.dart";
 
 /// Database class

@@ -109,8 +109,9 @@ class MyApp extends StatelessWidget {
 
 /// API Client generator config
 @Openapi(
-    additionalProperties: AdditionalProperties(pubName: "noheva_api"),
-    inputSpecFile: "noheva-api-spec/swagger.yaml",
-    generatorName: Generator.dio,
-    outputDirectory: "noheva-api")
+  additionalProperties: AdditionalProperties(pubName: "noheva_api"),
+  inputSpecFile: "noheva-api-spec/swagger.yaml",
+  generatorName: Generator.dio,
+  outputDirectory: "noheva-api",
+)
 class NohevaApi extends OpenapiGeneratorConfig {}

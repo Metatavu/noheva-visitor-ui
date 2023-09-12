@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
@@ -27,6 +28,7 @@ class LayoutController {
       "Loading layouts for exhibition device $exhibitionDeviceId...",
     );
     final deviceDataApi = await apiFactory.getDeviceDataApi();
+    final existingLayouts = await layoutDao.listLayouts();
     final layouts = await deviceDataApi
         .listDeviceDataLayouts(exhibitionDeviceId: exhibitionDeviceId)
         .then((value) => value.data);
@@ -37,17 +39,22 @@ class LayoutController {
     }
     SimpleLogger().info("Successfully loaded ${layouts.length} layouts!");
     SimpleLogger().info("Persisting layouts...");
-    await _deleteLayouts();
+    await deleteLayouts();
     final storedLayouts = [];
     for (var layout in layouts) {
-      storedLayouts.add(await persistLayout(layout));
+      final existingLayout = existingLayouts.firstWhereOrNull(
+        (element) => element.id == layout.id,
+      );
+      if (existingLayout == null) {
+        storedLayouts.add(await persistLayout(layout));
+      }
     }
     SimpleLogger()
         .info("Successfully persisted ${storedLayouts.length} layouts!");
   }
 
   /// Deletes existing Layouts
-  static Future _deleteLayouts() async {
+  static Future deleteLayouts() async {
     SimpleLogger().info("Deleting existing layouts...");
 
     await layoutDao.deleteLayouts();

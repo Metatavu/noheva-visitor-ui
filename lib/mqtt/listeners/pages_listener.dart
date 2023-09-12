@@ -9,34 +9,28 @@ class PagesListener extends AbstractListener {
 
   @override
   void handleCreate(String message) {
-    final json = AbstractListener.decodeMessage(message);
-    final createMessage = MqttExhibitionPageCreate((builder) {
-      builder.exhibitionId = json["exhibitionId"];
-      builder.id = json["id"];
-    });
-
-    SimpleLogger().info("Handling create message: $createMessage");
+    SimpleLogger().info("Handling page create message...");
+    final createMessage =
+        AbstractListener.decodeMessage(message, MqttExhibitionPageCreate);
+    SimpleLogger().info(createMessage);
+    // TODO: Implement logic for handling page create messages
   }
 
   @override
   void handleDelete(String message) {
-    final json = AbstractListener.decodeMessage(message);
-    final deleteMessage = MqttExhibitionPageDelete((builder) {
-      builder.exhibitionId = json["exhibitionId"];
-      builder.id = json["id"];
-    });
-
-    SimpleLogger().info("Handling delete message: $deleteMessage");
+    SimpleLogger().info("Handling page delete message...");
+    final deleteMessage =
+        AbstractListener.decodeMessage(message, MqttExhibitionPageDelete);
+    SimpleLogger().info(deleteMessage);
+    // TODO: Implement logic for handling page delete messages
   }
 
   @override
   void handleUpdate(String message) {
-    final json = AbstractListener.decodeMessage(message);
-    final updateMessage = MqttExhibitionPageUpdate((builder) {
-      builder.exhibitionId = json["exhibitionId"];
-      builder.id = json["id"];
-    });
-
-    SimpleLogger().info("Handling update message: $updateMessage");
+    SimpleLogger().info("Handling page update message...");
+    final updateMessage =
+        AbstractListener.decodeMessage(message, MqttExhibitionPageUpdate);
+    SimpleLogger().info(updateMessage);
+    // TODO: Implement logic for handling page update messages
   }
 }

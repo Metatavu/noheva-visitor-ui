@@ -1,5 +1,7 @@
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/dao/exhibition_dao.dart";
+import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
+import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/abstract_listener.dart";
@@ -29,15 +31,13 @@ class AttachListener {
   /// Callback function for handling attach messages
   void handleAttach(String message) async {
     SimpleLogger().info("Handling attach message...");
-    final json = AbstractListener.decodeMessage(message);
-    final attachedMessage = MqttDeviceAttachedToExhibition((builder) {
-      builder.exhibitionId = json["exhibitionId"];
-      builder.exhibitionDeviceId = json["exhibitionDeviceId"];
-      builder.exhibitionDeviceGroupId = json["exhibitionDeviceGroupId"];
-      builder.deviceId = json["deviceId"];
-    });
+    final attachedMessage =
+        AbstractListener.decodeMessage(message, MqttDeviceAttachedToExhibition);
+    SimpleLogger().info(attachedMessage);
 
     // There's no support for having device attached to multiple exhibitions and therefore existing exhibitions are deleted
+    await pageDao.deletePages();
+    await layoutDao.deleteLayouts();
     await exhibitionDao.deleteExhibitions();
     SimpleLogger().info("Deleted existing Exhibitions!");
     await exhibitionDao.storeExhibition(
@@ -58,12 +58,10 @@ class AttachListener {
 
   /// Callback function for handling detach messages
   void handleDetach(String message) {
-    final json = AbstractListener.decodeMessage(message);
-    final detachedMessage = MqttDeviceDetachedFromExhibition((builder) {
-      builder.exhibitionId = json["exhibitionId"];
-      builder.exhibitionDeviceId = json["exhibitionDeviceId"];
-      builder.exhibitionDeviceGroupId = json["exhibitionDeviceGroupId"];
-      builder.deviceId = json["deviceId"];
-    });
+    SimpleLogger().info("Handling detach message...");
+    final detachedMessage = AbstractListener.decodeMessage(
+        message, MqttDeviceDetachedFromExhibition);
+    SimpleLogger().info(detachedMessage);
+    streamController.sink.add(null);
   }
 }

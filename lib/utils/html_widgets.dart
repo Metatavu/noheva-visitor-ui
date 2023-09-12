@@ -41,7 +41,7 @@ class HtmlWidgets {
         _findClickViewEventTrigger(element, eventTriggers);
     String? foundResource = resources
         .firstWhereOrNull(
-            (resource) => resource.id == "@resources/${element.innerHtml}")
+            (resource) => "@resources/${resource.id}" == element.innerHtml)
         ?.data;
 
     Widget imageWidget = Image.network(
@@ -71,12 +71,11 @@ class HtmlWidgets {
         _findClickViewEventTrigger(element, eventTriggers);
     String? foundResource = resources
         .firstWhereOrNull(
-            (resource) => resource.id == "@resources/${element.innerHtml}")
+            (resource) => "@resources/${resource.id}" == element.innerHtml)
         ?.data;
 
     // TODO: Parse styles from HTML
     return ElevatedButton(
-        style: ButtonStyle(fixedSize: MaterialStateProperty.all(size)),
         onPressed: clickViewEventTrigger != null
             ? _handleTapEvent(clickViewEventTrigger)
             : () {},
@@ -97,7 +96,7 @@ class HtmlWidgets {
             (element) => element.localName == CustomHtmlWidgets.SOURCE)
         ?.attributes[CustomHtmlWidgets.SRC];
     String? foundResource = resources
-        .firstWhereOrNull((resource) => resource.id == "@resources/$source")
+        .firstWhereOrNull((resource) => "@resources/${resource.id}" == source)
         ?.data;
 
     if (source != null) {
