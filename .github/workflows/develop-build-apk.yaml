@@ -26,11 +26,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add pubspec.yaml
           git commit -m "Updated version in pubspec.yaml"
-      - name: Push version changes to develop
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: develop
       - name: Build APK
         uses: subosito/flutter-action@v2
         with:
@@ -62,6 +57,11 @@ jobs:
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: update
           destination_dir: "staging/"
+      - name: Push version changes to develop
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: develop
       - name: Resolve commit SHA
         id: get_commit_sha
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
