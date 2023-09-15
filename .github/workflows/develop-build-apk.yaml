@@ -46,7 +46,7 @@ jobs:
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter build apk --split-per-abi
-          mkdir -p update/android
+          mkdir -p update/android/${{ steps.get_version.outputs.new_tag }}
           mv build/app/outputs/apk/release/output-metadata.json update/android/output-metadata.json
           mv build/app/outputs/apk/release/*.apk update/android/${{ steps.get_version.outputs.new_tag }}/
       - name: Upload APK
