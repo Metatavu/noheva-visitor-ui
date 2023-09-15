@@ -4,7 +4,7 @@ on:
     branches:
       - develop
 jobs:
-  build:
+  bumpVersion:
     runs-on: ubuntu-latest
     environment: develop
     steps:
@@ -26,6 +26,33 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add pubspec.yaml
           git diff --quiet && git diff --staged --quiet || git commit -m "Updated version in pubspec.yaml"
+      - name: Push version changes to develop
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: develop
+      - name: Resolve commit SHA
+        id: get_commit_sha
+        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+      - name: Tag version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          custom_tag: ${{ steps.get_version.outputs.new_tag }}
+          commit_sha: ${{ steps.get_commit_sha.outputs.commit_sha }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ""
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_version.outputs.new_tag }}
+          name: Release ${{ steps.get_version.outputs.new_tag }}
+          body: ${{ steps.get_version.outputs.changelog }}
+
+  buildAndroid:
+    runs-on: ubuntu-latest
+    environment: develop
+    steps:
       - name: Build APK
         uses: subosito/flutter-action@v2
         with:
@@ -57,25 +84,34 @@ jobs:
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: update
           destination_dir: "staging/"
-      - name: Push version changes to develop
-        uses: ad-m/github-push-action@v0.6.0
+
+  buildMacOS:
+    runs-on: macos-latest
+    environment: develop
+    steps:
+      - name: Build APK
+        uses: subosito/flutter-action@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: develop
-      - name: Resolve commit SHA
-        id: get_commit_sha
-        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
-      - name: Tag version
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.1
+          flutter-version: "3.13.1"
+          channel: "stable"
+      - run: |
+          echo API_BASE_PATH=${{ secrets.API_BASE_PATH }} >> .env
+          echo ENVIRONMENT=${{ secrets.ENVIRONMENT }} >> .env
+          echo MQTT_PASSWORD=${{ secrets.MQTT_PASSWORD }} >> .env
+          echo MQTT_PORT=${{ secrets.MQTT_PORT }} >> .env
+          echo MQTT_URL=${{ secrets.MQTT_URL }} >> .env
+          echo MQTT_USERNAME=${{ secrets.MQTT_USERNAME }} >> .env
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter build macos
+          mkdir -p update/macos/${{ steps.get_version.outputs.new_tag }}
+          echo "${{ steps.get_version.outputs.new_tag }}" > update/macos/version.txt
+          mv build/macos/Build/Products/Release/noheva_visitor_ui.app update/macos/${{ steps.get_version.outputs.new_tag }}/
+      - name: Upload APP
+        uses: shallwefootball/s3-upload-action@master
         with:
-          custom_tag: ${{ steps.get_version.outputs.new_tag }}
-          commit_sha: ${{ steps.get_commit_sha.outputs.commit_sha }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: ""
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.get_version.outputs.new_tag }}
-          name: Release ${{ steps.get_version.outputs.new_tag }}
-          body: ${{ steps.get_version.outputs.changelog }}
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ secrets.UPDATES_BUCKET }}
+          source_dir: update
+          destination_dir: "staging/"
