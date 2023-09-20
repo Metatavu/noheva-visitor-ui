@@ -34,6 +34,26 @@ class OfflineFileController {
     }
   }
 
+  /// Deletes offlined file by [fileName]
+  Future<bool> deleteOfflineFile(String fileName) async {
+    File? file = await _getDirectoryFile(
+      await getImagesDirectoryPath(),
+      fileName,
+    );
+
+    if (file != null) {
+      await file.delete();
+      File metaFile = File("${file.path}.meta");
+      if (await metaFile.exists()) {
+        await metaFile.delete();
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
   /// Downloads file from [url]
   ///
   /// If the same file is already downloaded, applies its ETag to the request headers to not download it again in case it is not modified.

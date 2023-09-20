@@ -77,7 +77,7 @@ class HtmlWidgets {
         ?.data;
 
     // TODO: Parse styles from HTML
-    return ElevatedButton(
+    return MaterialButton(
         onPressed: clickViewEventTrigger != null
             ? _handleTapEvent(clickViewEventTrigger)
             : () {},

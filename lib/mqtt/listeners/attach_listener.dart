@@ -7,6 +7,7 @@ import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/abstract_listener.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
+import "package:noheva_visitor_ui/utils/offline_file_controller.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart";
 import "package:simple_logger/simple_logger.dart";
 
@@ -32,7 +33,8 @@ class AttachListener {
   void handleAttach(String message) async {
     SimpleLogger().info("Handling attach message...");
     final attachedMessage =
-        AbstractListener.decodeMessage(message, MqttDeviceAttachedToExhibition);
+        AbstractListener.decodeMessage<MqttDeviceAttachedToExhibition>(
+            message, MqttDeviceAttachedToExhibition);
     SimpleLogger().info(attachedMessage);
 
     // There's no support for having device attached to multiple exhibitions and therefore existing exhibitions are deleted
@@ -57,11 +59,23 @@ class AttachListener {
   }
 
   /// Callback function for handling detach messages
-  void handleDetach(String message) {
+  void handleDetach(String message) async {
     SimpleLogger().info("Handling detach message...");
-    final detachedMessage = AbstractListener.decodeMessage(
-        message, MqttDeviceDetachedFromExhibition);
+    final detachedMessage =
+        AbstractListener.decodeMessage<MqttDeviceDetachedFromExhibition>(
+            message, MqttDeviceDetachedFromExhibition);
     SimpleLogger().info(detachedMessage);
+    SimpleLogger().info(
+      "Deleting exhibition ${detachedMessage.exhibitionId} content...",
+    );
+    final pages = await pageDao.listPages(detachedMessage.exhibitionId!);
+    for (var page in pages) {
+      for (var resource in page.resources) {
+        if (PageController.offlineMediaTypes.contains(resource.type)) {
+          await offlineFileController.deleteOfflineFile(resource.data);
+        }
+      }
+    }
     streamController.sink.add(null);
   }
 }

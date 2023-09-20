@@ -7,7 +7,7 @@ import "package:simple_logger/simple_logger.dart";
 
 /// Page Controller class
 class PageController {
-  static final _offlineMediaTypes = [
+  static final offlineMediaTypes = [
     ExhibitionPageResourceType.image,
     ExhibitionPageResourceType.video
   ];
@@ -17,7 +17,7 @@ class PageController {
     SimpleLogger().info("Downloading page ${newPage.id} resources...");
     final offlinedResources = {};
     for (var resource in newPage.resources) {
-      if (_offlineMediaTypes.contains(resource.type)) {
+      if (offlineMediaTypes.contains(resource.type)) {
         final offlinedFile =
             await offlineFileController.getOfflineFile(resource.data);
         offlinedResources[resource.id] = offlinedFile?.path;
