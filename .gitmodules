@@ -1,0 +1,3 @@
+[submodule "noheva-api-spec"]
+	path = noheva-api-spec
+	url = https://github.com/Metatavu/noheva-api-spec.git
