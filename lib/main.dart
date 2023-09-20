@@ -10,7 +10,7 @@ import "package:simple_logger/simple_logger.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
 import "database/dao/keys_dao.dart";
-import 'screens/device_setup_screen.dart';
+import "screens/device_setup_screen.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;

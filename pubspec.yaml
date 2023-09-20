@@ -36,6 +36,15 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.1
+  flutter_widget_from_html_core:
+    git:
+      url: https://github.com/Metatavu/flutter_widget_from_html.git
+      ref: flex
+      path: packages/core
+  video_player: ^2.6.1
+  video_player_macos: ^2.0.1
+  collection: ^1.17.2
+  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:

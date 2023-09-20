@@ -3,6 +3,8 @@ import "dart:convert";
 import "dart:typed_data";
 import "package:mqtt_client/mqtt_client.dart";
 import "package:mqtt_client/mqtt_server_client.dart";
+import "package:noheva_visitor_ui/mqtt/listeners/attach_listener.dart";
+import "package:noheva_visitor_ui/mqtt/listeners/pages_listener.dart";
 import "package:noheva_visitor_ui/mqtt/model/status_message.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:typed_data/typed_buffers.dart";
@@ -109,6 +111,10 @@ class MqttClient {
     );
 
     _initPeriodicStatusMessage();
+
+    SimpleLogger().info("Setting up listeners...");
+    AttachListener();
+    PagesListener();
   }
 
   /// Handler for disconnection event.
