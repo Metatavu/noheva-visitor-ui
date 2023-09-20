@@ -7,6 +7,9 @@ jobs:
   bumpVersion:
     runs-on: ubuntu-latest
     environment: develop
+    outputs:
+      new_tag: ${{ steps.get_version.outputs.new_tag }}
+      commit_sha: ${{ steps.get_commit_sha.outputs.commit_sha }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -58,6 +61,7 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+          ref: ${{ needs.bumpVersion.outputs.commit_sha }}
       - name: Build APK
         uses: subosito/flutter-action@v2
         with:
@@ -78,9 +82,9 @@ jobs:
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter build apk --split-per-abi
-          mkdir -p update/android/${{ steps.get_version.outputs.new_tag }}
+          mkdir -p update/android/${{ needs.bumpVersion.outputs.new_tag }}
           mv build/app/outputs/apk/release/output-metadata.json update/android/output-metadata.json
-          mv build/app/outputs/apk/release/*.apk update/android/${{ steps.get_version.outputs.new_tag }}/
+          mv build/app/outputs/apk/release/*.apk update/android/${{ needs.bumpVersion.outputs.new_tag }}/
       - name: Upload APK
         uses: shallwefootball/s3-upload-action@master
         with:
@@ -99,6 +103,7 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+          ref: ${{ needs.bumpVersion.outputs.commit_sha }}
       - name: Build APK
         uses: subosito/flutter-action@v2
         with:
@@ -114,9 +119,9 @@ jobs:
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter build macos
-          mkdir -p update/macos/${{ steps.get_version.outputs.new_tag }}
-          echo "${{ steps.get_version.outputs.new_tag }}" > update/macos/version.txt
-          mv build/macos/Build/Products/Release/noheva_visitor_ui.app update/macos/${{ steps.get_version.outputs.new_tag }}/
+          mkdir -p update/macos/${{ needs.bumpVersion.outputs.new_tag }}
+          echo "${{ needs.bumpVersion.outputs.new_tag }}" > update/macos/version.txt
+          mv build/macos/Build/Products/Release/noheva_visitor_ui.app update/macos/${{ needs.bumpVersion.outputs.new_tag }}/
       - name: Upload APP
         uses: shallwefootball/s3-upload-action@master
         with:
