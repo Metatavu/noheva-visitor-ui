@@ -1,12 +1,12 @@
-name: Build app (develop)
+name: Build app (master)
 on:
   push:
     branches:
-      - develop
+      - master
 jobs:
   bumpVersion:
     runs-on: ubuntu-latest
-    environment: develop
+    environment: master
     outputs:
       new_tag: ${{ steps.get_version.outputs.new_tag }}
       commit_sha: ${{ steps.get_commit_sha.outputs.commit_sha }}
@@ -34,6 +34,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: develop
+      - name: Push version changes to master
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
       - name: Resolve commit SHA
         id: get_commit_sha
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
@@ -54,7 +59,7 @@ jobs:
 
   buildAndroid:
     runs-on: ubuntu-latest
-    environment: develop
+    environment: master
     needs: bumpVersion
     steps:
       - uses: actions/checkout@v3
@@ -92,11 +97,11 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: update
-          destination_dir: "staging/"
+          destination_dir: "production/"
 
   buildMacOS:
     runs-on: macos-latest
-    environment: develop
+    environment: master
     needs: bumpVersion
     steps:
       - uses: actions/checkout@v3
@@ -129,4 +134,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: update
-          destination_dir: "staging/"
+          destination_dir: "production/"
