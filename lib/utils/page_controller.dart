@@ -67,7 +67,6 @@ class PageController {
     }
     SimpleLogger().info("Successfully loaded ${pages.length} pages!");
     SimpleLogger().info("Persisting pages...");
-    await deletePages();
     final storedPages = [];
     for (var page in pages) {
       storedPages.add(await persistPage(page));
@@ -80,5 +79,17 @@ class PageController {
     SimpleLogger().info("Deleting existing pages...");
 
     await pageDao.deletePages();
+  }
+
+  /// Compares pages modified at timestamps
+  ///
+  /// Returns true whether page from backend has been modified
+  static bool isPageModified(Page existingPage, DevicePage newPage) {
+    final existingPageModifiedAt =
+        (existingPage.modifiedAt.millisecondsSinceEpoch / 1000).floor();
+    final newPageModifiedAt =
+        (newPage.modifiedAt.millisecondsSinceEpoch / 1000).floor();
+
+    return newPageModifiedAt > existingPageModifiedAt;
   }
 }

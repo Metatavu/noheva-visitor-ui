@@ -1,7 +1,7 @@
 import "package:drift/drift.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/converters/list_converter.dart";
-import "package:noheva_visitor_ui/database/model/exhibition.dart";
+import 'package:noheva_visitor_ui/database/model/device_exhibition_mapping.dart';
 import "package:noheva_visitor_ui/database/model/layout.dart";
 
 /// Page persistence model
@@ -14,7 +14,8 @@ class Pages extends Table {
   TextColumn get activeConditionEquals => text().nullable()();
   IntColumn get orderNumber => integer()();
   TextColumn get layoutId => text().references(Layouts, #id)();
-  TextColumn get exhibitionId => text().references(Exhibitions, #id)();
+  TextColumn get exhibitionId =>
+      text().references(DeviceExhibitionMappings, #exhibitionId)();
   TextColumn get resources => text().map(
         const ListConverter<ExhibitionPageResource>(),
       )();

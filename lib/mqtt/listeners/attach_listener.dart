@@ -1,5 +1,5 @@
 import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/database/dao/exhibition_dao.dart";
+import 'package:noheva_visitor_ui/database/dao/device_exhibition_mapping_dao.dart';
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
@@ -43,8 +43,8 @@ class AttachListener {
     await exhibitionDao.deleteExhibitions();
     SimpleLogger().info("Deleted existing Exhibitions!");
     await exhibitionDao.storeExhibition(
-      ExhibitionsCompanion.insert(
-        id: attachedMessage.exhibitionId!,
+      DeviceExhibitionMappingsCompanion.insert(
+        exhibitionId: attachedMessage.exhibitionId!,
         exhibitionDeviceId: attachedMessage.exhibitionDeviceId!,
         exhibitionDeviceGroupId: attachedMessage.exhibitionDeviceGroupId!,
       ),
@@ -75,7 +75,14 @@ class AttachListener {
           await offlineFileController.deleteOfflineFile(resource.data);
         }
       }
+      SimpleLogger().info("Deleted page ${page.id} offlined resources!");
     }
+    await PageController.deletePages();
+    SimpleLogger().info("Deleted pages!");
+    await LayoutController.deleteLayouts();
+    SimpleLogger().info("Deleted layouts!");
+    await exhibitionDao.deleteExhibitions();
+    SimpleLogger().info("Deleted exhibitions!");
     streamController.sink.add(null);
   }
 }
