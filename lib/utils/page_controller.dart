@@ -1,4 +1,6 @@
+import "package:collection/collection.dart";
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
 import "package:noheva_visitor_ui/main.dart";
@@ -33,12 +35,11 @@ class PageController {
             }))
         .toList();
 
-    // TODO: Remove language from Page?
     return await pageDao.storePage(
       PagesCompanion.insert(
         id: newPage.id,
         name: newPage.name ?? "Unnamed page",
-        language: "FI",
+        language: newPage.language,
         orderNumber: newPage.orderNumber,
         layoutId: newPage.layoutId,
         exhibitionId: newPage.exhibitionId,
@@ -91,5 +92,95 @@ class PageController {
         (newPage.modifiedAt.millisecondsSinceEpoch / 1000).floor();
 
     return newPageModifiedAt > existingPageModifiedAt;
+  }
+
+  /// Substitutes pages resource keys with actual resources
+  static String substitutePageResources(
+    String html,
+    List<ExhibitionPageResource> resources,
+  ) {
+    for (var resource in resources) {
+      html = html.replaceAll(
+        "@resources/${resource.id}",
+        resource.data,
+      );
+    }
+    return html;
+  }
+
+  /// Compares existing pages with page from backend
+  ///
+  /// Updates existing pages if they have been modified and
+  /// deletes pages that have been deleted from backend.
+  static Future comparePages(
+    String exhibitionId,
+    List<DevicePage> newPages,
+  ) async {
+    final existingPages = await pageDao.listPages(exhibitionId);
+    for (var page in newPages) {
+      final existingPage = existingPages.firstWhereOrNull(
+        (element) => element.id == page.id,
+      );
+      if (existingPage == null) {
+        SimpleLogger().info("Page ${page.id} is new, persisting...");
+        await persistPage(page);
+        continue;
+      }
+      final pageIsModified = isPageModified(
+        existingPage,
+        page,
+      );
+      if (pageIsModified) {
+        SimpleLogger().info("Page is modified, updating...");
+        final existingResources = existingPage.resources;
+        final newResources = page.resources;
+
+        for (var existingResource in existingResources) {
+          final newResource = newResources.firstWhereOrNull(
+            (element) => element.id == existingResource.id,
+          );
+          final resourceIsChanged = existingResource.data != newResource?.data;
+          final resourceIsOfflineable =
+              offlineMediaTypes.contains(existingResource.type);
+
+          if (resourceIsOfflineable && resourceIsChanged) {
+            SimpleLogger().info(
+              "Resource ${existingResource.id} is modified, deleting...",
+            );
+            await offlineFileController
+                .deleteOfflineFile(existingResource.data);
+          }
+        }
+        await persistPage(page);
+      } else {
+        SimpleLogger().info("Page is not modified. Not updating!");
+      }
+    }
+    await _deleteUnusedPages(existingPages, newPages);
+  }
+
+  /// Deletes locally stored pages that are no longer being used
+  static Future _deleteUnusedPages(
+    List<Page> existingPages,
+    List<DevicePage> newPages,
+  ) async {
+    for (var existingPage in existingPages) {
+      final newPage =
+          newPages.firstWhereOrNull((page) => page.id == existingPage.id);
+      if (newPage == null) {
+        SimpleLogger().info(
+          "Page ${existingPage.id} is deleted, deleting...",
+        );
+        await pageDao.deletePage(existingPage.id);
+        final isLayoutUsed =
+            newPages.any((page) => page.layoutId == existingPage.layoutId);
+        if (!isLayoutUsed) {
+          SimpleLogger().info(
+            "Layout ${existingPage.layoutId} is not used anymore, deleting...",
+          );
+          await layoutDao.deleteLayout(existingPage.layoutId);
+        }
+      }
+    }
   }
 }

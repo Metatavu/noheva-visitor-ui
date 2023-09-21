@@ -5,7 +5,9 @@ import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/widgets/video_widget.dart";
+import "package:simple_logger/simple_logger.dart";
 
 /// Html Widgets
 ///
@@ -14,47 +16,54 @@ class HtmlWidgets {
   /// Builds custom widget from HTML [element]
   ///
   /// Parses elements resource and event trigger data from [resources] and [eventTriggers]
-  /// TODO: Implement support for layouts default resources once backend communication is ready.
   static Widget? buildCustomWidget(
     dom.Element element,
     List<ExhibitionPageResource> resources,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    BuildContext context,
   ) =>
       switch (element.localName) {
-        CustomHtmlWidgets.IMAGE =>
-          _buildCustomImageWidget(element, resources, eventTriggers),
-        CustomHtmlWidgets.BUTTON =>
-          _buildCustomButtonWidget(element, resources, eventTriggers),
-        CustomHtmlWidgets.VIDEO =>
-          _buildCustomVideoWidget(element, resources, eventTriggers),
+        CustomHtmlWidgets.IMAGE => _buildCustomImageWidget(
+            element,
+            resources,
+            eventTriggers,
+            context,
+          ),
+        CustomHtmlWidgets.BUTTON => _buildCustomButtonWidget(
+            element,
+            resources,
+            eventTriggers,
+            context,
+          ),
+        CustomHtmlWidgets.VIDEO => _buildCustomVideoWidget(
+            element,
+            resources,
+            eventTriggers,
+            context,
+          ),
         _ => null
       };
 
   /// Builds custom Image widget from HTML [element] and applies [resources]
-  ///
-  /// TODO: Implement loading images from device memory
   static Widget _buildCustomImageWidget(
     dom.Element element,
     List<ExhibitionPageResource> resources,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    BuildContext context,
   ) {
     Size size = _extractSize(element);
     ExhibitionPageEventTrigger? clickViewEventTrigger =
         _findClickViewEventTrigger(element, eventTriggers);
-    String? foundResource = resources
-        .firstWhereOrNull((resource) =>
-            "@resources/${resource.id}" == element.attributes["src"])
-        ?.data;
 
     Widget imageWidget = Image.file(
-      File(foundResource ?? ""),
+      File(element.attributes["src"] ?? ""),
       width: size.width,
       height: size.height,
     );
 
     if (clickViewEventTrigger != null) {
       return GestureDetector(
-        onTap: _handleTapEvent(clickViewEventTrigger),
+        onTap: _handleTapEvent(clickViewEventTrigger, context),
         child: imageWidget,
       );
     }
@@ -67,21 +76,20 @@ class HtmlWidgets {
     dom.Element element,
     List<ExhibitionPageResource> resources,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    BuildContext context,
   ) {
     Size size = _extractSize(element);
     ExhibitionPageEventTrigger? clickViewEventTrigger =
         _findClickViewEventTrigger(element, eventTriggers);
-    String? foundResource = resources
-        .firstWhereOrNull(
-            (resource) => "@resources/${resource.id}" == element.innerHtml)
-        ?.data;
 
     // TODO: Parse styles from HTML
     return MaterialButton(
+        height: size.height,
+        minWidth: size.width,
         onPressed: clickViewEventTrigger != null
-            ? _handleTapEvent(clickViewEventTrigger)
+            ? _handleTapEvent(clickViewEventTrigger, context)
             : () {},
-        child: Text(foundResource ?? ""));
+        child: Text(element.innerHtml));
   }
 
   /// Builds custom Video widget from HTML [element] and applies [resources]
@@ -89,6 +97,7 @@ class HtmlWidgets {
     dom.Element element,
     List<ExhibitionPageResource> resources,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    BuildContext context,
   ) {
     Size size = _extractSize(element);
     ExhibitionPageEventTrigger? clickViewEventTrigger =
@@ -97,15 +106,12 @@ class HtmlWidgets {
         .firstWhereOrNull(
             (element) => element.localName == CustomHtmlWidgets.SOURCE)
         ?.attributes[CustomHtmlWidgets.SRC];
-    String? foundResource = resources
-        .firstWhereOrNull((resource) => "@resources/${resource.id}" == source)
-        ?.data;
 
     if (source != null) {
       return Container(
         width: size.width,
         height: size.height,
-        child: VideoWidget(src: foundResource ?? ""),
+        child: VideoWidget(src: source),
       );
     }
 
@@ -123,10 +129,27 @@ class HtmlWidgets {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  ///
-  /// TODO: Implement this
-  static Function() _handleTapEvent(ExhibitionPageEventTrigger eventTrigger) {
-    return () {};
+  static Function() _handleTapEvent(
+    ExhibitionPageEventTrigger eventTrigger,
+    BuildContext context,
+  ) {
+    return () {
+      SimpleLogger().info("Handling tap event...");
+      final event = eventTrigger.events?.first;
+      final property = event?.properties.first;
+      if (property == null) {
+        SimpleLogger().info("No event property found!");
+        return;
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PageScreen(
+            pageId: property.value,
+          ),
+        ),
+      );
+    };
   }
 
   /// Extracts elements width and height

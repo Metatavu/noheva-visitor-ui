@@ -1,7 +1,7 @@
 import "dart:io";
 import "package:drift/drift.dart";
 import "package:drift/native.dart";
-import 'package:noheva_visitor_ui/database/model/device_exhibition_mapping.dart';
+import "package:noheva_visitor_ui/database/model/device_exhibition_detail.dart";
 import "package:noheva_visitor_ui/database/model/key.dart";
 import "package:noheva_visitor_ui/database/model/layout.dart";
 import "package:noheva_visitor_ui/database/model/page.dart";
@@ -9,6 +9,7 @@ import "package:path_provider/path_provider.dart";
 import "package:path/path.dart" as p;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/converters/list_converter.dart";
+
 part "database.g.dart";
 
 /// Database class
@@ -18,7 +19,7 @@ part "database.g.dart";
 @DriftDatabase(
   tables: [
     Keys,
-    DeviceExhibitionMappings,
+    DeviceExhibitionDetails,
     Layouts,
     Pages,
   ],
@@ -27,7 +28,7 @@ class Database extends _$Database {
   Database() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -44,20 +45,11 @@ class Database extends _$Database {
             return await migrator.create(keys);
           case 2:
             {
-              await migrator.create(deviceExhibitionMappings);
+              await migrator.create(deviceExhibitionDetails);
               await migrator.create(layouts);
               await migrator.create(pages);
               break;
             }
-          case 3:
-            return await migrator.renameTable(
-                deviceExhibitionMappings, "exhibitions");
-          case 4:
-            return await migrator.renameColumn(
-              deviceExhibitionMappings,
-              "id",
-              deviceExhibitionMappings.exhibitionId,
-            );
         }
       }
     });

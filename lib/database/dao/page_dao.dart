@@ -22,6 +22,15 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
         .getSingleOrNull();
   }
 
+  /// Finds Page by [exhibitionId] and [orderNumber]
+  Future<Page?> findPageByOrderNumber(
+      String exhibitionId, int orderNumber) async {
+    return (select(pages)
+          ..where((row) => row.exhibitionId.equals(exhibitionId))
+          ..where((row) => row.orderNumber.equals(orderNumber)))
+        .getSingleOrNull();
+  }
+
   /// Updates given [page] in database and returns the updated row
   Future<Page> updatePage(Page page) async {
     await update(pages).replace(page);
@@ -32,6 +41,11 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
   /// Deletes existing Pages from database
   Future deletePages() async {
     await delete(pages).go();
+  }
+
+  /// Deletes page by [id]
+  Future deletePage(String id) async {
+    await (delete(pages)..where((row) => row.id.equals(id))).go();
   }
 
   /// Lists all Pages by [exhibitionId]

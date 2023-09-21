@@ -1,8 +1,8 @@
 import "package:drift/drift.dart";
 
-/// Device Exhibition Mapping persistence model
-@DataClassName("DeviceExhibitionMapping")
-class DeviceExhibitionMappings extends Table {
+/// Device Exhibition Details persistence model
+@DataClassName("DeviceExhibitionDetail")
+class DeviceExhibitionDetails extends Table {
   TextColumn get exhibitionId => text()();
   TextColumn get exhibitionDeviceId => text()();
   TextColumn get exhibitionDeviceGroupId => text()();

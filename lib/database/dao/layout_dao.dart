@@ -28,6 +28,11 @@ class LayoutDao extends DatabaseAccessor<Database> with _$LayoutDaoMixin {
     await delete(layouts).go();
   }
 
+  /// Deletes Layout by [id]
+  Future deleteLayout(String id) async {
+    await (delete(layouts)..where((row) => row.id.equals(id))).go();
+  }
+
   /// Finds Layout by [layoutId]
   Future<Layout?> findLayout(String layoutId) async {
     return (select(layouts)..where((row) => row.id.equals(layoutId)))

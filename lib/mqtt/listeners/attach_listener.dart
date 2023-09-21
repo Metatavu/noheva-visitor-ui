@@ -1,5 +1,5 @@
 import "package:noheva_api/noheva_api.dart";
-import 'package:noheva_visitor_ui/database/dao/device_exhibition_mapping_dao.dart';
+import "package:noheva_visitor_ui/database/dao/device_exhibition_detail_dao.dart";
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
@@ -40,10 +40,10 @@ class AttachListener {
     // There's no support for having device attached to multiple exhibitions and therefore existing exhibitions are deleted
     await pageDao.deletePages();
     await layoutDao.deleteLayouts();
-    await exhibitionDao.deleteExhibitions();
+    await deviceExhitionDetailDao.deleteDeviceExhibitionDetails();
     SimpleLogger().info("Deleted existing Exhibitions!");
-    await exhibitionDao.storeExhibition(
-      DeviceExhibitionMappingsCompanion.insert(
+    await deviceExhitionDetailDao.storeDeviceExhibitionDetail(
+      DeviceExhibitionDetailsCompanion.insert(
         exhibitionId: attachedMessage.exhibitionId!,
         exhibitionDeviceId: attachedMessage.exhibitionDeviceId!,
         exhibitionDeviceGroupId: attachedMessage.exhibitionDeviceGroupId!,
@@ -55,7 +55,10 @@ class AttachListener {
     SimpleLogger().info("Successfully loaded layouts!");
     SimpleLogger().info("Loading pages...");
     await PageController.loadPages(attachedMessage.exhibitionDeviceId!);
-    streamController.sink.add(attachedMessage.exhibitionId);
+    SimpleLogger().info("Successfully loaded pages!");
+    final firstPage =
+        await pageDao.findPageByOrderNumber(attachedMessage.exhibitionId!, 0);
+    streamController.sink.add(firstPage!.id);
   }
 
   /// Callback function for handling detach messages
@@ -81,7 +84,7 @@ class AttachListener {
     SimpleLogger().info("Deleted pages!");
     await LayoutController.deleteLayouts();
     SimpleLogger().info("Deleted layouts!");
-    await exhibitionDao.deleteExhibitions();
+    await deviceExhitionDetailDao.deleteDeviceExhibitionDetails();
     SimpleLogger().info("Deleted exhibitions!");
     streamController.sink.add(null);
   }

@@ -1,18 +1,14 @@
 import "dart:async";
-import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
-import 'package:noheva_visitor_ui/database/dao/device_exhibition_mapping_dao.dart';
-import 'package:noheva_visitor_ui/database/dao/key_dao.dart';
-import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
+import "package:noheva_visitor_ui/database/dao/device_exhibition_detail_dao.dart";
+import "package:noheva_visitor_ui/database/dao/key_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/main.dart";
-import "package:noheva_visitor_ui/screens/exhibition_screen.dart";
+import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
-import "package:noheva_visitor_ui/utils/offline_file_controller.dart";
 import "package:simple_logger/simple_logger.dart";
-import "package:noheva_visitor_ui/utils/page_controller.dart"
-    as page_controller;
+import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 
 /// Default Screen
 class DefaultScreen extends StatefulWidget {
@@ -26,86 +22,83 @@ class DefaultScreen extends StatefulWidget {
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
 
+  /// Navigates to [PageScreen] with [pageId]
+  void _navigateToPageScreen(String pageId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PageScreen(pageId: pageId),
+      ),
+    );
+  }
+
+  /// Handles stream events
+  ///
+  /// If event is not null, navigates to [PageScreen] with [event] as [pageId]
+  void _handleStreamEvent(dynamic event) {
+    if (event != null) {
+      _navigateToPageScreen(event);
+    }
+  }
+
+  /// Checks device approval status from local database
+  Future _checkDeviceApproval() async {
+    final deviceIsApproved = await keyDao.checkIsDeviceApproved();
+    if (!deviceIsApproved) {
+      Timer.periodic(const Duration(seconds: 5), (timer) async {
+        SimpleLogger().info("Checking whether device has been approved...");
+        bool isApproved = await keyDao.checkIsDeviceApproved();
+        setState(() => _isDeviceApproved = isApproved);
+        if (isApproved) {
+          SimpleLogger().info("Device is approved, loading device data...");
+          await _loadDeviceData();
+          timer.cancel();
+        }
+      });
+    } else {
+      SimpleLogger().info("Device is approved, loading device data...");
+      await _loadDeviceData();
+    }
+    setState(() => _isDeviceApproved = deviceIsApproved);
+  }
+
+  /// Loads device data from API and updates local database
+  Future _loadDeviceData() async {
+    SimpleLogger().info("Loading device data...");
+    final deviceExhibitionDetail =
+        await deviceExhitionDetailDao.getDeviceExhibitionDetail();
+    if (deviceExhibitionDetail != null) {
+      SimpleLogger().info("Device is attached to an Exhibition!");
+      final exhibitionDeviceId = deviceExhibitionDetail.exhibitionDeviceId;
+      final exhibitionId = deviceExhibitionDetail.exhibitionId;
+      final deviceDataApi = await apiFactory.getDeviceDataApi();
+      SimpleLogger().info("Loading layouts...");
+      await LayoutController.loadLayouts(exhibitionDeviceId);
+      SimpleLogger().info("Loading pages...");
+      final pages = (await deviceDataApi.listDeviceDataPages(
+        exhibitionDeviceId: exhibitionDeviceId,
+      ))
+          .data!
+          .toList();
+      await pc.PageController.comparePages(exhibitionId, pages);
+
+      final firstPage = await pageDao.findPageByOrderNumber(exhibitionId, 0);
+      if (firstPage != null) {
+        SimpleLogger().info("Navigating to first page...");
+        _navigateToPageScreen(firstPage.id);
+      } else {
+        SimpleLogger().info("No pages found.");
+      }
+    } else {
+      SimpleLogger().info("Device is not attached to an Exhibition!");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    streamController.stream.listen((event) {
-      if (event != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ExhibitionScreen(exhibitionId: event),
-          ),
-        );
-      }
-    });
-    keyDao.checkIsDeviceApproved().then(
-      (value) {
-        if (!value) {
-          Timer.periodic(const Duration(seconds: 5), (timer) async {
-            SimpleLogger().info("Checking whether device has been approved...");
-            bool isApproved = await keyDao.checkIsDeviceApproved();
-            setState(() => _isDeviceApproved = isApproved);
-            if (isApproved) {
-              SimpleLogger().info("Device is approved!");
-              timer.cancel();
-            }
-          });
-        }
-        setState(() => _isDeviceApproved = value);
-      },
-    );
-
-    exhibitionDao.getExhibition().then((value) async {
-      if (value != null) {
-        print("Value: $value");
-        final exhibitionDeviceId = value.exhibitionDeviceId;
-        final deviceDataApi = await apiFactory.getDeviceDataApi();
-        final pages = await deviceDataApi
-            .listDeviceDataPages(
-              exhibitionDeviceId: exhibitionDeviceId,
-            )
-            .then((value) => value.data!);
-        final existingPages = await pageDao.listPages(value.exhibitionId);
-        for (var page in pages) {
-          final existingPage = existingPages.firstWhereOrNull(
-            (element) => element.id == page.id,
-          );
-          if (existingPage == null) continue;
-          final pageIsModified = page_controller.PageController.isPageModified(
-            existingPage,
-            page,
-          );
-          if (pageIsModified) {
-            SimpleLogger().info("Page is modified, updating...");
-            final existingResources = existingPage.resources;
-            final newResources = page.resources;
-
-            for (var existingResource in existingResources) {
-              final newResource = newResources.firstWhereOrNull(
-                (element) => element.id == existingResource.id,
-              );
-              final resourceIsChanged =
-                  existingResource.data != newResource?.data;
-              final resourceIsOfflineable = page_controller
-                  .PageController.offlineMediaTypes
-                  .contains(existingResource.type);
-
-              if (resourceIsOfflineable && resourceIsChanged) {
-                SimpleLogger().info(
-                  "Resource ${existingResource.id} is modified, deleting...",
-                );
-                await offlineFileController
-                    .deleteOfflineFile(existingResource.data);
-              }
-            }
-            await page_controller.PageController.persistPage(page);
-          } else {
-            SimpleLogger().info("Page is not modified. Not updating!");
-          }
-        }
-      }
-    });
+    streamController.stream.listen(_handleStreamEvent);
+    _checkDeviceApproval();
   }
 
   @override
