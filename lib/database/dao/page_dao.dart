@@ -12,10 +12,14 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
 
   /// Stores given [page] to database and returns the inserted row
   Future<Page> storePage(PagesCompanion page) async {
-    await into(pages).insert(page);
+    await into(pages).insertOnConflictUpdate(page);
+    return (await findPage(page.id.value.toString()))!;
+  }
 
-    return (await (select(pages)..where((row) => row.id.equals(page.id.value)))
-        .getSingleOrNull())!;
+  /// Finds Page by [pageId]
+  Future<Page?> findPage(String pageId) async {
+    return (select(pages)..where((row) => row.id.equals(pageId)))
+        .getSingleOrNull();
   }
 
   /// Updates given [page] in database and returns the updated row
