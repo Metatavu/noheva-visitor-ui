@@ -38,15 +38,16 @@ class OfflineFileController {
   Future<bool> deleteOfflineFile(String fileName) async {
     File? file = await _getDirectoryFile(
       await getImagesDirectoryPath(),
-      fileName,
+      p.basename(fileName),
     );
 
     if (file != null) {
-      await file.delete();
       File metaFile = File("${file.path}.meta");
       if (await metaFile.exists()) {
         await metaFile.delete();
       }
+
+      await file.delete();
 
       return true;
     }
