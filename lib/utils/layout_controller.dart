@@ -39,7 +39,6 @@ class LayoutController {
     }
     SimpleLogger().info("Successfully loaded ${layouts.length} layouts!");
     SimpleLogger().info("Persisting layouts...");
-    await deleteLayouts();
     final storedLayouts = [];
     for (var layout in layouts) {
       final existingLayout = existingLayouts.firstWhereOrNull(

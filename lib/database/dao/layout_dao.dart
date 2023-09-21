@@ -11,9 +11,9 @@ class LayoutDao extends DatabaseAccessor<Database> with _$LayoutDaoMixin {
 
   /// Stores given [layout] to database and returns the inserted row
   Future<Layout> storeLayout(LayoutsCompanion layout) async {
-    await into(layouts).insert(layout);
+    await into(layouts).insertOnConflictUpdate(layout);
 
-    return (select(layouts).getSingleOrNull().then((row) => row!));
+    return (await findLayout(layout.id.value.toString()))!;
   }
 
   /// Updates given [layout] in database and returns the updated row
