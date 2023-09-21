@@ -4,6 +4,7 @@ import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/main.dart";
+import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:simple_logger/simple_logger.dart";
 
@@ -52,6 +53,13 @@ class _ExhibitionScreenState extends State<ExhibitionScreen> {
     streamController.stream.listen((event) {
       if (event != null) {
         _loadExhibition(event);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const DefaultScreen(),
+          ),
+        );
       }
     });
   }
