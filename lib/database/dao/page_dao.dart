@@ -14,7 +14,8 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
   Future<Page> storePage(PagesCompanion page) async {
     await into(pages).insert(page);
 
-    return (select(pages).getSingleOrNull().then((row) => row!));
+    return (await (select(pages)..where((row) => row.id.equals(page.id.value)))
+        .getSingleOrNull())!;
   }
 
   /// Updates given [page] in database and returns the updated row
