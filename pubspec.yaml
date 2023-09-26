@@ -44,6 +44,7 @@ dependencies:
   html: ^0.15.4
   built_value: ^8.6.2
   crypto: ^3.0.3
+  csslib: ^1.0.0
 
 dev_dependencies:
   flutter_test:

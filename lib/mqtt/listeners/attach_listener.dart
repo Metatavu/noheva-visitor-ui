@@ -58,7 +58,7 @@ class AttachListener {
     SimpleLogger().info("Successfully loaded pages!");
     final firstPage =
         await pageDao.findPageByOrderNumber(attachedMessage.exhibitionId!, 0);
-    streamController.sink.add(firstPage!.id);
+    streamController.sink.add(firstPage?.id);
   }
 
   /// Callback function for handling detach messages

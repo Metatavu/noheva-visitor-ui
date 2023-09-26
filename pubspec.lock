@@ -194,7 +194,7 @@ packages:
     source: hosted
     version: "3.0.3"
   csslib:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: csslib
       sha256: "706b5707578e0c1b4b7550f64078f0a0f19dec3f50a178ffae7006b0a9ca58fb"
@@ -338,7 +338,7 @@ packages:
     description:
       path: "packages/core"
       ref: flex
-      resolved-ref: "32b531229f2fa253f335504ada6942a2ecd4c537"
+      resolved-ref: b03cb3db6ee665a8f9d0d646e8434793e8bc7227
       url: "https://github.com/Metatavu/flutter_widget_from_html.git"
     source: git
     version: "0.10.3"

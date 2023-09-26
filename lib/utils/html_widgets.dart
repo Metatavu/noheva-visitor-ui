@@ -1,12 +1,13 @@
-import "dart:io";
-
 import "package:collection/collection.dart";
+import "package:csslib/visitor.dart";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
-import "package:noheva_visitor_ui/widgets/video_widget.dart";
+import 'package:noheva_visitor_ui/widgets/custom_button.dart';
+import 'package:noheva_visitor_ui/widgets/custom_image.dart';
+import "package:noheva_visitor_ui/widgets/custom_video.dart";
 import "package:simple_logger/simple_logger.dart";
 
 /// Html Widgets
@@ -23,99 +24,116 @@ class HtmlWidgets {
     BuildContext context,
   ) =>
       switch (element.localName) {
-        CustomHtmlWidgets.IMAGE => _buildCustomImageWidget(
-            element,
-            resources,
-            eventTriggers,
-            context,
+        CustomHtmlWidgets.IMAGE => CustomImage(
+            element: element,
+            resources: resources,
+            eventTriggers: eventTriggers,
           ),
-        CustomHtmlWidgets.BUTTON => _buildCustomButtonWidget(
-            element,
-            resources,
-            eventTriggers,
-            context,
+        CustomHtmlWidgets.BUTTON => CustomButton(
+            element: element,
+            resources: resources,
+            eventTriggers: eventTriggers,
           ),
-        CustomHtmlWidgets.VIDEO => _buildCustomVideoWidget(
-            element,
-            resources,
-            eventTriggers,
-            context,
+        CustomHtmlWidgets.VIDEO => CustomVideo(
+            element: element,
+            resources: resources,
+            eventTriggers: eventTriggers,
           ),
         _ => null
       };
 
-  /// Builds custom Image widget from HTML [element] and applies [resources]
-  static Widget _buildCustomImageWidget(
-    dom.Element element,
-    List<ExhibitionPageResource> resources,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-    BuildContext context,
-  ) {
-    Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? clickViewEventTrigger =
-        _findClickViewEventTrigger(element, eventTriggers);
+  /// Parses RGB color element from [Expression]
+  static int? _parseColorRgbElement(Expression v) => (v is NumberTerm
+          ? v.number.ceil()
+          : v is PercentageTerm
+              ? (v.valueAsDouble * 255.0).ceil()
+              : null)
+      ?.clamp(0, 255);
 
-    Widget imageWidget = Image.file(
-      File(element.attributes["src"] ?? ""),
-      width: size.width,
-      height: size.height,
-    );
+  /// Parses Alpha color element from [Expression]
+  static int? _parseColorAlpha(Expression v) => (v is NumberTerm
+          ? (v.number * 255).ceil()
+          : v is PercentageTerm
+              ? (v.valueAsDouble * 255.0).ceil()
+              : 255)
+      .clamp(0, 255);
 
-    if (clickViewEventTrigger != null) {
-      return GestureDetector(
-        onTap: _handleTapEvent(clickViewEventTrigger, context),
-        child: imageWidget,
-      );
-    }
-
-    return imageWidget;
+  static double? extractFontSize(dom.Element element) {
+    final fontSize = _extractStyleAttribute(element, "font-size");
+    return double.tryParse(fontSize ?? "16");
   }
 
-  /// Builds custom Button widget from HTML [element] and applies [resources]
-  static Widget _buildCustomButtonWidget(
-    dom.Element element,
-    List<ExhibitionPageResource> resources,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-    BuildContext context,
-  ) {
-    Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? clickViewEventTrigger =
-        _findClickViewEventTrigger(element, eventTriggers);
-
-    // TODO: Parse styles from HTML
-    return MaterialButton(
-        height: size.height,
-        minWidth: size.width,
-        onPressed: clickViewEventTrigger != null
-            ? _handleTapEvent(clickViewEventTrigger, context)
-            : () {},
-        child: Text(element.innerHtml));
-  }
-
-  /// Builds custom Video widget from HTML [element] and applies [resources]
-  static Widget? _buildCustomVideoWidget(
-    dom.Element element,
-    List<ExhibitionPageResource> resources,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-    BuildContext context,
-  ) {
-    Size size = _extractSize(element);
-    ExhibitionPageEventTrigger? clickViewEventTrigger =
-        _findClickViewEventTrigger(element, eventTriggers);
-    String? source = element.children
-        .firstWhereOrNull(
-            (element) => element.localName == CustomHtmlWidgets.SOURCE)
-        ?.attributes[CustomHtmlWidgets.SRC];
-
-    if (source != null) {
-      return Container(
-        width: size.width,
-        height: size.height,
-        child: VideoWidget(src: source),
-      );
+  /// Extracts color from HTML [element] styles and returns it as an int
+  static Color? extractColor(
+    dom.Element element, {
+    String property = "color",
+  }) {
+    final colorAttribute =
+        element.styles.where((style) => style.property == property).firstOrNull;
+    if (colorAttribute != null) {
+      if (colorAttribute.value is FunctionTerm) {
+        final params = (colorAttribute.value as FunctionTerm).params;
+        final r = _parseColorRgbElement(params[0]);
+        final g = _parseColorRgbElement(params[1]);
+        final b = _parseColorRgbElement(params[2]);
+        final a = params.length >= 4 ? _parseColorAlpha(params[3]) : 255;
+        if (r != null && g != null && b != null && a != null) {
+          return Color.fromARGB(a, r, g, b);
+        }
+      }
     }
 
     return null;
+  }
+
+  static String? extractAttribute(
+    dom.Element element, {
+    required String attribute,
+  }) {
+    return element.attributes[attribute];
+  }
+
+  static double _parsePixelValueToDouble(Expression value) {
+    return double.tryParse(value.toString().replaceAll("px", "")) ?? 0;
+  }
+
+  static BorderRadius extractBorderRadius(dom.Element element) {
+    final borderRadiusAttribute = element.styles
+        .firstWhereOrNull((style) => style.property == "border-radius")
+        ?.values;
+    if (borderRadiusAttribute == null) {
+      return const BorderRadius.all(Radius.circular(0));
+    }
+
+    final parsedValues = borderRadiusAttribute
+        .map((value) => _parsePixelValueToDouble(value))
+        .toList();
+
+    return switch (borderRadiusAttribute.length) {
+      1 => BorderRadius.all(
+          Radius.circular(
+            parsedValues[0],
+          ),
+        ),
+      2 => BorderRadius.only(
+          topLeft: Radius.circular(parsedValues[0]),
+          bottomRight: Radius.circular(parsedValues[0]),
+          topRight: Radius.circular(parsedValues[1]),
+          bottomLeft: Radius.circular(parsedValues[1]),
+        ),
+      3 => BorderRadius.only(
+          topLeft: Radius.circular(parsedValues[0]),
+          topRight: Radius.circular(parsedValues[1]),
+          bottomLeft: Radius.circular(parsedValues[1]),
+          bottomRight: Radius.circular(parsedValues[2])),
+      4 => BorderRadius.only(
+          topLeft: Radius.circular(parsedValues[0]),
+          topRight: Radius.circular(parsedValues[1]),
+          bottomRight: Radius.circular(parsedValues[2]),
+          bottomLeft: Radius.circular(parsedValues[3]),
+        ),
+      _ => const BorderRadius.only()
+    };
   }
 
   /// Finds event trigger assigned to this [element] from [eventTriggers]
@@ -129,19 +147,22 @@ class HtmlWidgets {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  static Function() _handleTapEvent(
-    ExhibitionPageEventTrigger eventTrigger,
+  static Function()? handleTapEvent(
+    dom.Element element,
+    List<ExhibitionPageEventTrigger> eventTriggers,
     BuildContext context,
   ) {
     return () {
+      ExhibitionPageEventTrigger? clickViewEventTrigger =
+          _findClickViewEventTrigger(element, eventTriggers);
       SimpleLogger().info("Handling tap event...");
-      final event = eventTrigger.events?.first;
+      final event = clickViewEventTrigger?.events?.first;
       final property = event?.properties.first;
       if (property == null) {
         SimpleLogger().info("No event property found!");
-        return;
+        return null;
       }
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => PageScreen(
@@ -153,25 +174,37 @@ class HtmlWidgets {
   }
 
   /// Extracts elements width and height
-  static Size _extractSize(dom.Element element) {
-    final width = _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH)
-        .replaceAll(RegExp(r'(px|%)\b'), "");
-    final height = _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT)
-        .replaceAll(RegExp(r'(px|%)\b'), "");
+  static Size extractSize(dom.Element element) {
+    if (element.localName == CustomHtmlWidgets.VIDEO) {
+      final widthString =
+          HtmlWidgets.extractAttribute(element, attribute: "width");
+      final heightString =
+          HtmlWidgets.extractAttribute(element, attribute: "height");
+      final width = double.tryParse(widthString ?? "0");
+      final height = double.tryParse(heightString ?? "0");
 
-    return Size(double.tryParse(width) ?? 200, double.tryParse(height) ?? 200);
+      return Size(width ?? 0, height ?? 0);
+    } else {
+      final width = _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH)
+              ?.replaceAll(RegExp(r'(px|%)\b'), "") ??
+          "";
+      final height = _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT)
+              ?.replaceAll(RegExp(r'(px|%)\b'), "") ??
+          "";
+
+      return Size(double.tryParse(width) ?? 0, double.tryParse(height) ?? 0);
+    }
   }
 
   /// Extracts given style [attribute] from HTML [element]
-  static String _extractStyleAttribute(
+  static String? _extractStyleAttribute(
     dom.Element element,
     String attribute,
   ) =>
       element.styles
           .firstWhereOrNull((style) => style.property == attribute)
           ?.value
-          .toString() ??
-      "";
+          .toString();
 }
 
 class CustomHtmlWidgets {
