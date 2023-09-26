@@ -21,10 +21,11 @@ class DefaultScreen extends StatefulWidget {
 /// Default Screen State
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
+  late StreamSubscription _streamSubscription;
 
   /// Navigates to [PageScreen] with [pageId]
   void _navigateToPageScreen(String pageId) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => PageScreen(pageId: pageId),
@@ -97,8 +98,14 @@ class _DefaultScreenState extends State<DefaultScreen> {
   @override
   void initState() {
     super.initState();
-    streamController.stream.listen(_handleStreamEvent);
+    _streamSubscription = streamController.stream.listen(_handleStreamEvent);
     _checkDeviceApproval();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
   }
 
   @override

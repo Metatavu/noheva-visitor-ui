@@ -1,3 +1,4 @@
+import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:noheva_api/noheva_api.dart";
@@ -26,6 +27,7 @@ class _PageScreenState extends State<PageScreen> {
   String? _pageHtml;
   final List<ExhibitionPageResource> _pageResources = [];
   final List<ExhibitionPageEventTrigger> _eventTriggers = [];
+  late StreamSubscription _streamSubscription;
 
   /// Loads page and its content by [pageId]
   Future _loadPage(String pageId) async {
@@ -54,11 +56,11 @@ class _PageScreenState extends State<PageScreen> {
   void initState() {
     super.initState();
     _loadPage(widget.pageId);
-    streamController.stream.listen((event) {
+    _streamSubscription = streamController.stream.listen((event) {
       if (event != null) {
         _loadPage(event);
       } else {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const DefaultScreen(),
@@ -66,6 +68,12 @@ class _PageScreenState extends State<PageScreen> {
         );
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
   }
 
   @override

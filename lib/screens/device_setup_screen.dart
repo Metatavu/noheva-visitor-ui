@@ -24,7 +24,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
 
   /// Navigates to default screen
   void _navigateToDefaultScreen() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => const DefaultScreen(),
