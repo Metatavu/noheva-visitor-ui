@@ -42,27 +42,6 @@ class HtmlWidgets {
         _ => null
       };
 
-  /// Parses RGB color element from [Expression]
-  static int? _parseColorRgbElement(Expression v) => (v is NumberTerm
-          ? v.number.ceil()
-          : v is PercentageTerm
-              ? (v.valueAsDouble * 255.0).ceil()
-              : null)
-      ?.clamp(0, 255);
-
-  /// Parses Alpha color element from [Expression]
-  static int? _parseColorAlpha(Expression v) => (v is NumberTerm
-          ? (v.number * 255).ceil()
-          : v is PercentageTerm
-              ? (v.valueAsDouble * 255.0).ceil()
-              : 255)
-      .clamp(0, 255);
-
-  static double? extractFontSize(dom.Element element) {
-    final fontSize = _extractStyleAttribute(element, "font-size");
-    return double.tryParse(fontSize ?? "16");
-  }
-
   /// Extracts color from HTML [element] styles and returns it as an int
   static Color? extractColor(
     dom.Element element, {
@@ -91,10 +70,6 @@ class HtmlWidgets {
     required String attribute,
   }) {
     return element.attributes[attribute];
-  }
-
-  static double _parsePixelValueToDouble(Expression value) {
-    return double.tryParse(value.toString().replaceAll("px", "")) ?? 0;
   }
 
   static BorderRadius extractBorderRadius(dom.Element element) {
@@ -136,14 +111,9 @@ class HtmlWidgets {
     };
   }
 
-  /// Finds event trigger assigned to this [element] from [eventTriggers]
-  static ExhibitionPageEventTrigger? _findClickViewEventTrigger(
-    dom.Element element,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-  ) {
-    String? elementId = element.id;
-    return eventTriggers.firstWhereOrNull(
-        (eventTrigger) => eventTrigger.clickViewId == elementId);
+  static double? extractFontSize(dom.Element element) {
+    final fontSize = _extractStyleAttribute(element, "font-size");
+    return double.tryParse(fontSize ?? "16");
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
@@ -194,6 +164,36 @@ class HtmlWidgets {
 
       return Size(double.tryParse(width) ?? 0, double.tryParse(height) ?? 0);
     }
+  }
+
+  /// Parses RGB color element from [Expression]
+  static int? _parseColorRgbElement(Expression v) => (v is NumberTerm
+          ? v.number.ceil()
+          : v is PercentageTerm
+              ? (v.valueAsDouble * 255.0).ceil()
+              : null)
+      ?.clamp(0, 255);
+
+  /// Parses Alpha color element from [Expression]
+  static int? _parseColorAlpha(Expression v) => (v is NumberTerm
+          ? (v.number * 255).ceil()
+          : v is PercentageTerm
+              ? (v.valueAsDouble * 255.0).ceil()
+              : 255)
+      .clamp(0, 255);
+
+  static double _parsePixelValueToDouble(Expression value) {
+    return double.tryParse(value.toString().replaceAll("px", "")) ?? 0;
+  }
+
+  /// Finds event trigger assigned to this [element] from [eventTriggers]
+  static ExhibitionPageEventTrigger? _findClickViewEventTrigger(
+    dom.Element element,
+    List<ExhibitionPageEventTrigger> eventTriggers,
+  ) {
+    String? elementId = element.id;
+    return eventTriggers.firstWhereOrNull(
+        (eventTrigger) => eventTrigger.clickViewId == elementId);
   }
 
   /// Extracts given style [attribute] from HTML [element]
