@@ -83,6 +83,7 @@ class _PageScreenState extends State<PageScreen> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
+        backgroundColor: const Color(0xffffffff),
         body: Container(
           width: screenSize.width,
           height: screenSize.height,
