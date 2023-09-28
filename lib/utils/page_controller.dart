@@ -20,8 +20,10 @@ class PageController {
     final offlinedResources = {};
     for (var resource in newPage.resources) {
       if (offlineMediaTypes.contains(resource.type)) {
+        final resourceData =
+            resource.data.replaceAll("url('", "").replaceAll("')", "");
         final offlinedFile =
-            await offlineFileController.getOfflineFile(resource.data);
+            await offlineFileController.getOfflineFile(resourceData);
         offlinedResources[resource.id] = offlinedFile?.path;
       }
     }
@@ -78,7 +80,6 @@ class PageController {
   /// Deletes existing Pages
   static Future deletePages() async {
     SimpleLogger().info("Deleting existing pages...");
-
     await pageDao.deletePages();
   }
 

@@ -49,17 +49,30 @@ class HtmlWidgets {
   }) {
     final colorAttribute =
         element.styles.where((style) => style.property == property).firstOrNull;
-    if (colorAttribute != null) {
-      if (colorAttribute.value is FunctionTerm) {
-        final params = (colorAttribute.value as FunctionTerm).params;
-        final r = _parseColorRgbElement(params[0]);
-        final g = _parseColorRgbElement(params[1]);
-        final b = _parseColorRgbElement(params[2]);
-        final a = params.length >= 4 ? _parseColorAlpha(params[3]) : 255;
-        if (r != null && g != null && b != null && a != null) {
-          return Color.fromARGB(a, r, g, b);
+    if (colorAttribute == null) {
+      return null;
+    }
+    final color = colorAttribute.value;
+    if (color == null) {
+      return null;
+    }
+    switch (color.runtimeType) {
+      case FunctionTerm:
+        {
+          final params = (colorAttribute.value as FunctionTerm).params;
+          final r = _parseColorRgbElement(params[0]);
+          final g = _parseColorRgbElement(params[1]);
+          final b = _parseColorRgbElement(params[2]);
+          final a = params.length >= 4 ? _parseColorAlpha(params[3]) : 255;
+          if (r != null && g != null && b != null && a != null) {
+            return Color.fromARGB(a, r, g, b);
+          }
         }
-      }
+      case HexColorTerm:
+        {
+          final hexColor = (colorAttribute.value as HexColorTerm).text;
+          return Color(int.parse(hexColor, radix: 16)).withAlpha(255);
+        }
     }
 
     return null;
@@ -113,7 +126,8 @@ class HtmlWidgets {
 
   static double? extractFontSize(dom.Element element) {
     final fontSize = _extractStyleAttribute(element, "font-size");
-    return double.tryParse(fontSize ?? "16");
+
+    return _parsePixelValueToDouble(fontSize);
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
@@ -146,23 +160,21 @@ class HtmlWidgets {
   /// Extracts elements width and height
   static Size extractSize(dom.Element element) {
     if (element.localName == CustomHtmlWidgets.VIDEO) {
-      final widthString =
-          HtmlWidgets.extractAttribute(element, attribute: "width");
-      final heightString =
-          HtmlWidgets.extractAttribute(element, attribute: "height");
+      final widthString = HtmlWidgets.extractAttribute(element,
+          attribute: CustomHtmlWidgets.WIDTH);
+      final heightString = HtmlWidgets.extractAttribute(element,
+          attribute: CustomHtmlWidgets.HEIGHT);
       final width = double.tryParse(widthString ?? "0");
       final height = double.tryParse(heightString ?? "0");
 
       return Size(width ?? 0, height ?? 0);
     } else {
-      final width = _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH)
-              ?.replaceAll(RegExp(r'(px|%)\b'), "") ??
-          "";
-      final height = _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT)
-              ?.replaceAll(RegExp(r'(px|%)\b'), "") ??
-          "";
+      final width = _parsePixelValueToDouble(
+          _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH));
+      final height = _parsePixelValueToDouble(
+          _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT));
 
-      return Size(double.tryParse(width) ?? 0, double.tryParse(height) ?? 0);
+      return Size(width, height);
     }
   }
 
@@ -182,7 +194,7 @@ class HtmlWidgets {
               : 255)
       .clamp(0, 255);
 
-  static double _parsePixelValueToDouble(Expression value) {
+  static double _parsePixelValueToDouble(Expression? value) {
     return double.tryParse(value.toString().replaceAll("px", "")) ?? 0;
   }
 
@@ -197,14 +209,13 @@ class HtmlWidgets {
   }
 
   /// Extracts given style [attribute] from HTML [element]
-  static String? _extractStyleAttribute(
+  static Expression? _extractStyleAttribute(
     dom.Element element,
     String attribute,
   ) =>
       element.styles
           .firstWhereOrNull((style) => style.property == attribute)
-          ?.value
-          .toString();
+          ?.value;
 }
 
 class CustomHtmlWidgets {

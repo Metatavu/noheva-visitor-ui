@@ -21,7 +21,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontColor =
-        HtmlWidgets.extractColor(element) ?? const Color(0x00000000);
+        HtmlWidgets.extractColor(element) ?? const Color(0xff000000);
     final fontSize = HtmlWidgets.extractFontSize(element) ?? 16;
     final backgroundColor =
         HtmlWidgets.extractColor(element, property: "background-color");
@@ -31,10 +31,6 @@ class CustomButton extends StatelessWidget {
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor: MaterialStatePropertyAll(fontColor),
-        textStyle: MaterialStatePropertyAll(
-          TextStyle(fontSize: fontSize),
-        ),
         backgroundColor: MaterialStatePropertyAll(backgroundColor),
         maximumSize: MaterialStatePropertyAll(size),
         minimumSize: MaterialStatePropertyAll(size),
@@ -45,7 +41,13 @@ class CustomButton extends StatelessWidget {
         ),
       ),
       onPressed: tapEvent,
-      child: Text(element.innerHtml),
+      child: Text(
+        element.innerHtml,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: fontColor,
+        ),
+      ),
     );
   }
 }
