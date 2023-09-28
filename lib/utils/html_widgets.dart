@@ -85,19 +85,28 @@ class HtmlWidgets {
     return element.attributes[attribute];
   }
 
-  static BorderRadius extractBorderRadius(dom.Element element) {
+  static OutlinedBorder extractBorderRadius(dom.Element element) {
+    final size = extractSize(element);
     final borderRadiusAttribute = element.styles
         .firstWhereOrNull((style) => style.property == "border-radius")
         ?.values;
     if (borderRadiusAttribute == null) {
-      return const BorderRadius.all(Radius.circular(0));
+      return const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(0)),
+      );
     }
 
     final parsedValues = borderRadiusAttribute
         .map((value) => _parsePixelValueToDouble(value))
         .toList();
-
-    return switch (borderRadiusAttribute.length) {
+    if (parsedValues.every((element) => element == parsedValues[0]) &&
+        parsedValues.isNotEmpty &&
+        parsedValues[0] == size.width &&
+        parsedValues[0] == size.height) {
+      return const CircleBorder();
+    }
+    return RoundedRectangleBorder(
+        borderRadius: switch (borderRadiusAttribute.length) {
       1 => BorderRadius.all(
           Radius.circular(
             parsedValues[0],
@@ -121,7 +130,7 @@ class HtmlWidgets {
           bottomLeft: Radius.circular(parsedValues[3]),
         ),
       _ => const BorderRadius.only()
-    };
+    });
   }
 
   static double? extractFontSize(dom.Element element) {

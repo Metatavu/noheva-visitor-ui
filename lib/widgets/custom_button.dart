@@ -1,3 +1,6 @@
+import "dart:io";
+
+import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
@@ -28,6 +31,29 @@ class CustomButton extends StatelessWidget {
     final size = HtmlWidgets.extractSize(element);
     final tapEvent =
         HtmlWidgets.handleTapEvent(element, eventTriggers, context) ?? () {};
+    final pattern =
+        RegExp(r'https:\/\/[^ "]+\.(jpg|jpeg|png|gif|bmp|svg|webp|tiff|ico)');
+    final match = pattern.firstMatch(element.outerHtml);
+    String? resourceId;
+    if (match != null) {
+      resourceId = match.group(0);
+    }
+    final foundResource = resources.firstWhereOrNull(
+      (resource) => resource.data == resourceId,
+    );
+
+    Widget? child;
+    if (foundResource != null) {
+      child = Image.network(foundResource.data);
+    } else {
+      child = Text(
+        element.innerHtml,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: fontColor,
+        ),
+      );
+    }
 
     return TextButton(
       style: ButtonStyle(
@@ -35,19 +61,11 @@ class CustomButton extends StatelessWidget {
         maximumSize: MaterialStatePropertyAll(size),
         minimumSize: MaterialStatePropertyAll(size),
         shape: MaterialStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: HtmlWidgets.extractBorderRadius(element),
-          ),
+          HtmlWidgets.extractBorderRadius(element),
         ),
       ),
       onPressed: tapEvent,
-      child: Text(
-        element.innerHtml,
-        style: TextStyle(
-          fontSize: fontSize,
-          color: fontColor,
-        ),
-      ),
+      child: child,
     );
   }
 }
