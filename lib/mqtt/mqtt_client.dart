@@ -3,9 +3,11 @@ import "dart:convert";
 import "dart:typed_data";
 import "package:mqtt_client/mqtt_client.dart";
 import "package:mqtt_client/mqtt_server_client.dart";
+import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/attach_listener.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/pages_listener.dart";
-import "package:noheva_visitor_ui/mqtt/model/status_message.dart";
+import "package:noheva_visitor_ui/utils/device_info.dart";
+import "package:noheva_visitor_ui/utils/serialization_utils.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:typed_data/typed_buffers.dart";
 import "../main.dart";
@@ -24,7 +26,7 @@ class MqttClient {
       return "";
     }
 
-    return "noheva/$environment/$deviceId/status";
+    return "$environment/$deviceId/status";
   }
 
   bool get isConnected =>
@@ -56,7 +58,8 @@ class MqttClient {
     final connMessage = MqttConnectMessage()
         .keepAliveFor(60)
         .withWillTopic(await _statusTopic)
-        .withWillMessage(jsonEncode((await _buildStatusMessage(false))))
+        .withWillMessage(SerializationUtils.serializeObject(
+            await _buildStatusMessage(false), MqttDeviceStatus))
         .authenticateAs(mqttUsername, mqttPassword)
         .startClean()
         .withWillQos(MqttQos.atLeastOnce);
@@ -95,7 +98,7 @@ class MqttClient {
   ///
   /// Initializes periodic status message.
   Future onConnected() async {
-    StatusMessage? statusMessage = await _buildStatusMessage(true);
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(true);
 
     if (statusMessage == null) {
       SimpleLogger()
@@ -107,7 +110,8 @@ class MqttClient {
     SimpleLogger().info("Connected, sending status message...");
     publishMessage(
       await _statusTopic,
-      createMessagePayload(jsonEncode(statusMessage)),
+      createMessagePayload(
+          SerializationUtils.serializeObject(statusMessage, MqttDeviceStatus)),
     );
 
     _initPeriodicStatusMessage();
@@ -141,8 +145,14 @@ class MqttClient {
   }
 
   /// Disconnects MQTT Client
-  void disconnect() {
+  Future disconnect() async {
     SimpleLogger().info("Disconnecting MQTT Client...");
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(false);
+    publishMessage(
+      await _statusTopic,
+      createMessagePayload(
+          SerializationUtils.serializeObject(statusMessage, MqttDeviceStatus)),
+    );
     _client?.disconnect();
   }
 
@@ -182,9 +192,9 @@ class MqttClient {
     }
   }
 
-  /// Sends [StatusMessage]
+  /// Sends [MqttDeviceStatus]
   Future sendStatusMessage(bool status) async {
-    StatusMessage? statusMessage = await _buildStatusMessage(status);
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(status);
 
     if (statusMessage == null) {
       SimpleLogger()
@@ -197,7 +207,8 @@ class MqttClient {
 
     publishMessage(
       statusTopic,
-      createMessagePayload(jsonEncode(statusMessage)),
+      createMessagePayload((SerializationUtils.serializeObject(
+          statusMessage, MqttDeviceStatus))),
     );
     SimpleLogger().info("Sent status message to topic: $statusTopic");
   }
@@ -217,11 +228,12 @@ class MqttClient {
     return _client!;
   }
 
-  /// Builds [StatusMessage]
-  Future<StatusMessage?> _buildStatusMessage(
+  /// Builds [MqttDeviceStatus]
+  Future<MqttDeviceStatus?> _buildStatusMessage(
     bool status,
   ) async {
     String? deviceId = _deviceId;
+    String softwareVersion = await DeviceInfo.getSoftwareVersion();
 
     if (deviceId == null) {
       SimpleLogger()
@@ -230,10 +242,12 @@ class MqttClient {
       return null;
     }
 
-    return StatusMessage(
-      status: status ? "ONLINE" : "OFFLINE",
-      deviceId: deviceId,
-    );
+    return MqttDeviceStatus((builder) async {
+      builder
+        ..deviceId = deviceId
+        ..status = status ? DeviceStatus.ONLINE : DeviceStatus.OFFLINE
+        ..version = softwareVersion;
+    });
   }
 
   /// Reconnects MQTT Client.

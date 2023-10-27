@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
@@ -7,6 +8,7 @@ import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
+import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
 import "database/dao/key_dao.dart";
@@ -24,6 +26,24 @@ final StreamController streamController =
 void main() async {
   _configureLogger();
   SimpleLogger().info("Starting Noheva Visitor UI App...");
+  WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+  AppLifecycleListener(onExitRequested: _onAppExitRequested);
+
+  WindowOptions windowOptions = const WindowOptions(
+    alwaysOnTop: true,
+    windowButtonVisibility: false,
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+    fullScreen: true,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+    await windowManager.maximize();
+  });
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
   SimpleLogger().info("Validating environment variables...");
@@ -90,6 +110,16 @@ void _configureLogger({logLevel = Level.INFO}) {
   SimpleLogger().setLevel(logLevel, includeCallerInfo: true);
   SimpleLogger().formatter = ((info) =>
       "[${info.time}] -- ${info.callerFrame ?? "NO CALLER INFO"} - ${info.message}");
+}
+
+/// Callback function for when App exit is requested.
+///
+/// e.g. user clicks on close button
+/// Disconnects MQTT client and sends appropriate status message
+Future<AppExitResponse> _onAppExitRequested() async {
+  SimpleLogger().info("App exit requested, disconnecting MQTT...");
+  await mqttClient.disconnect();
+  return AppExitResponse.exit;
 }
 
 class MyApp extends StatelessWidget {
