@@ -123,8 +123,10 @@ jobs:
           flutter build macos
           mkdir -p update/macos/${{ needs.bumpVersion.outputs.new_tag }}
           echo "${{ needs.bumpVersion.outputs.new_tag }}" > update/macos/version.txt
-          cd build/macos/Build/Products/ 
-          zip -r Release.zip Release
+          pushd .
+          cd build/macos/Build/Products/Release 
+          zip -r ../../../../../Release.zip *
+          popd
           mv Release.zip update/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
       - name: Generate AppCast XML
         run: |
