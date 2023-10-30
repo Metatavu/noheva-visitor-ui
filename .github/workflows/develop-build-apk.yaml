@@ -134,10 +134,10 @@ jobs:
           destination_dir: "staging/"
       - name: Generate AppCast XML
         run: |
-          ASSET_URL=https://${{ secrets.UPDATES_BUCKET }}.s3.eu-north-1.amazonaws.com/staging/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
-          RELEASE_NOTES=Version ${{ needs.bumpVersion.outputs.new_version }}
+          ASSET_URL="https://${{ secrets.UPDATES_BUCKET }}.s3.eu-north-1.amazonaws.com/staging/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip"
+          RELEASE_NOTES="Version ${{ needs.bumpVersion.outputs.new_version }}"
           RELEASE_DATE=$(date -R)
-          VERSION=${{ needs.bumpVersion.outputs.new_version }}
+          VERSION="${{ needs.bumpVersion.outputs.new_version }}"
 
           echo '<?xml version="1.0" encoding="utf-8"?>' > appcast.xml
           echo '<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">' >> appcast.xml
