@@ -3,12 +3,14 @@ on:
   push:
     branches:
       - develop
+      - feature-21-sparkle
 jobs:
   bumpVersion:
     runs-on: ubuntu-latest
     environment: develop
     outputs:
       new_tag: ${{ steps.get_version.outputs.new_tag }}
+      new_version: ${{ steps.get_version.outputs.new_version }}
       commit_sha: ${{ steps.get_commit_sha.outputs.commit_sha }}
     steps:
       - uses: actions/checkout@v3
@@ -130,3 +132,28 @@ jobs:
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: update
           destination_dir: "staging/"
+      - name: Generate AppCast XML
+        run: |
+          ASSET_URL=https://${{ secrets.UPDATES_BUCKET }}.s3.eu-north-1.amazonaws.com/staging/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
+          RELEASE_NOTES=Version ${{ needs.bumpVersion.outputs.new_version }}
+          RELEASE_DATE=$(date -R)
+          VERSION=${{ needs.bumpVersion.outputs.new_version }}
+
+          echo '<?xml version="1.0" encoding="utf-8"?>' > appcast.xml
+          echo '<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">' >> appcast.xml
+          echo '  <channel>' >> appcast.xml
+          echo "    <title>${{ github.repository }} Updates</title>" >> appcast.xml
+          echo '    <item>' >> appcast.xml
+          echo "      <title>Version $VERSION</title>" >> appcast.xml
+          echo "      <description><![CDATA[$RELEASE_NOTES]]></description>" >> appcast.xml
+          echo "      <pubDate>$RELEASE_DATE</pubDate>" >> appcast.xml
+          echo "      <enclosure url=\"$ASSET_URL\" sparkle:version=\"$VERSION\" type=\"application/octet-stream\"/>" >> appcast.xml
+          echo '    </item>' >> appcast.xml
+          echo '  </channel>' >> appcast.xml
+          echo '</rss>' >> appcast.xml
+      - name: Commit and push AppCast XML
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add appcast.xml
+          git diff --quiet && git diff --staged --quiet || git commit -m "Updated appcast.xml"
