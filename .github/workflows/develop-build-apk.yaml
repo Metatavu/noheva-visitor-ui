@@ -118,6 +118,7 @@ jobs:
           echo MQTT_PORT=${{ secrets.MQTT_PORT }} >> .env
           echo MQTT_URL=${{ secrets.MQTT_URL }} >> .env
           echo MQTT_USERNAME=${{ secrets.MQTT_USERNAME }} >> .env
+          echo ${{ secrets.SPARKLE_SIGN_KEY }} > /tmp/sparkle-sign.b64 && base64 -d -i /tmp/sparkle-sign.b64 > /tmp/sparkle-sign.key
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter build macos
@@ -128,6 +129,10 @@ jobs:
           zip -r ../../../../../Release.zip *
           popd
           mv Release.zip update/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
+          wget https://github.com/sparkle-project/Sparkle/releases/download/2.5.1/Sparkle-2.5.1.tar.xz
+          mkdir -p sparkle
+          tar -xf Sparkle-2.5.1.tar.xz -C sparkle
+          sparkle/bin/sign_update --ed-key-file /tmp/sparkle-sign.key update/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
       - name: Generate AppCast XML
         run: |
           ASSET_URL="https://${{ secrets.UPDATES_BUCKET }}.s3.eu-north-1.amazonaws.com/staging/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip"
