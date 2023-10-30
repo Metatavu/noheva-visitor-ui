@@ -5,7 +5,9 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/screens/management_screen.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
+import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:window_manager/window_manager.dart";
@@ -22,6 +24,13 @@ late bool isDeviceApproved;
 String? deviceId;
 final StreamController streamController =
     StreamController.broadcast(sync: true);
+final StreamController managementStreamController =
+    StreamController.broadcast(sync: true);
+final managementButtonTickCounter = TimedTickCounter(
+  ticksRequired: 10,
+  timeout: const Duration(seconds: 5),
+  onTicksReached: () => managementStreamController.sink.add(true),
+);
 
 void main() async {
   _configureLogger();
@@ -31,7 +40,7 @@ void main() async {
   AppLifecycleListener(onExitRequested: _onAppExitRequested);
 
   WindowOptions windowOptions = const WindowOptions(
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     windowButtonVisibility: false,
     center: true,
     backgroundColor: Colors.transparent,
@@ -122,6 +131,32 @@ Future<AppExitResponse> _onAppExitRequested() async {
   return AppExitResponse.exit;
 }
 
+/// Handler for management button click
+void _addManagementButtonOverlay(BuildContext context) {
+  return Overlay.of(context).insert(
+    OverlayEntry(
+      builder: (context) => Positioned(
+        left: 0,
+        top: 0,
+        width: 200,
+        height: 100,
+        child: SizedBox(
+          width: 200,
+          height: 100,
+          child: TextButton(
+            onPressed: () => managementButtonTickCounter.tick(),
+            style: const ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll(Colors.transparent),
+              overlayColor: MaterialStatePropertyAll(Colors.transparent),
+            ),
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -131,8 +166,15 @@ class MyApp extends StatelessWidget {
       title: "Noheva visitor UI",
       theme: getApplicationTheme(),
       localizationsDelegates: const [AppLocalizations.delegate],
-      home:
-          deviceId == null ? const DeviceSetupScreen() : const DefaultScreen(),
+      home: Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _addManagementButtonOverlay(context));
+          return deviceId == null
+              ? const DeviceSetupScreen()
+              : const DefaultScreen();
+        },
+      ),
     );
   }
 }

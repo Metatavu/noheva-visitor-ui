@@ -46,6 +46,9 @@ dependencies:
   crypto: ^3.0.3
   csslib: ^1.0.0
   window_manager: ^0.3.6
+  url_launcher: ^6.2.1
+  flutter_app_installer: ^1.0.0
+  archive: ^3.4.6
 
 dev_dependencies:
   flutter_test:

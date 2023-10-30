@@ -12,6 +12,8 @@ class Configuration {
   static const String MQTT_PASSWORD = "MQTT_PASSWORD";
   static const String MQTT_URL = "MQTT_URL";
   static const String MQTT_PORT = "MQTT_PORT";
+  static const String ANDROID_ARCHITECTURE = "ANDROID_ARCHITECTURE";
+  static const String APP_UPDATES_BASE_URL = "APP_UPDATES_BASE_URL";
 
   static final Configuration _instance = Configuration._();
   factory Configuration() => _instance;
@@ -29,7 +31,9 @@ class Configuration {
       MQTT_USERNAME,
       MQTT_PASSWORD,
       MQTT_URL,
-      MQTT_PORT
+      MQTT_PORT,
+      ANDROID_ARCHITECTURE,
+      APP_UPDATES_BASE_URL,
     ];
 
     for (final key in keys) {
@@ -53,4 +57,6 @@ class Configuration {
   String getMqttPassword() => get(MQTT_PASSWORD);
   String getMqttUrl() => get(MQTT_URL);
   String getMqttPort() => get(MQTT_PORT);
+  String getAppUpdatesBaseUrl() => get(APP_UPDATES_BASE_URL);
+  String getAndroidArchitecture() => get(ANDROID_ARCHITECTURE);
 }

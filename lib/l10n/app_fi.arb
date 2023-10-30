@@ -6,5 +6,9 @@
   "deviceSetupSubmitButton": "Jatka",
   "deviceSetupSkipButton": "Ohita",
   "deviceNotYetApproved": "Laitetta ei ole vielä otettu käyttöön.",
-  "deviceIsApproved": "Laite on otettu käyttöön."
+  "deviceIsApproved": "Laite on otettu käyttöön.",
+  "currentVersion": "Nykyinen versio: {currentVersion}",
+  "availableVersion": "Saatavilla oleva versio: {availableVersion}",
+  "installUpdateButton": "Asenna päivitys",
+  "mqttClientConnectionStatus": "MQTT-yhteyden tila: {status}"
 }
