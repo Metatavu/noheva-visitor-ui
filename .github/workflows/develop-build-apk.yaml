@@ -123,22 +123,15 @@ jobs:
           flutter build macos
           mkdir -p update/macos/${{ needs.bumpVersion.outputs.new_tag }}
           echo "${{ needs.bumpVersion.outputs.new_tag }}" > update/macos/version.txt
-          mv build/macos/Build/Products/Release/noheva_visitor_ui.app update/macos/${{ needs.bumpVersion.outputs.new_tag }}/
-      - name: Upload APP
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: ${{ secrets.UPDATES_BUCKET }}
-          source_dir: update
-          destination_dir: "staging/"
+          cd build/macos/Build/Products/ 
+          zip -r Release.zip Release
+          mv Release.zip update/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip
       - name: Generate AppCast XML
         run: |
           ASSET_URL="https://${{ secrets.UPDATES_BUCKET }}.s3.eu-north-1.amazonaws.com/staging/macos/${{ needs.bumpVersion.outputs.new_tag }}.zip"
           RELEASE_NOTES="Version ${{ needs.bumpVersion.outputs.new_version }}"
           RELEASE_DATE=$(date -R)
           VERSION="${{ needs.bumpVersion.outputs.new_version }}"
-
           echo '<?xml version="1.0" encoding="utf-8"?>' > appcast.xml
           echo '<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">' >> appcast.xml
           echo '  <channel>' >> appcast.xml
@@ -151,9 +144,12 @@ jobs:
           echo '    </item>' >> appcast.xml
           echo '  </channel>' >> appcast.xml
           echo '</rss>' >> appcast.xml
-      - name: Commit and push AppCast XML
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add appcast.xml
-          git diff --quiet && git diff --staged --quiet || git commit -m "Updated appcast.xml"
+          mv appcast.xml update/macos/appcast.xml
+      - name: Upload APP
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: ${{ secrets.UPDATES_BUCKET }}
+          source_dir: update
+          destination_dir: "staging/"
