@@ -1,8 +1,11 @@
 import "dart:async";
+import "dart:io";
 import "package:flutter/material.dart";
+import "package:flutter_sparkle/flutter_sparkle.dart";
 import "package:noheva_visitor_ui/app_updates/app_updater.dart";
 import "dart:core";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
+import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:simple_logger/simple_logger.dart";
 
@@ -49,6 +52,62 @@ class _ManagementScreenState extends State<ManagementScreen> {
     });
   }
 
+  List<Widget> _renderUpdateUI(BuildContext context) {
+    if (Platform.isAndroid) {
+      return [
+        Text(
+          AppLocalizations.of(context)!.currentVersion(_currentVersion),
+          style: const TextStyle(fontSize: 50),
+        ),
+        Text(
+          AppLocalizations.of(context)!.availableVersion(_serverVersion),
+          style: const TextStyle(fontSize: 50),
+        ),
+        SizedBox(
+          child: ElevatedButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all(
+                EdgeInsetsGeometry.lerp(
+                  const EdgeInsets.all(20),
+                  const EdgeInsets.all(30),
+                  0.5,
+                ),
+              ),
+            ),
+            onPressed: _serverVersionResolvingError ? null : _handleUpdate,
+            child: Text(
+              AppLocalizations.of(context)!.installUpdateButton,
+              style: const TextStyle(fontSize: 50),
+            ),
+          ),
+        ),
+      ];
+    } else {
+      return [
+        SizedBox(
+          child: ElevatedButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all(
+                EdgeInsetsGeometry.lerp(
+                  const EdgeInsets.all(20),
+                  const EdgeInsets.all(30),
+                  0.5,
+                ),
+              ),
+            ),
+            onPressed: () => FlutterSparkle.checkMacUpdate(
+              "${configuration.getAppUpdatesBaseUrl()}/macos/appcast.xml",
+            ),
+            child: Text(
+              AppLocalizations.of(context)!.installUpdateButton,
+              style: const TextStyle(fontSize: 50),
+            ),
+          ),
+        ),
+      ];
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -86,35 +145,7 @@ class _ManagementScreenState extends State<ManagementScreen> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    AppLocalizations.of(context)!
-                        .currentVersion(_currentVersion),
-                    style: const TextStyle(fontSize: 50),
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!
-                        .availableVersion(_serverVersion),
-                    style: const TextStyle(fontSize: 50),
-                  ),
-                  SizedBox(
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all(
-                          EdgeInsetsGeometry.lerp(
-                            const EdgeInsets.all(20),
-                            const EdgeInsets.all(30),
-                            0.5,
-                          ),
-                        ),
-                      ),
-                      onPressed:
-                          _serverVersionResolvingError ? null : _handleUpdate,
-                      child: Text(
-                        AppLocalizations.of(context)!.installUpdateButton,
-                        style: const TextStyle(fontSize: 50),
-                      ),
-                    ),
-                  ),
+                  ..._renderUpdateUI(context),
                   Container(
                     margin: const EdgeInsets.only(top: 10),
                     child: Text(
