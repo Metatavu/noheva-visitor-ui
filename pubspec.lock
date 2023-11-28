@@ -336,12 +336,11 @@ packages:
   flutter_widget_from_html_core:
     dependency: "direct main"
     description:
-      path: "packages/core"
-      ref: "7d88c2dc35981438ed4fa494b3513d8bc5404542"
-      resolved-ref: "7d88c2dc35981438ed4fa494b3513d8bc5404542"
-      url: "https://github.com/Metatavu/flutter_widget_from_html.git"
-    source: git
-    version: "0.10.5"
+      name: flutter_widget_from_html_core
+      sha256: d3239b1670e83fafb209d0ddccfd19bb1cd5382b3ac9a507eb1b36274df78fec
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.14.7"
   frontend_server_client:
     dependency: transitive
     description:
