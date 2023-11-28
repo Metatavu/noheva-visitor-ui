@@ -20,8 +20,13 @@ class PageController {
     final offlinedResources = {};
     for (var resource in newPage.resources) {
       if (offlineMediaTypes.contains(resource.type)) {
+        final resourceData = resource.data
+            .replaceAll("url('", "")
+            .replaceAll("')", "")
+            .replaceAll("none", "");
+        if (resourceData.isEmpty) continue;
         final offlinedFile =
-            await offlineFileController.getOfflineFile(resource.data);
+            await offlineFileController.getOfflineFile(resourceData);
         offlinedResources[resource.id] = offlinedFile?.path;
       }
     }
@@ -78,7 +83,6 @@ class PageController {
   /// Deletes existing Pages
   static Future deletePages() async {
     SimpleLogger().info("Deleting existing pages...");
-
     await pageDao.deletePages();
   }
 
@@ -100,10 +104,12 @@ class PageController {
     List<ExhibitionPageResource> resources,
   ) {
     for (var resource in resources) {
-      html = html.replaceAll(
-        "@resources/${resource.id}",
-        resource.data,
-      );
+      html = html
+          .replaceAll(
+            "@resources/${resource.id}",
+            resource.data,
+          )
+          .replaceAll(RegExp(r'width:\s*(\d+)\s*%'), "");
     }
     return html;
   }

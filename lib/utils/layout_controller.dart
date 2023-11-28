@@ -14,7 +14,7 @@ class LayoutController {
     /// TODO: Use newLayout.screenOrientation
     return await layoutDao.storeLayout(
       LayoutsCompanion.insert(
-        id: newLayout.id!,
+        id: newLayout.id,
         screenOrientation: 0,
         data: newLayout.data.html,
         modifiedAt: newLayout.modifiedAt,
