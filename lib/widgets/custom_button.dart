@@ -11,12 +11,16 @@ class CustomButton extends StatelessWidget {
   final dom.Element element;
   final List<ExhibitionPageResource> resources;
   final List<ExhibitionPageEventTrigger> eventTriggers;
+  final List<ExhibitionPageTransition> enterTransitions;
+  final List<ExhibitionPageTransition> exitTransitions;
 
   const CustomButton({
     Key? key,
     required this.element,
     required this.resources,
     required this.eventTriggers,
+    required this.enterTransitions,
+    required this.exitTransitions,
   }) : super(key: key);
 
   @override
@@ -27,8 +31,14 @@ class CustomButton extends StatelessWidget {
     final backgroundColor =
         HtmlWidgets.extractColor(element, property: "background-color");
     final size = HtmlWidgets.extractSize(element);
-    final tapEvent =
-        HtmlWidgets.handleTapEvent(element, eventTriggers, context) ?? () {};
+    final tapEvent = HtmlWidgets.handleTapEvent(
+          element,
+          eventTriggers,
+          enterTransitions,
+          exitTransitions,
+          context,
+        ) ??
+        () {};
     final pattern =
         RegExp(r'https:\/\/[^ "]+\.(jpg|jpeg|png|gif|bmp|svg|webp|tiff|ico)');
     final match = pattern.firstMatch(element.outerHtml);

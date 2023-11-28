@@ -27,8 +27,6 @@ class _VideoWidgetState extends State<VideoWidget> {
   late VideoPlayerController _controller;
 
   /// Initializes video player and sets its source as [src]
-  ///
-  /// TODO: Implement logic for loading video from local storage
   void _initializeVideoPlayer(String src) {
     _controller = VideoPlayerController.file(File(src))
       ..initialize().then((_) {

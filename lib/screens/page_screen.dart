@@ -20,18 +20,20 @@ class PageScreen extends NohevaScreen {
   const PageScreen({Key? key, required this.pageId}) : super(key: key);
 
   @override
-  State<PageScreen> createState() => _PageScreenState();
+  State<PageScreen> createState() => PageScreenState();
 }
 
 /// Exhibition screen state
-class _PageScreenState extends NohevaScreenState<PageScreen> {
+class PageScreenState extends NohevaScreenState<PageScreen> {
   String? _pageHtml;
   final List<ExhibitionPageResource> _pageResources = [];
   final List<ExhibitionPageEventTrigger> _eventTriggers = [];
-  late StreamSubscription _streamSubscription;
+  final List<ExhibitionPageTransition> _enterTransitions = [];
+  final List<ExhibitionPageTransition> _exitTransitions = [];
+  late StreamSubscription<String?> _streamSubscription;
 
   /// Loads page and its content by [pageId]
-  Future _loadPage(String pageId) async {
+  Future<void> _loadPage(String pageId) async {
     SimpleLogger().info("Loading page $pageId ...");
     final page = await pageDao.findPage(pageId);
     if (page == null) {
@@ -43,6 +45,8 @@ class _PageScreenState extends NohevaScreenState<PageScreen> {
       throw Exception("Layout ${page.layoutId} not found!");
     }
 
+    applyPageEventTriggers(page.eventTriggers);
+
     setState(() {
       _pageHtml = pc.PageController.substitutePageResources(
         layout.data,
@@ -50,6 +54,8 @@ class _PageScreenState extends NohevaScreenState<PageScreen> {
       );
       _pageResources.addAll(page.resources);
       _eventTriggers.addAll(page.eventTriggers);
+      _enterTransitions.addAll(page.enterTransitions);
+      _exitTransitions.addAll(page.exitTransitions);
     });
   }
 
@@ -63,7 +69,7 @@ class _PageScreenState extends NohevaScreenState<PageScreen> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<NohevaScreen>(
             builder: (context) => const DefaultScreen(),
           ),
         );
@@ -94,6 +100,8 @@ class _PageScreenState extends NohevaScreenState<PageScreen> {
               element,
               _pageResources,
               _eventTriggers,
+              _enterTransitions,
+              _exitTransitions,
               context,
             ),
           ),

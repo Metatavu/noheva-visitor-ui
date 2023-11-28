@@ -5,8 +5,9 @@ import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
-import 'package:noheva_visitor_ui/widgets/custom_button.dart';
-import 'package:noheva_visitor_ui/widgets/custom_image.dart';
+import "package:noheva_visitor_ui/utils/navigation_utils.dart";
+import "package:noheva_visitor_ui/widgets/custom_button.dart";
+import "package:noheva_visitor_ui/widgets/custom_image.dart";
 import "package:noheva_visitor_ui/widgets/custom_video.dart";
 import "package:simple_logger/simple_logger.dart";
 
@@ -21,6 +22,8 @@ class HtmlWidgets {
     dom.Element element,
     List<ExhibitionPageResource> resources,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    List<ExhibitionPageTransition> enterTransitions,
+    List<ExhibitionPageTransition> exitTransitions,
     BuildContext context,
   ) =>
       switch (element.localName) {
@@ -28,11 +31,15 @@ class HtmlWidgets {
             element: element,
             resources: resources,
             eventTriggers: eventTriggers,
+            enterTransitions: enterTransitions,
+            exitTransitions: exitTransitions,
           ),
         CustomHtmlWidgets.BUTTON => CustomButton(
             element: element,
             resources: resources,
             eventTriggers: eventTriggers,
+            enterTransitions: enterTransitions,
+            exitTransitions: exitTransitions,
           ),
         CustomHtmlWidgets.VIDEO => CustomVideo(
             element: element,
@@ -143,6 +150,8 @@ class HtmlWidgets {
   static Function()? handleTapEvent(
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
+    List<ExhibitionPageTransition> enterTransition,
+    List<ExhibitionPageTransition> exitTransition,
     BuildContext context,
   ) {
     return () {
@@ -155,14 +164,20 @@ class HtmlWidgets {
         SimpleLogger().info("No event property found!");
         return null;
       }
-      Navigator.pushReplacement(
+      NavigationUtils.navigateTo(
+        PageScreen(pageId: property.value),
         context,
-        MaterialPageRoute(
-          builder: (context) => PageScreen(
-            pageId: property.value,
-          ),
-        ),
+        enterTransition: enterTransition.firstOrNull,
+        exitTransition: exitTransition.firstOrNull,
       );
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => PageScreen(
+      //       pageId: property.value,
+      //     ),
+      //   ),
+      // );
     };
   }
 

@@ -11,18 +11,27 @@ class CustomImage extends StatelessWidget {
   final dom.Element element;
   final List<ExhibitionPageResource> resources;
   final List<ExhibitionPageEventTrigger> eventTriggers;
+  final List<ExhibitionPageTransition> enterTransitions;
+  final List<ExhibitionPageTransition> exitTransitions;
 
   const CustomImage({
     Key? key,
     required this.element,
     required this.resources,
     required this.eventTriggers,
+    required this.enterTransitions,
+    required this.exitTransitions,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final tapEvent =
-        HtmlWidgets.handleTapEvent(element, eventTriggers, context);
+    final tapEvent = HtmlWidgets.handleTapEvent(
+      element,
+      eventTriggers,
+      enterTransitions,
+      exitTransitions,
+      context,
+    );
     final imageSource =
         HtmlWidgets.extractAttribute(element, attribute: "src") ?? "";
     final size = HtmlWidgets.extractSize(element);

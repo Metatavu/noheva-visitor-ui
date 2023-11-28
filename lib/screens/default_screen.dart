@@ -65,33 +65,37 @@ class _DefaultScreenState extends State<DefaultScreen> {
 
   /// Loads device data from API and updates local database
   Future _loadDeviceData() async {
-    SimpleLogger().info("Loading device data...");
-    final deviceExhibitionDetail =
-        await deviceExhitionDetailDao.getDeviceExhibitionDetail();
-    if (deviceExhibitionDetail != null) {
-      SimpleLogger().info("Device is attached to an Exhibition!");
-      final exhibitionDeviceId = deviceExhibitionDetail.exhibitionDeviceId;
-      final exhibitionId = deviceExhibitionDetail.exhibitionId;
-      final deviceDataApi = await apiFactory.getDeviceDataApi();
-      SimpleLogger().info("Loading layouts...");
-      await LayoutController.loadLayouts(exhibitionDeviceId);
-      SimpleLogger().info("Loading pages...");
-      final pages = (await deviceDataApi.listDeviceDataPages(
-        exhibitionDeviceId: exhibitionDeviceId,
-      ))
-          .data!
-          .toList();
-      await pc.PageController.comparePages(exhibitionId, pages);
+    try {
+      SimpleLogger().info("Loading device data...");
+      final deviceExhibitionDetail =
+          await deviceExhitionDetailDao.getDeviceExhibitionDetail();
+      if (deviceExhibitionDetail != null) {
+        SimpleLogger().info("Device is attached to an Exhibition!");
+        final exhibitionDeviceId = deviceExhibitionDetail.exhibitionDeviceId;
+        final exhibitionId = deviceExhibitionDetail.exhibitionId;
+        final deviceDataApi = await apiFactory.getDeviceDataApi();
+        SimpleLogger().info("Loading layouts...");
+        await LayoutController.loadLayouts(exhibitionDeviceId);
+        SimpleLogger().info("Loading pages...");
+        final pages = (await deviceDataApi.listDeviceDataPages(
+          exhibitionDeviceId: exhibitionDeviceId,
+        ))
+            .data!
+            .toList();
+        await pc.PageController.comparePages(exhibitionId, pages);
 
-      final firstPage = await pageDao.findPageByOrderNumber(exhibitionId, 0);
-      if (firstPage != null) {
-        SimpleLogger().info("Navigating to first page...");
-        _navigateToPageScreen(firstPage.id);
+        final firstPage = await pageDao.findPageByOrderNumber(exhibitionId, 0);
+        if (firstPage != null) {
+          SimpleLogger().info("Navigating to first page...");
+          _navigateToPageScreen(firstPage.id);
+        } else {
+          SimpleLogger().info("No pages found.");
+        }
       } else {
-        SimpleLogger().info("No pages found.");
+        SimpleLogger().info("Device is not attached to an Exhibition!");
       }
-    } else {
-      SimpleLogger().info("Device is not attached to an Exhibition!");
+    } catch (exception) {
+      SimpleLogger().shout("Error loading device data: $exception");
     }
   }
 
