@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/database/dao/keys_dao.dart";
+import "package:noheva_visitor_ui/database/dao/key_dao.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
@@ -24,7 +24,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
 
   /// Navigates to default screen
   void _navigateToDefaultScreen() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => const DefaultScreen(),
@@ -39,8 +39,9 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
       Device createdDevice =
           (await devicesApi.createDevice(deviceRequest: deviceRequest)).data!;
       SimpleLogger().info("Created device: $createdDevice");
-      await keysDao.storeDeviceId(createdDevice.id!);
+      await keyDao.storeDeviceId(createdDevice.id!);
       SimpleLogger().info("Connecting MQTT client...");
+      deviceId = createdDevice.id!;
       await mqttClient.connect(createdDevice.id!);
       _navigateToDefaultScreen();
     } catch (exception) {

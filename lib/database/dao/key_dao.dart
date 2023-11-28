@@ -2,12 +2,12 @@ import "package:drift/drift.dart";
 import "package:noheva_visitor_ui/database/database.dart";
 import "../model/key.dart";
 
-part "keys_dao.g.dart";
+part "key_dao.g.dart";
 
-/// Keys DAO
+/// DAO class for Key entities
 @DriftAccessor(tables: [Keys])
-class KeysDao extends DatabaseAccessor<Database> with _$KeysDaoMixin {
-  KeysDao(Database database) : super(database);
+class KeyDao extends DatabaseAccessor<Database> with _$KeyDaoMixin {
+  KeyDao(Database database) : super(database);
 
   /// Checks if this device is approved e.g. it has received a key from the API.
   Future<bool> checkIsDeviceApproved() async {
@@ -39,4 +39,4 @@ class KeysDao extends DatabaseAccessor<Database> with _$KeysDaoMixin {
   }
 }
 
-final keysDao = KeysDao(database);
+final keyDao = KeyDao(database);

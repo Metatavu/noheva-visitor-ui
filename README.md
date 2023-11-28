@@ -1,16 +1,20 @@
-# noheva_visitor_ui
+# Noheva Visitor UI
 
 Noheva visitor UI project
 
-## Getting Started
+## Activate RPS
 
-This project is a starting point for a Flutter application.
+`dart pub global activate rps --version 0.7.0-dev.6`
+Used for running scrips in pubspec.yaml
+For example run code generation with
+`rps gen`
 
-A few resources to get you started if this is your first Flutter project:
+## Generate API client
+`flutter pub run build_runner build --delete-conflicting-outputs`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Defining a new database table
+  1. Create the table model in `lib/database/models/tables`
+  2. Run `rps gen` to generate the table definition
+  3. Append it into `@DriftDatabase` annotation within `lib/database/database.dart`
+  4. Bump the schema version in `lib/database/database.dart`
+  5. Create new migrations.

@@ -9,10 +9,7 @@ environment:
   sdk: ">=3.0.6 <4.0.0"
 
 scripts:
-  generate:
-    client: >
-      flutter pub run build_runner build --delete-conflicting-outputs &&
-      flutter pub get noheva-api
+  gen: flutter pub run build_runner build --delete-conflicting-outputs
 
 dependencies:
   flutter:
@@ -36,6 +33,17 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.1
+  flutter_widget_from_html_core:
+    git:
+      url: https://github.com/Metatavu/flutter_widget_from_html.git
+      ref: flex
+      path: packages/core
+  video_player: ^2.6.1
+  video_player_macos: ^2.0.1
+  collection: ^1.17.2
+  html: ^0.15.4
+  built_value: ^8.6.2
+  crypto: ^3.0.3
 
 dev_dependencies:
   flutter_test:
