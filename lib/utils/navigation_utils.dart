@@ -39,7 +39,7 @@ class NavigationUtils {
         ),
       );
 
-  /// Builds transitions
+  /// Builds transitions and returns given [child] wrapped in a transition.
   static Widget _buildTransition(
     Widget child,
     Animation<double> animation, {
@@ -53,7 +53,7 @@ class NavigationUtils {
     }
   }
 
-  /// TODO: Add docs
+  /// Gets correct Flutter transition for given [transition]
   static dynamic _getTransition(
     noheva_api.ExhibitionPageTransition? transition,
     Widget child,
@@ -72,7 +72,7 @@ class NavigationUtils {
     }
   }
 
-  /// TODO: Add docs
+  /// gets correct Flutter curve tween for given [animationTimeInterpolation]
   static CurveTween? _getCurveTween(
     noheva_api.AnimationTimeInterpolation? animationTimeInterpolation,
   ) {

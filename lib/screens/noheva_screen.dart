@@ -49,26 +49,40 @@ abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
     super.dispose();
   }
 
+  /// Applies page [eventTriggers] not bound to a particular widget
   @protected
   void applyPageEventTriggers(List<ExhibitionPageEventTrigger> eventTriggers) {
-    for (var eventTrigger in eventTriggers) {
-      if (eventTrigger.keyDown != null) {
-        _bindKeyCodeEventListener(
-          eventTrigger.keyDown!,
-          eventTrigger.events?.toList() ?? [],
-          true,
-        );
-      }
-      if (eventTrigger.keyUp != null) {
-        _bindKeyCodeEventListener(
-          eventTrigger.keyUp!,
-          eventTrigger.events?.toList() ?? [],
-          false,
-        );
-      }
+    eventTriggers.forEach(_applyPageEventTrigger);
+  }
+
+  /// Applies single page [eventTrigger] not bound to a particular widget
+  void _applyPageEventTrigger(ExhibitionPageEventTrigger eventTrigger) {
+    var events = eventTrigger.events?.toList() ?? [];
+    if (eventTrigger.delay != null) {
+      _scheduledTimedEvents(eventTrigger.delay!, events);
+    }
+    if (eventTrigger.keyDown != null) {
+      _bindKeyCodeEventListener(
+        eventTrigger.keyDown!,
+        events,
+        true,
+      );
+    }
+    if (eventTrigger.keyUp != null) {
+      _bindKeyCodeEventListener(
+        eventTrigger.keyUp!,
+        events,
+        false,
+      );
     }
   }
 
+  /// Schedules timed page [events]
+  void _scheduledTimedEvents(int delay, List<ExhibitionPageEvent> events) {
+    Timer(Duration(milliseconds: delay), () => events.forEach(_triggerEvent));
+  }
+
+  /// Handles Flutter key [event] and triggers page events bound to them
   bool _keyEventHandler(KeyEvent event) {
     String keyLabel = event.logicalKey.keyLabel;
     if (event is KeyDownEvent) {
@@ -89,6 +103,7 @@ abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
     return true;
   }
 
+  /// Binds page [events] to a key code [keyLabel]
   void _bindKeyCodeEventListener(
     String keyLabel,
     List<ExhibitionPageEvent> events,
@@ -111,6 +126,7 @@ abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
     }
   }
 
+  /// Triggers page [event]
   void _triggerEvent(ExhibitionPageEvent event) {
     List<ExhibitionPageEventProperty> properties = event.properties.toList();
     PageActionProviderFactory.buildProvider(event.action, properties)

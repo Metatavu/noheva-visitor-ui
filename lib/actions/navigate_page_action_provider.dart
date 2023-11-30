@@ -1,4 +1,3 @@
-import "package:flutter/material.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/actions/abstract_page_action_provider.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
@@ -7,6 +6,9 @@ import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
 import "package:simple_logger/simple_logger.dart";
 
+/// Page Action Provider for navigate events
+///
+/// Action navigates user to another page
 class NavigatePageActionProvider extends AbstractPageActionProvider {
   @override
   ExhibitionPageEventActionType actionType =
@@ -35,28 +37,13 @@ class NavigatePageActionProvider extends AbstractPageActionProvider {
               "Attempted to navigate from non-existing page ${screen.widget.pageId}!");
           return;
         }
-
-        _navigateToPage(
+        NavigationUtils.navigateTo(
+          PageScreen(pageId: targetPageId),
           screen.context,
-          targetPageId,
-          targetPage.enterTransitions,
-          sourcePage.exitTransitions,
+          enterTransition: targetPage.enterTransitions.firstOrNull,
+          exitTransition: sourcePage.exitTransitions.firstOrNull,
         );
       }
     }
-  }
-
-  void _navigateToPage(
-    BuildContext context,
-    String targetPageId,
-    List<ExhibitionPageTransition> enterTransition,
-    List<ExhibitionPageTransition> exitTransition,
-  ) {
-    NavigationUtils.navigateTo(
-      PageScreen(pageId: targetPageId),
-      context,
-      enterTransition: enterTransition.firstOrNull,
-      exitTransition: exitTransition.firstOrNull,
-    );
   }
 }
