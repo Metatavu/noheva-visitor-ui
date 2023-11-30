@@ -10,5 +10,8 @@
   "currentVersion": "Nykyinen versio: {currentVersion}",
   "availableVersion": "Saatavilla oleva versio: {availableVersion}",
   "installUpdateButton": "Asenna päivitys",
-  "mqttClientConnectionStatus": "MQTT-yhteyden tila: {status}"
+  "mqttClientConnectionStatus": "MQTT-yhteyden tila: {status}",
+  "skip": "Ohita",
+  "loading": "Ladataan...",
+  "startingApplication": "Käynnistetään Noheva sovellusta..."
 }

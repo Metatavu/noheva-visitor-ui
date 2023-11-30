@@ -51,10 +51,10 @@ class AttachListener {
     );
     SimpleLogger().info("Stored Exhibition: ${attachedMessage.exhibitionId}");
     SimpleLogger().info("Loading layouts...");
-    await LayoutController.loadLayouts(attachedMessage.exhibitionDeviceId!);
+    await LayoutController.loadLayouts(deviceId!);
     SimpleLogger().info("Successfully loaded layouts!");
     SimpleLogger().info("Loading pages...");
-    await PageController.loadPages(attachedMessage.exhibitionDeviceId!);
+    await PageController.loadPages(deviceId!);
     SimpleLogger().info("Successfully loaded pages!");
     final firstPage =
         await pageDao.findPageByOrderNumber(attachedMessage.exhibitionId!, 0);

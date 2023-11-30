@@ -22,19 +22,18 @@ class LayoutController {
     );
   }
 
-  /// Loads Layouts from backend by [exhibitionDeviceId]
-  static Future loadLayouts(String exhibitionDeviceId) async {
+  /// Loads Layouts from backend by [deviceId]
+  static Future loadLayouts(String deviceId) async {
     SimpleLogger().info(
-      "Loading layouts for exhibition device $exhibitionDeviceId...",
+      "Loading layouts for device $deviceId...",
     );
     final deviceDataApi = await apiFactory.getDeviceDataApi();
     final existingLayouts = await layoutDao.listLayouts();
     final layouts = await deviceDataApi
-        .listDeviceDataLayouts(exhibitionDeviceId: exhibitionDeviceId)
+        .listDeviceDataLayouts(deviceId: deviceId)
         .then((value) => value.data);
     if (layouts == null) {
-      SimpleLogger().info(
-          "No layouts found for exhibition device $exhibitionDeviceId, aborting!");
+      SimpleLogger().info("No layouts found for device $deviceId, aborting!");
       return;
     }
     SimpleLogger().info("Successfully loaded ${layouts.length} layouts!");
