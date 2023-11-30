@@ -12,5 +12,6 @@
   "installUpdateButton": "Install update",
   "mqttClientConnectionStatus": "MQTT client connection status: {status}",
   "skip": "Skip",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "startingApplication": "Starting Noheva Application..."
 }

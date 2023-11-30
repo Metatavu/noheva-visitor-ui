@@ -86,21 +86,23 @@ class _StartupScreenState extends State<StartupScreen> {
     setState(() => _loading = false);
   }
 
-  /// Renders UI
-  Widget _renderButtons() {
+  /// Renders UI for either updating software or starting the application
+  Widget _renderUI() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (_updateAvailable)
+        if (_updateAvailable) ...[
           ElevatedButton(
             onPressed: _navigateToDefaultScreen,
             child: Text(AppLocalizations.of(context)!.skip),
           ),
-        const SizedBox(width: 50),
-        ElevatedButton(
-          onPressed: _handleUpdate,
-          child: Text(AppLocalizations.of(context)!.installUpdateButton),
-        ),
+          const SizedBox(width: 50),
+          ElevatedButton(
+            onPressed: _handleUpdate,
+            child: Text(AppLocalizations.of(context)!.installUpdateButton),
+          ),
+        ] else
+          Text(AppLocalizations.of(context)!.startingApplication)
       ],
     );
   }
@@ -126,7 +128,7 @@ class _StartupScreenState extends State<StartupScreen> {
                     style: const TextStyle(fontSize: 20),
                   ),
                 ]
-              : [_renderButtons()],
+              : [_renderUI()],
         ),
       ),
     );

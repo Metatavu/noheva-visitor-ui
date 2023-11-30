@@ -12,5 +12,6 @@
   "installUpdateButton": "Asenna päivitys",
   "mqttClientConnectionStatus": "MQTT-yhteyden tila: {status}",
   "skip": "Ohita",
-  "loading": "Ladataan..."
+  "loading": "Ladataan...",
+  "startingApplication": "Käynnistetään Noheva sovellusta..."
 }
