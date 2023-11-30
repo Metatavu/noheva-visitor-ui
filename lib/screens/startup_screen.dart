@@ -75,7 +75,7 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   /// On click handler for button
-  Future _handleUpdate() async {
+  Future<void> _handleUpdate() async {
     if (_serverVersion == null) return;
     setState(() => _loading = true);
     try {

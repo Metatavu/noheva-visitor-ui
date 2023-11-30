@@ -4,7 +4,7 @@ import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:noheva_api/noheva_api.dart";
-import 'package:noheva_visitor_ui/actions/key_listener.dart';
+import 'package:noheva_visitor_ui/actions/key_event_listener.dart';
 import "package:noheva_visitor_ui/actions/page_action_provider_factory.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/management_screen.dart";
@@ -22,8 +22,8 @@ abstract class NohevaScreen extends StatefulWidget {
 /// Provides a stream subscription for navigating to management screen when required.
 abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
   late StreamSubscription<bool?> _managementButtonStreamSubscription;
-  final List<KeyListener> _keyDownListeners = [];
-  final List<KeyListener> _keyUpListeners = [];
+  final List<KeyEventListener> _keyDownListeners = [];
+  final List<KeyEventListener> _keyUpListeners = [];
 
   @override
   void initState() {
@@ -96,14 +96,14 @@ abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
   ) {
     if (keyDown) {
       _keyDownListeners.add(
-        KeyListener(
+        KeyEventListener(
           keyLabel: keyLabel,
           listener: () => events.forEach(_triggerEvent),
         ),
       );
     } else {
       _keyUpListeners.add(
-        KeyListener(
+        KeyEventListener(
           keyLabel: keyLabel,
           listener: () => events.forEach(_triggerEvent),
         ),

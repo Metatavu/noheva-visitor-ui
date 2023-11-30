@@ -11,7 +11,6 @@ class LayoutController {
   static Future<Layout?> persistLayout(DeviceLayout newLayout) async {
     SimpleLogger().info("Persisting layout ${newLayout.id}...");
 
-    /// TODO: Use newLayout.screenOrientation
     return await layoutDao.storeLayout(
       LayoutsCompanion.insert(
         id: newLayout.id,
@@ -23,7 +22,7 @@ class LayoutController {
   }
 
   /// Loads Layouts from backend by [deviceId]
-  static Future loadLayouts(String deviceId) async {
+  static Future<void> loadLayouts(String deviceId) async {
     SimpleLogger().info(
       "Loading layouts for device $deviceId...",
     );
@@ -38,7 +37,7 @@ class LayoutController {
     }
     SimpleLogger().info("Successfully loaded ${layouts.length} layouts!");
     SimpleLogger().info("Persisting layouts...");
-    final storedLayouts = [];
+    final List<Layout?> storedLayouts = [];
     for (var layout in layouts) {
       final existingLayout = existingLayouts.firstWhereOrNull(
         (element) => element.id == layout.id,
@@ -52,7 +51,7 @@ class LayoutController {
   }
 
   /// Deletes existing Layouts
-  static Future deleteLayouts() async {
+  static Future<void> deleteLayouts() async {
     SimpleLogger().info("Deleting existing layouts...");
 
     await layoutDao.deleteLayouts();

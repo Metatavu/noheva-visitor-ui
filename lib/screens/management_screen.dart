@@ -29,7 +29,7 @@ class _ManagementScreenState extends State<ManagementScreen> {
   Timer? _mqttConnectionTimer;
 
   /// On click handler for button
-  Future _handleUpdate() async {
+  Future<void> _handleUpdate() async {
     setState(() => _loading = true);
     try {
       await Updater.updateApp(_serverVersion);
@@ -40,7 +40,7 @@ class _ManagementScreenState extends State<ManagementScreen> {
   }
 
   /// Checks applications current and available version numbers
-  Future _checkVersions() async {
+  Future<void> _checkVersions() async {
     String currentVersion = await Updater.getCurrentVersion();
     String? serverVersion = await Updater.getServerVersion();
 

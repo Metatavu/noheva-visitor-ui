@@ -20,7 +20,7 @@ late final String environment;
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
-final StreamController<String?> streamController =
+final StreamController<String?> pageStreamController =
     StreamController.broadcast(sync: true);
 final StreamController<bool?> managementStreamController =
     StreamController.broadcast(sync: true);

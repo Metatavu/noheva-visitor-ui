@@ -63,7 +63,7 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
   void initState() {
     super.initState();
     _loadPage(widget.pageId);
-    _streamSubscription = streamController.stream.listen((event) {
+    _streamSubscription = pageStreamController.stream.listen((event) {
       if (event != null) {
         _loadPage(event);
       } else {

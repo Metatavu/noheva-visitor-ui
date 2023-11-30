@@ -49,7 +49,7 @@ class Updater {
   }
 
   /// Updates the app to [version]
-  static Future updateApp(String version) async {
+  static Future<void> updateApp(String version) async {
     if (Platform.isAndroid) {
       await _updateAndroidApp(version);
     } else if (Platform.isMacOS) {
@@ -60,7 +60,7 @@ class Updater {
   }
 
   /// Updates the Android app to [version]
-  static Future _updateAndroidApp(String version) async {
+  static Future<void> _updateAndroidApp(String version) async {
     SimpleLogger().info("Downloading new version...");
     String architecture = configuration.getAndroidArchitecture();
     Int8Buffer fileContent =

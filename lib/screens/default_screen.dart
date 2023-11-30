@@ -21,13 +21,13 @@ class DefaultScreen extends StatefulWidget {
 /// Default Screen State
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
-  late StreamSubscription _streamSubscription;
+  late StreamSubscription<String?> _pageStreamSubscription;
 
   /// Navigates to [PageScreen] with [pageId]
   void _navigateToPageScreen(String pageId) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<PageScreen>(
         builder: (context) => PageScreen(pageId: pageId),
       ),
     );
@@ -43,7 +43,7 @@ class _DefaultScreenState extends State<DefaultScreen> {
   }
 
   /// Checks device approval status from local database
-  Future _checkDeviceApproval() async {
+  Future<void> _checkDeviceApproval() async {
     final deviceIsApproved = await keyDao.checkIsDeviceApproved();
     if (!deviceIsApproved) {
       Timer.periodic(const Duration(seconds: 5), (timer) async {
@@ -64,7 +64,7 @@ class _DefaultScreenState extends State<DefaultScreen> {
   }
 
   /// Loads device data from API and updates local database
-  Future _loadDeviceData() async {
+  Future<void> _loadDeviceData() async {
     try {
       SimpleLogger().info("Loading device data...");
       final deviceExhibitionDetail =
@@ -101,13 +101,14 @@ class _DefaultScreenState extends State<DefaultScreen> {
   @override
   void initState() {
     super.initState();
-    _streamSubscription = streamController.stream.listen(_handleStreamEvent);
+    _pageStreamSubscription =
+        pageStreamController.stream.listen(_handleStreamEvent);
     _checkDeviceApproval();
   }
 
   @override
   void dispose() {
-    _streamSubscription.cancel();
+    _pageStreamSubscription.cancel();
     super.dispose();
   }
 

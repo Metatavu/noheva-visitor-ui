@@ -12,7 +12,7 @@ abstract class AbstractListener {
   abstract String baseTopic;
 
   /// Returns a map of topic:callback entries handled by this listener.
-  Map<String, Function(String)> getListeners() => {
+  Map<String, void Function(String)> getListeners() => {
         "$baseTopic/create": handleCreate,
         "$baseTopic/update": handleUpdate,
         "$baseTopic/delete": handleDelete
@@ -28,7 +28,7 @@ abstract class AbstractListener {
   void handleDelete(String message);
 
   /// Sets listeners described here to MQTT Client
-  Future setListeners() async {
+  void setListeners() {
     mqttClient.addListeners(getListeners());
   }
 

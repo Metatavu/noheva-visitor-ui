@@ -1,7 +1,7 @@
-import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
-import 'package:noheva_api/noheva_api.dart';
-import 'package:noheva_visitor_ui/screens/noheva_screen.dart';
+import "package:collection/collection.dart";
+import "package:flutter/foundation.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/screens/noheva_screen.dart";
 
 abstract class AbstractPageActionProvider {
   final List<ExhibitionPageEventProperty> properties;

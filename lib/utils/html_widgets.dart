@@ -170,14 +170,6 @@ class HtmlWidgets {
         enterTransition: enterTransition.firstOrNull,
         exitTransition: exitTransition.firstOrNull,
       );
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => PageScreen(
-      //       pageId: property.value,
-      //     ),
-      //   ),
-      // );
     };
   }
 
