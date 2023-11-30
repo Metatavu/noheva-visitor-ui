@@ -68,16 +68,15 @@ class _DefaultScreenState extends State<DefaultScreen> {
     SimpleLogger().info("Loading device data...");
     final deviceExhibitionDetail =
         await deviceExhitionDetailDao.getDeviceExhibitionDetail();
-    if (deviceExhibitionDetail != null) {
+    if (deviceExhibitionDetail != null && deviceId != null) {
       SimpleLogger().info("Device is attached to an Exhibition!");
-      final exhibitionDeviceId = deviceExhibitionDetail.exhibitionDeviceId;
       final exhibitionId = deviceExhibitionDetail.exhibitionId;
       final deviceDataApi = await apiFactory.getDeviceDataApi();
       SimpleLogger().info("Loading layouts...");
-      await LayoutController.loadLayouts(exhibitionDeviceId);
+      await LayoutController.loadLayouts(deviceId!);
       SimpleLogger().info("Loading pages...");
       final pages = (await deviceDataApi.listDeviceDataPages(
-        exhibitionDeviceId: exhibitionDeviceId,
+        deviceId: deviceId!,
       ))
           .data!
           .toList();

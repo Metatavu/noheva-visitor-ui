@@ -4,8 +4,7 @@ import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
-import "package:noheva_visitor_ui/screens/default_screen.dart";
-import "package:noheva_visitor_ui/screens/management_screen.dart";
+import "package:noheva_visitor_ui/screens/startup_screen.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
 import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
@@ -14,7 +13,6 @@ import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
 import "database/dao/key_dao.dart";
-import "screens/device_setup_screen.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
@@ -39,8 +37,8 @@ void main() async {
   await windowManager.ensureInitialized();
   AppLifecycleListener(onExitRequested: _onAppExitRequested);
 
+  // TODO: Add alwaysOnTop: true, removed for development purposes.
   WindowOptions windowOptions = const WindowOptions(
-    // alwaysOnTop: true,
     windowButtonVisibility: false,
     center: true,
     backgroundColor: Colors.transparent,
@@ -84,7 +82,7 @@ void main() async {
     );
   }
 
-  runApp(const MyApp());
+  runApp(const NohevaApp());
 }
 
 /// Polls device approval status and cancels [timer] when device is approved.
@@ -157,8 +155,8 @@ void _addManagementButtonOverlay(BuildContext context) {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NohevaApp extends StatelessWidget {
+  const NohevaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -170,9 +168,7 @@ class MyApp extends StatelessWidget {
         builder: (context) {
           WidgetsBinding.instance.addPostFrameCallback(
               (_) => _addManagementButtonOverlay(context));
-          return deviceId == null
-              ? const DeviceSetupScreen()
-              : const DefaultScreen();
+          return const StartupScreen();
         },
       ),
     );

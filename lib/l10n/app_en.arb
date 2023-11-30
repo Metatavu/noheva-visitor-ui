@@ -10,5 +10,7 @@
   "currentVersion": "Current version: {currentVersion}",
   "availableVersion": "Available version: {availableVersion}",
   "installUpdateButton": "Install update",
-  "mqttClientConnectionStatus": "MQTT client connection status: {status}"
+  "mqttClientConnectionStatus": "MQTT client connection status: {status}",
+  "skip": "Skip",
+  "loading": "Loading..."
 }
