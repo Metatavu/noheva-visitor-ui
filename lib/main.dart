@@ -1,16 +1,18 @@
 import "dart:async";
+import "dart:ui";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
-import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/screens/startup_screen.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
+import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
+import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
 import "database/dao/key_dao.dart";
-import "screens/device_setup_screen.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
@@ -20,10 +22,35 @@ late bool isDeviceApproved;
 String? deviceId;
 final StreamController streamController =
     StreamController.broadcast(sync: true);
+final StreamController managementStreamController =
+    StreamController.broadcast(sync: true);
+final managementButtonTickCounter = TimedTickCounter(
+  ticksRequired: 10,
+  timeout: const Duration(seconds: 5),
+  onTicksReached: () => managementStreamController.sink.add(true),
+);
 
 void main() async {
   _configureLogger();
   SimpleLogger().info("Starting Noheva Visitor UI App...");
+  WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+  AppLifecycleListener(onExitRequested: _onAppExitRequested);
+
+  // TODO: Add alwaysOnTop: true, removed for development purposes.
+  WindowOptions windowOptions = const WindowOptions(
+    windowButtonVisibility: false,
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+    fullScreen: true,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+    await windowManager.maximize();
+  });
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
   SimpleLogger().info("Validating environment variables...");
@@ -55,7 +82,7 @@ void main() async {
     );
   }
 
-  runApp(const MyApp());
+  runApp(const NohevaApp());
 }
 
 /// Polls device approval status and cancels [timer] when device is approved.
@@ -92,8 +119,44 @@ void _configureLogger({logLevel = Level.INFO}) {
       "[${info.time}] -- ${info.callerFrame ?? "NO CALLER INFO"} - ${info.message}");
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Callback function for when App exit is requested.
+///
+/// e.g. user clicks on close button
+/// Disconnects MQTT client and sends appropriate status message
+Future<AppExitResponse> _onAppExitRequested() async {
+  SimpleLogger().info("App exit requested, disconnecting MQTT...");
+  await mqttClient.disconnect();
+  return AppExitResponse.exit;
+}
+
+/// Handler for management button click
+void _addManagementButtonOverlay(BuildContext context) {
+  return Overlay.of(context).insert(
+    OverlayEntry(
+      builder: (context) => Positioned(
+        left: 0,
+        top: 0,
+        width: 200,
+        height: 100,
+        child: SizedBox(
+          width: 200,
+          height: 100,
+          child: TextButton(
+            onPressed: () => managementButtonTickCounter.tick(),
+            style: const ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll(Colors.transparent),
+              overlayColor: MaterialStatePropertyAll(Colors.transparent),
+            ),
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class NohevaApp extends StatelessWidget {
+  const NohevaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +164,13 @@ class MyApp extends StatelessWidget {
       title: "Noheva visitor UI",
       theme: getApplicationTheme(),
       localizationsDelegates: const [AppLocalizations.delegate],
-      home:
-          deviceId == null ? const DeviceSetupScreen() : const DefaultScreen(),
+      home: Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _addManagementButtonOverlay(context));
+          return const StartupScreen();
+        },
+      ),
     );
   }
 }

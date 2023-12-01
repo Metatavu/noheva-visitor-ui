@@ -76,6 +76,7 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
       builder.description = description;
       builder.serialNumber = serialNumber;
       builder.version = version;
+      builder.deviceType = DeviceInfo.getNohevaDeviceType();
     });
   }
 

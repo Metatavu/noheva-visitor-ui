@@ -57,18 +57,17 @@ class PageController {
     );
   }
 
-  /// Loads Pages from backend by [exhibitionDeviceId]
-  static Future loadPages(String exhibitionDeviceId) async {
+  /// Loads Pages from backend by [deviceId]
+  static Future loadPages(String deviceId) async {
     SimpleLogger().info(
-      "Loading pages for exhibition device $exhibitionDeviceId...",
+      "Loading pages for device $deviceId...",
     );
     final deviceDataApi = await apiFactory.getDeviceDataApi();
     final pages = await deviceDataApi
-        .listDeviceDataPages(exhibitionDeviceId: exhibitionDeviceId)
+        .listDeviceDataPages(deviceId: deviceId)
         .then((value) => value.data);
     if (pages == null) {
-      SimpleLogger().info(
-          "No pages found for exhibition device $exhibitionDeviceId, aborting!");
+      SimpleLogger().info("No pages found for device $deviceId, aborting!");
       return;
     }
     SimpleLogger().info("Successfully loaded ${pages.length} pages!");

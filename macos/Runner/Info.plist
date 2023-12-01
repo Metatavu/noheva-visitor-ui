@@ -28,5 +28,16 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<true/>
+	</dict>
+	<key>SUPublicEDKey</key>
+	<string>Kpvb5F9SL32SjdJ79HCFKSJgIfm9oHAGOOp+ARukgWQ=</string>
+	<key>SUFeedURL</key>
+	<string>https://lhm-noheva-updates.s3.eu-north-1.amazonaws.com/staging/macos/appcast.xml</string>
 </dict>
 </plist>

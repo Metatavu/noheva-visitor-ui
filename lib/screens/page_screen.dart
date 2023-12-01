@@ -6,6 +6,7 @@ import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/screens/noheva_screen.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
@@ -13,7 +14,7 @@ import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 /// Page Screen
 ///
 /// Displays Page [pageId] content
-class PageScreen extends StatefulWidget {
+class PageScreen extends NohevaScreen {
   final String pageId;
 
   const PageScreen({Key? key, required this.pageId}) : super(key: key);
@@ -23,7 +24,7 @@ class PageScreen extends StatefulWidget {
 }
 
 /// Exhibition screen state
-class _PageScreenState extends State<PageScreen> {
+class _PageScreenState extends NohevaScreenState<PageScreen> {
   String? _pageHtml;
   final List<ExhibitionPageResource> _pageResources = [];
   final List<ExhibitionPageEventTrigger> _eventTriggers = [];
