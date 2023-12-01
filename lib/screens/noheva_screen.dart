@@ -86,9 +86,9 @@ abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
   bool _keyEventHandler(KeyEvent event) {
     String keyLabel = event.logicalKey.keyLabel;
     if (event is KeyDownEvent) {
-      _keyDownListeners.firstWhereOrNull((element) {
-        return element.keyLabel == keyLabel;
-      })?.listener();
+      _keyDownListeners
+          .firstWhereOrNull((element) => element.keyLabel == keyLabel)
+          ?.listener();
 
       return false;
     }
