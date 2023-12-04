@@ -39,12 +39,12 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
   }
 
   /// Deletes existing Pages from database
-  Future deletePages() async {
+  Future<void> deletePages() async {
     await delete(pages).go();
   }
 
   /// Deletes page by [id]
-  Future deletePage(String id) async {
+  Future<void> deletePage(String id) async {
     await (delete(pages)..where((row) => row.id.equals(id))).go();
   }
 

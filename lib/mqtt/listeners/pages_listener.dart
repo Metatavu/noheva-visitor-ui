@@ -11,7 +11,8 @@ class PagesListener extends AbstractListener {
   void handleCreate(String message) {
     SimpleLogger().info("Handling page create message...");
     final createMessage =
-        AbstractListener.decodeMessage(message, MqttExhibitionPageCreate);
+        AbstractListener.decodeMessage<MqttExhibitionPageCreate>(
+            message, MqttExhibitionPageCreate);
     SimpleLogger().info(createMessage);
     // TODO: Implement logic for handling page create messages
   }
@@ -20,7 +21,8 @@ class PagesListener extends AbstractListener {
   void handleDelete(String message) {
     SimpleLogger().info("Handling page delete message...");
     final deleteMessage =
-        AbstractListener.decodeMessage(message, MqttExhibitionPageDelete);
+        AbstractListener.decodeMessage<MqttExhibitionPageDelete>(
+            message, MqttExhibitionPageDelete);
     SimpleLogger().info(deleteMessage);
     // TODO: Implement logic for handling page delete messages
   }
@@ -29,7 +31,8 @@ class PagesListener extends AbstractListener {
   void handleUpdate(String message) {
     SimpleLogger().info("Handling page update message...");
     final updateMessage =
-        AbstractListener.decodeMessage(message, MqttExhibitionPageUpdate);
+        AbstractListener.decodeMessage<MqttExhibitionPageUpdate>(
+            message, MqttExhibitionPageUpdate);
     SimpleLogger().info(updateMessage);
     // TODO: Implement logic for handling page update messages
   }

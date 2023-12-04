@@ -17,7 +17,7 @@ class PageController {
   /// Persists [newPage]
   static Future<Page?> persistPage(DevicePage newPage) async {
     SimpleLogger().info("Downloading page ${newPage.id} resources...");
-    final offlinedResources = {};
+    final Map<String, String?> offlinedResources = {};
     for (var resource in newPage.resources) {
       if (offlineMediaTypes.contains(resource.type)) {
         final resourceData = resource.data
@@ -58,7 +58,7 @@ class PageController {
   }
 
   /// Loads Pages from backend by [deviceId]
-  static Future loadPages(String deviceId) async {
+  static Future<void> loadPages(String deviceId) async {
     SimpleLogger().info(
       "Loading pages for device $deviceId...",
     );
@@ -72,7 +72,7 @@ class PageController {
     }
     SimpleLogger().info("Successfully loaded ${pages.length} pages!");
     SimpleLogger().info("Persisting pages...");
-    final storedPages = [];
+    final List<Page?> storedPages = [];
     for (var page in pages) {
       storedPages.add(await persistPage(page));
     }
@@ -80,7 +80,7 @@ class PageController {
   }
 
   /// Deletes existing Pages
-  static Future deletePages() async {
+  static Future<void> deletePages() async {
     SimpleLogger().info("Deleting existing pages...");
     await pageDao.deletePages();
   }
@@ -117,7 +117,7 @@ class PageController {
   ///
   /// Updates existing pages if they have been modified and
   /// deletes pages that have been deleted from backend.
-  static Future comparePages(
+  static Future<void> comparePages(
     String exhibitionId,
     List<DevicePage> newPages,
   ) async {
@@ -165,7 +165,7 @@ class PageController {
   }
 
   /// Deletes locally stored pages that are no longer being used
-  static Future _deleteUnusedPages(
+  static Future<void> _deleteUnusedPages(
     List<Page> existingPages,
     List<DevicePage> newPages,
   ) async {

@@ -20,9 +20,9 @@ late final String environment;
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
-final StreamController streamController =
+final StreamController<String?> pageStreamController =
     StreamController.broadcast(sync: true);
-final StreamController managementStreamController =
+final StreamController<bool?> managementStreamController =
     StreamController.broadcast(sync: true);
 final managementButtonTickCounter = TimedTickCounter(
   ticksRequired: 10,
@@ -86,7 +86,7 @@ void main() async {
 }
 
 /// Polls device approval status and cancels [timer] when device is approved.
-Future _pollDeviceApprovalStatus(Timer timer) async {
+Future<void> _pollDeviceApprovalStatus(Timer timer) async {
   SimpleLogger().info("Polling device approval status...");
   DevicesApi devicesApi = await apiFactory.getDevicesApi();
 
@@ -113,7 +113,7 @@ Future _pollDeviceApprovalStatus(Timer timer) async {
 }
 
 /// Configures logger to use [logLevel] and formats log messages to be cleaner than by default.
-void _configureLogger({logLevel = Level.INFO}) {
+void _configureLogger({Level logLevel = Level.INFO}) {
   SimpleLogger().setLevel(logLevel, includeCallerInfo: true);
   SimpleLogger().formatter = ((info) =>
       "[${info.time}] -- ${info.callerFrame ?? "NO CALLER INFO"} - ${info.message}");

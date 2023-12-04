@@ -18,7 +18,7 @@ class AttachListener {
   }
 
   /// Set listeners for attach and detach messages
-  Future setListeners() async {
+  void setListeners() {
     String baseTopic = AbstractListener.BASE_TOPIC;
     if (deviceId == null) {
       throw Exception("Device ID is null, cannot set listeners!");
@@ -58,7 +58,7 @@ class AttachListener {
     SimpleLogger().info("Successfully loaded pages!");
     final firstPage =
         await pageDao.findPageByOrderNumber(attachedMessage.exhibitionId!, 0);
-    streamController.sink.add(firstPage?.id);
+    pageStreamController.sink.add(firstPage?.id);
   }
 
   /// Callback function for handling detach messages
@@ -86,6 +86,6 @@ class AttachListener {
     SimpleLogger().info("Deleted layouts!");
     await deviceExhitionDetailDao.deleteDeviceExhibitionDetails();
     SimpleLogger().info("Deleted exhibitions!");
-    streamController.sink.add(null);
+    pageStreamController.sink.add(null);
   }
 }

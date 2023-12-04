@@ -21,13 +21,13 @@ class DefaultScreen extends StatefulWidget {
 /// Default Screen State
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
-  late StreamSubscription _streamSubscription;
+  late StreamSubscription<String?> _pageStreamSubscription;
 
   /// Navigates to [PageScreen] with [pageId]
   void _navigateToPageScreen(String pageId) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<PageScreen>(
         builder: (context) => PageScreen(pageId: pageId),
       ),
     );
@@ -43,7 +43,7 @@ class _DefaultScreenState extends State<DefaultScreen> {
   }
 
   /// Checks device approval status from local database
-  Future _checkDeviceApproval() async {
+  Future<void> _checkDeviceApproval() async {
     final deviceIsApproved = await keyDao.checkIsDeviceApproved();
     if (!deviceIsApproved) {
       Timer.periodic(const Duration(seconds: 5), (timer) async {
@@ -64,46 +64,51 @@ class _DefaultScreenState extends State<DefaultScreen> {
   }
 
   /// Loads device data from API and updates local database
-  Future _loadDeviceData() async {
-    SimpleLogger().info("Loading device data...");
-    final deviceExhibitionDetail =
-        await deviceExhitionDetailDao.getDeviceExhibitionDetail();
-    if (deviceExhibitionDetail != null && deviceId != null) {
-      SimpleLogger().info("Device is attached to an Exhibition!");
-      final exhibitionId = deviceExhibitionDetail.exhibitionId;
-      final deviceDataApi = await apiFactory.getDeviceDataApi();
-      SimpleLogger().info("Loading layouts...");
-      await LayoutController.loadLayouts(deviceId!);
-      SimpleLogger().info("Loading pages...");
-      final pages = (await deviceDataApi.listDeviceDataPages(
-        deviceId: deviceId!,
-      ))
-          .data!
-          .toList();
-      await pc.PageController.comparePages(exhibitionId, pages);
+  Future<void> _loadDeviceData() async {
+    try {
+      SimpleLogger().info("Loading device data...");
+      final deviceExhibitionDetail =
+          await deviceExhitionDetailDao.getDeviceExhibitionDetail();
+      if (deviceExhibitionDetail != null && deviceId != null) {
+        SimpleLogger().info("Device is attached to an Exhibition!");
+        final exhibitionId = deviceExhibitionDetail.exhibitionId;
+        final deviceDataApi = await apiFactory.getDeviceDataApi();
+        SimpleLogger().info("Loading layouts...");
+        await LayoutController.loadLayouts(deviceId!);
+        SimpleLogger().info("Loading pages...");
+        final pages = (await deviceDataApi.listDeviceDataPages(
+          deviceId: deviceId!,
+        ))
+            .data!
+            .toList();
+        await pc.PageController.comparePages(exhibitionId, pages);
 
-      final firstPage = await pageDao.findPageByOrderNumber(exhibitionId, 0);
-      if (firstPage != null) {
-        SimpleLogger().info("Navigating to first page...");
-        _navigateToPageScreen(firstPage.id);
+        final firstPage = await pageDao.findPageByOrderNumber(exhibitionId, 0);
+        if (firstPage != null) {
+          SimpleLogger().info("Navigating to first page...");
+          _navigateToPageScreen(firstPage.id);
+        } else {
+          SimpleLogger().info("No pages found.");
+        }
       } else {
-        SimpleLogger().info("No pages found.");
+        SimpleLogger().info("Device is not attached to an Exhibition!");
       }
-    } else {
-      SimpleLogger().info("Device is not attached to an Exhibition!");
+    } catch (exception) {
+      SimpleLogger().shout("Error loading device data: $exception");
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _streamSubscription = streamController.stream.listen(_handleStreamEvent);
+    _pageStreamSubscription =
+        pageStreamController.stream.listen(_handleStreamEvent);
     _checkDeviceApproval();
   }
 
   @override
   void dispose() {
-    _streamSubscription.cancel();
+    _pageStreamSubscription.cancel();
     super.dispose();
   }
 
