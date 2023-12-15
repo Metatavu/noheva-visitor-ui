@@ -9,7 +9,6 @@ import "package:noheva_visitor_ui/utils/html_widgets.dart";
 /// Used by [HtmlWidgets] to build custom image widget from HTML element
 class CustomImage extends StatelessWidget {
   final dom.Element element;
-  final List<ExhibitionPageResource> resources;
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
   final List<ExhibitionPageTransition> exitTransitions;
@@ -17,7 +16,6 @@ class CustomImage extends StatelessWidget {
   const CustomImage({
     Key? key,
     required this.element,
-    required this.resources,
     required this.eventTriggers,
     required this.enterTransitions,
     required this.exitTransitions,

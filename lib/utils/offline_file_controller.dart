@@ -42,7 +42,9 @@ class OfflineFileController {
     );
 
     if (file != null) {
-      File metaFile = File("${file.path}.meta");
+      String fileName = p.basenameWithoutExtension(file.path);
+      String imageDirectory = (await getImagesDirectoryPath());
+      File metaFile = File("$imageDirectory/$fileName.meta");
       if (await metaFile.exists()) {
         await metaFile.delete();
       }

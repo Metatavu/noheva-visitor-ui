@@ -14,6 +14,7 @@ class Configuration {
   static const String MQTT_PORT = "MQTT_PORT";
   static const String ANDROID_ARCHITECTURE = "ANDROID_ARCHITECTURE";
   static const String APP_UPDATES_BASE_URL = "APP_UPDATES_BASE_URL";
+  static const String CDN_BASE_URL = "CDN_BASE_URL";
 
   static final Configuration _instance = Configuration._();
   factory Configuration() => _instance;
@@ -34,6 +35,7 @@ class Configuration {
       MQTT_PORT,
       ANDROID_ARCHITECTURE,
       APP_UPDATES_BASE_URL,
+      CDN_BASE_URL,
     ];
 
     for (final key in keys) {
@@ -59,4 +61,5 @@ class Configuration {
   String getMqttPort() => get(MQTT_PORT);
   String getAppUpdatesBaseUrl() => get(APP_UPDATES_BASE_URL);
   String getAndroidArchitecture() => get(ANDROID_ARCHITECTURE);
+  String getCdnBaseUrl() => get(CDN_BASE_URL);
 }

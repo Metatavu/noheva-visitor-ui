@@ -29,14 +29,12 @@ class HtmlWidgets {
       switch (element.localName) {
         CustomHtmlWidgets.IMAGE => CustomImage(
             element: element,
-            resources: resources,
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
           ),
         CustomHtmlWidgets.BUTTON => CustomButton(
             element: element,
-            resources: resources,
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
@@ -192,6 +190,15 @@ class HtmlWidgets {
 
       return Size(width, height);
     }
+  }
+
+  /// Extracts elements font family
+  static String? extractFontFamily(dom.Element element) {
+    final fontFamily = _extractStyleAttribute(element, "font-family");
+    if (fontFamily is LiteralTerm) {
+      return fontFamily.text;
+    }
+    return null;
   }
 
   /// Parses RGB color element from [Expression]
