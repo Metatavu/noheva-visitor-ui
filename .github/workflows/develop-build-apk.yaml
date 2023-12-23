@@ -80,7 +80,13 @@ jobs:
           echo MQTT_URL=${{ secrets.MQTT_URL }} >> .env
           echo MQTT_USERNAME=${{ secrets.MQTT_USERNAME }} >> .env
           flutter pub get
+          cd noheva-api
+          flutter pub get
+          cd ..
           flutter pub run build_runner build --delete-conflicting-outputs
+          cd noheva-api
+          flutter pub run build_runner build --delete-conflicting-outputs
+          cd ..
           flutter build apk --split-per-abi
           mkdir -p update/android/${{ needs.bumpVersion.outputs.new_tag }}
           mv build/app/outputs/apk/release/output-metadata.json update/android/output-metadata.json
