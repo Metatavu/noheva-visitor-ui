@@ -15,21 +15,33 @@ class FontHelper {
   static final HttpClient _httpClient = HttpClient();
   static final List<Font> _fonts = [
     const Font(
-        name: "Source-Sans-Pro-Bold", fileName: "SourceSansPro-Bold.ttf"),
+      name: "Source-Sans-Pro-Bold",
+      fileName: "SourceSansPro-Bold.ttf",
+    ),
     const Font(
-        name: "Source-Sans-Pro-BoldItalic",
-        fileName: "SourceSansPro-BoldItalic.ttf"),
+      name: "Source-Sans-Pro-BoldItalic",
+      fileName: "SourceSansPro-BoldItalic.ttf",
+    ),
     const Font(
-        name: "Source-Sans-Pro-Italic", fileName: "SourceSansPro-Italic.ttf"),
+      name: "Source-Sans-Pro-Italic",
+      fileName: "SourceSansPro-Italic.ttf",
+    ),
     const Font(
-        name: "Source-Sans-Pro-Regular", fileName: "SourceSansPro-Regular.ttf"),
+      name: "Source-Sans-Pro-Regular",
+      fileName: "SourceSansPro-Regular.ttf",
+    ),
     const Font(
-        name: "Source-Sans-Pro-SemiBold",
-        fileName: "SourceSansPro-SemiBold.ttf"),
+      name: "Source-Sans-Pro-SemiBold",
+      fileName: "SourceSansPro-SemiBold.ttf",
+    ),
     const Font(
-        name: "Source-Sans-Pro-SemiBoldItalic",
-        fileName: "SourceSansPro-SemiBoldItalic.ttf"),
-    const Font(name: "Larken-Medium", fileName: "Larken-Medium.ttf"),
+      name: "Source-Sans-Pro-SemiBoldItalic",
+      fileName: "SourceSansPro-SemiBoldItalic.ttf",
+    ),
+    const Font(
+      name: "Larken-Medium",
+      fileName: "Larken-Medium.ttf",
+    ),
   ];
 
   /// Loads offlined fonts into Flutter Engine
