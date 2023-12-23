@@ -104,6 +104,21 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
               _exitTransitions,
               context,
             ),
+            customStylesBuilder: (element) {
+              if (["h1", "h2", "h3", "h4", "h5", "h6"]
+                  .contains(element.localName)) {
+                return {
+                  "font-family": "Larken-Medium",
+                };
+              }
+              if (element.localName == "p") {
+                return {
+                  "font-family": "Source-Sans-Pro-Regular",
+                };
+              }
+
+              return null;
+            },
           ),
         ),
       ),

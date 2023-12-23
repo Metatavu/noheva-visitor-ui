@@ -1,4 +1,4 @@
-import "package:collection/collection.dart";
+import "dart:io";
 import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
@@ -9,7 +9,6 @@ import "package:noheva_visitor_ui/utils/html_widgets.dart";
 /// Used by [HtmlWidgets] to build custom button widget from HTML element
 class CustomButton extends StatelessWidget {
   final dom.Element element;
-  final List<ExhibitionPageResource> resources;
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
   final List<ExhibitionPageTransition> exitTransitions;
@@ -17,7 +16,6 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     Key? key,
     required this.element,
-    required this.resources,
     required this.eventTriggers,
     required this.enterTransitions,
     required this.exitTransitions,
@@ -31,6 +29,7 @@ class CustomButton extends StatelessWidget {
     final backgroundColor =
         HtmlWidgets.extractColor(element, property: "background-color");
     final size = HtmlWidgets.extractSize(element);
+    final fontFamily = HtmlWidgets.extractFontFamily(element);
     final tapEvent = HtmlWidgets.handleTapEvent(
           element,
           eventTriggers,
@@ -39,26 +38,23 @@ class CustomButton extends StatelessWidget {
           context,
         ) ??
         () {};
-    final pattern =
-        RegExp(r'https:\/\/[^ "]+\.(jpg|jpeg|png|gif|bmp|svg|webp|tiff|ico)');
-    final match = pattern.firstMatch(element.outerHtml);
-    String? resourceId;
-    if (match != null) {
-      resourceId = match.group(0);
+    String? imageButtonSource;
+    for (var child in element.children) {
+      if (child.localName == "img") {
+        imageButtonSource = child.attributes['src'];
+      }
     }
-    final foundResource = resources.firstWhereOrNull(
-      (resource) => resource.data == resourceId,
-    );
 
     Widget? child;
-    if (foundResource != null) {
-      child = Image.network(foundResource.data);
+    if (imageButtonSource != null) {
+      child = Image.file(File(imageButtonSource));
     } else {
       child = Text(
         element.innerHtml,
         style: TextStyle(
           fontSize: fontSize,
           color: fontColor,
+          fontFamily: fontFamily,
         ),
       );
     }

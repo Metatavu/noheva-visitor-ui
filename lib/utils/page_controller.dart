@@ -1,4 +1,6 @@
 import "package:collection/collection.dart";
+import "package:html/dom.dart";
+import "package:html/parser.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
@@ -97,6 +99,37 @@ class PageController {
     return newPageModifiedAt > existingPageModifiedAt;
   }
 
+  /// Substitutes background images in [element] with local file paths
+  ///
+  /// This is a questionable workaround for the [flutter_widget_from_html_core] packages logic
+  /// where background image source is provided from the url protocol
+  static void _prepareBackgroundImages(Element element) {
+    for (var child in element.children) {
+      if (child.localName == "div") {
+        var rawStyles = child.attributes["style"]!;
+        Map<String, String> styles = {};
+        for (var property in rawStyles.split(";")) {
+          final split = property.split(":");
+          if (split.length == 2) {
+            final key = split[0].trim();
+            final value = split[1].trim();
+            styles[key] = value;
+          }
+        }
+        ;
+        String? backgroundImage = styles["background-image"];
+        if (backgroundImage != null && backgroundImage != "none") {
+          styles["background-image"] = "url(\"file://$backgroundImage\")";
+        }
+
+        final joinedStyles =
+            styles.entries.map((e) => "${e.key}: ${e.value}").join("; ");
+        child.attributes["style"] = joinedStyles;
+      }
+      _prepareBackgroundImages(child);
+    }
+  }
+
   /// Substitutes pages resource keys with actual resources
   static String substitutePageResources(
     String html,
@@ -110,7 +143,9 @@ class PageController {
           )
           .replaceAll(RegExp(r'width:\s*(\d+)\s*%'), "");
     }
-    return html;
+    var doc = parse(html);
+    _prepareBackgroundImages(doc.body!);
+    return doc.body?.outerHtml ?? "";
   }
 
   /// Compares existing pages with page from backend

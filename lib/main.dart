@@ -5,6 +5,7 @@ import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/startup_screen.dart";
+import "package:noheva_visitor_ui/theme/font_helper.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
 import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
@@ -37,7 +38,6 @@ void main() async {
   await windowManager.ensureInitialized();
   AppLifecycleListener(onExitRequested: _onAppExitRequested);
 
-  // TODO: Add alwaysOnTop: true, removed for development purposes.
   WindowOptions windowOptions = const WindowOptions(
     windowButtonVisibility: false,
     center: true,
@@ -58,6 +58,7 @@ void main() async {
 
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
+  FontHelper.loadOfflinedFonts();
 
   deviceId = await keyDao.getDeviceId();
 
