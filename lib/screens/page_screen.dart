@@ -94,28 +94,32 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
         body: Container(
           width: screenSize.width,
           height: screenSize.height,
-          child: HtmlWidget(_pageHtml ?? "",
-              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-                    element,
-                    _pageResources,
-                    _eventTriggers,
-                    _enterTransitions,
-                    _exitTransitions,
-                    context,
-                  ),
-              customStylesBuilder: (element) {
-                if (["h1", "h2", "h3", "h4", "h5", "h6"]
-                    .contains(element.localName)) {
-                  return {
-                    "font-family": "Larken-Medium",
-                  };
-                }
-                if (element.localName == "p") {
-                  return {
-                    "font-family": "Source-Sans-Pro-Regular",
-                  };
-                }
-              }),
+          child: HtmlWidget(
+            _pageHtml ?? "",
+            customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
+              element,
+              _pageResources,
+              _eventTriggers,
+              _enterTransitions,
+              _exitTransitions,
+              context,
+            ),
+            customStylesBuilder: (element) {
+              if (["h1", "h2", "h3", "h4", "h5", "h6"]
+                  .contains(element.localName)) {
+                return {
+                  "font-family": "Larken-Medium",
+                };
+              }
+              if (element.localName == "p") {
+                return {
+                  "font-family": "Source-Sans-Pro-Regular",
+                };
+              }
+
+              return null;
+            },
+          ),
         ),
       ),
     );
