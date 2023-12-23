@@ -10,6 +10,7 @@
   "currentVersion": "Nykyinen versio: {currentVersion}",
   "availableVersion": "Saatavilla oleva versio: {availableVersion}",
   "installUpdateButton": "Asenna päivitys",
+  "updateAvailable": "Päivitys saatavilla",
   "mqttClientConnectionStatus": "MQTT-yhteyden tila: {status}",
   "skip": "Ohita",
   "loading": "Ladataan...",

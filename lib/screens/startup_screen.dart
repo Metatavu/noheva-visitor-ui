@@ -40,7 +40,7 @@ class _StartupScreenState extends State<StartupScreen> {
         SimpleLogger().info(
           "No update available. Navigating to Default Screen.",
         );
-        _navigateToDefaultScreen();
+        _navigateForward();
       }
     } else {
       SimpleLogger().warning("Couldn't get server version.");
@@ -48,8 +48,18 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   /// Navigates to default screen
-  void _navigateToDefaultScreen() {
-    NavigationUtils.navigateToDefaultScreen(context);
+  void _navigateForward() {
+    if (deviceId != null) {
+      SimpleLogger().info(
+        "Device setup complete, navigating to Default Screen.",
+      );
+      NavigationUtils.navigateToDefaultScreen(context);
+    } else {
+      SimpleLogger().info(
+        "Device setup not complete, navigating to Setup Screen.",
+      );
+      NavigationUtils.navigateToDeviceSetupScreen(context);
+    }
   }
 
   /// Checks for updates on startup
@@ -66,7 +76,7 @@ class _StartupScreenState extends State<StartupScreen> {
         );
         SimpleLogger().info("Initialized Sparkle updater.");
         // Navigating immediately seems to freeze the whole app.
-        Timer(const Duration(milliseconds: 3000), _navigateToDefaultScreen);
+        Timer(const Duration(milliseconds: 3000), _navigateForward);
       }
     } catch (e) {
       SimpleLogger().shout("Couldn't check for updates: $e");
@@ -92,17 +102,27 @@ class _StartupScreenState extends State<StartupScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (_updateAvailable) ...[
-          ElevatedButton(
-            onPressed: _navigateToDefaultScreen,
-            child: Text(AppLocalizations.of(context)!.skip),
-          ),
-          const SizedBox(width: 50),
-          ElevatedButton(
-            onPressed: _handleUpdate,
-            child: Text(AppLocalizations.of(context)!.installUpdateButton),
-          ),
+          Column(
+            children: [
+              Text(AppLocalizations.of(context)!.updateAvailable),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: _navigateForward,
+                    child: Text(AppLocalizations.of(context)!.skip),
+                  ),
+                  const SizedBox(width: 50),
+                  ElevatedButton(
+                    onPressed: _handleUpdate,
+                    child:
+                        Text(AppLocalizations.of(context)!.installUpdateButton),
+                  ),
+                ],
+              ),
+            ],
+          )
         ] else
-          Text(AppLocalizations.of(context)!.startingApplication)
+          Text(AppLocalizations.of(context)!.startingApplication),
       ],
     );
   }

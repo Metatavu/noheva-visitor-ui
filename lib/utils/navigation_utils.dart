@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:noheva_api/noheva_api.dart" as noheva_api;
 import 'package:noheva_visitor_ui/animations/curves.dart';
 import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/screens/device_setup_screen.dart";
 
 /// Utilities for animated navigation between screens.
 class NavigationUtils {
@@ -10,6 +11,13 @@ class NavigationUtils {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const DefaultScreen()),
+      );
+
+  /// Navigates to [DeviceSetupScreen]
+  static Future<void> navigateToDeviceSetupScreen(BuildContext context) async =>
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DeviceSetupScreen()),
       );
 
   /// Pushes given [screen] to the [context] with given [enterTransition] and [exitTransition].

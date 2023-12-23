@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 import "dart:ui";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
@@ -35,22 +36,11 @@ void main() async {
   _configureLogger();
   SimpleLogger().info("Starting Noheva Visitor UI App...");
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
   AppLifecycleListener(onExitRequested: _onAppExitRequested);
 
-  WindowOptions windowOptions = const WindowOptions(
-    windowButtonVisibility: false,
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-    fullScreen: true,
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-    await windowManager.maximize();
-  });
+  SimpleLogger().info("Setting up window manager...");
+  _setupWindowManager();
+
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
   SimpleLogger().info("Validating environment variables...");
@@ -86,6 +76,28 @@ void main() async {
   runApp(const NohevaApp());
 }
 
+/// Sets up window manager for platforms where it is required and supported.
+void _setupWindowManager() async {
+  if (Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      windowButtonVisibility: false,
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+      fullScreen: true,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+      await windowManager.maximize();
+    });
+  } else {
+    SimpleLogger().info("Not running on macOS, skipping window manager setup!");
+  }
+}
+
 /// Polls device approval status and cancels [timer] when device is approved.
 Future<void> _pollDeviceApprovalStatus(Timer timer) async {
   SimpleLogger().info("Polling device approval status...");
@@ -95,7 +107,8 @@ Future<void> _pollDeviceApprovalStatus(Timer timer) async {
     deviceId = await keyDao.getDeviceId();
     if (deviceId == null) {
       SimpleLogger().info(
-          "Device ID not found, cannot poll device status. Waiting for setup...");
+        "Device ID not found, cannot poll device status. Waiting for setup...",
+      );
     } else {
       String? deviceKey = await devicesApi
           .getDeviceKey(deviceId: deviceId!)
