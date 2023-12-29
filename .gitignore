@@ -44,7 +44,8 @@ app.*.map.json
 /android/app/release
 
 # Generated code
-/noheva-api/*
+# To later remove generated code from the repository, delete the files and un-comment the line below
+# /noheva-api/*
 !noheva-api/pubspec.yaml
 *.g.dart
 

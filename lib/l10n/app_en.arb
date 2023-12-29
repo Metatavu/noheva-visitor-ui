@@ -6,5 +6,13 @@
   "deviceSetupSubmitButton": "Proceed",
   "deviceSetupSkipButton": "Skip setup",
   "deviceNotYetApproved": "Device has not yet been approved.",
-  "deviceIsApproved": "Device is approved and ready to use."
+  "deviceIsApproved": "Device is approved and ready to use.",
+  "currentVersion": "Current version: {currentVersion}",
+  "availableVersion": "Available version: {availableVersion}",
+  "installUpdateButton": "Install update",
+  "updateAvailable": "Update available",
+  "mqttClientConnectionStatus": "MQTT client connection status: {status}",
+  "skip": "Skip",
+  "loading": "Loading...",
+  "startingApplication": "Starting Noheva Application..."
 }

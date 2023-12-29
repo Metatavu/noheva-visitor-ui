@@ -1,11 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
 linter:
-  # A list of all available lints
-  # and their documentation is published at
-  # https://dart-lang.github.io/linter/lints/index.html.
   rules:
     avoid_print: true
     prefer_single_quotes: false
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+analyzer:
+  language:
+    strict-inference: true
+    strict-raw-types: true
+  exclude:
+    - android/**
+    - test/**
+    - noheva-api/**
+  errors:
+    deprecated_member_use_from_same_package: warning

@@ -1,9 +1,12 @@
 import "dart:async";
-import "dart:convert";
 import "dart:typed_data";
 import "package:mqtt_client/mqtt_client.dart";
 import "package:mqtt_client/mqtt_server_client.dart";
-import "package:noheva_visitor_ui/mqtt/model/status_message.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/mqtt/listeners/attach_listener.dart";
+import "package:noheva_visitor_ui/mqtt/listeners/pages_listener.dart";
+import "package:noheva_visitor_ui/utils/device_info.dart";
+import "package:noheva_visitor_ui/utils/serialization_utils.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:typed_data/typed_buffers.dart";
 import "../main.dart";
@@ -22,13 +25,13 @@ class MqttClient {
       return "";
     }
 
-    return "noheva/$environment/$deviceId/status";
+    return "$environment/$deviceId/status";
   }
 
   bool get isConnected =>
       _getClientConnectionStatus() == MqttConnectionState.connected.name;
 
-  Map<String, Function(String)> listeners = {};
+  Map<String, void Function(String)> listeners = {};
 
   /// Connects MQTT server using [deviceId] as client id if not already connected.
   Future<void> connect(String deviceId) async {
@@ -54,7 +57,8 @@ class MqttClient {
     final connMessage = MqttConnectMessage()
         .keepAliveFor(60)
         .withWillTopic(await _statusTopic)
-        .withWillMessage(jsonEncode((await _buildStatusMessage(false))))
+        .withWillMessage(SerializationUtils.serializeObject(
+            await _buildStatusMessage(false), MqttDeviceStatus))
         .authenticateAs(mqttUsername, mqttPassword)
         .startClean()
         .withWillQos(MqttQos.atLeastOnce);
@@ -92,8 +96,8 @@ class MqttClient {
   /// Handler for successful connections event.
   ///
   /// Initializes periodic status message.
-  Future onConnected() async {
-    StatusMessage? statusMessage = await _buildStatusMessage(true);
+  Future<void> onConnected() async {
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(true);
 
     if (statusMessage == null) {
       SimpleLogger()
@@ -105,10 +109,15 @@ class MqttClient {
     SimpleLogger().info("Connected, sending status message...");
     publishMessage(
       await _statusTopic,
-      createMessagePayload(jsonEncode(statusMessage)),
+      createMessagePayload(
+          SerializationUtils.serializeObject(statusMessage, MqttDeviceStatus)),
     );
 
     _initPeriodicStatusMessage();
+
+    SimpleLogger().info("Setting up listeners...");
+    AttachListener();
+    PagesListener();
   }
 
   /// Handler for disconnection event.
@@ -135,8 +144,14 @@ class MqttClient {
   }
 
   /// Disconnects MQTT Client
-  void disconnect() {
+  Future<void> disconnect() async {
     SimpleLogger().info("Disconnecting MQTT Client...");
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(false);
+    publishMessage(
+      await _statusTopic,
+      createMessagePayload(
+          SerializationUtils.serializeObject(statusMessage, MqttDeviceStatus)),
+    );
     _client?.disconnect();
   }
 
@@ -164,21 +179,21 @@ class MqttClient {
   /// Subscribes to given MQTT [topic].
   ///
   /// Quality of Service (QoS) defaults to [MqttQos.atLeastOnce] (1)
-  void subscribeToTopic(String topic, {qos = MqttQos.atLeastOnce}) {
+  void subscribeToTopic(String topic, {MqttQos qos = MqttQos.atLeastOnce}) {
     _client?.subscribe(topic, qos);
   }
 
   /// Subscribes to topics listed in [newListeners] and adds topic:callback pairs to [listeners] for further callback invocation.
-  void addListeners(Map<String, Function(String)> newListeners) {
+  void addListeners(Map<String, void Function(String)> newListeners) {
     for (var listener in newListeners.entries) {
       subscribeToTopic(listener.key);
       listeners[listener.key] = listener.value;
     }
   }
 
-  /// Sends [StatusMessage]
-  Future sendStatusMessage(bool status) async {
-    StatusMessage? statusMessage = await _buildStatusMessage(status);
+  /// Sends [MqttDeviceStatus]
+  Future<void> sendStatusMessage(bool status) async {
+    MqttDeviceStatus? statusMessage = await _buildStatusMessage(status);
 
     if (statusMessage == null) {
       SimpleLogger()
@@ -191,7 +206,8 @@ class MqttClient {
 
     publishMessage(
       statusTopic,
-      createMessagePayload(jsonEncode(statusMessage)),
+      createMessagePayload((SerializationUtils.serializeObject(
+          statusMessage, MqttDeviceStatus))),
     );
     SimpleLogger().info("Sent status message to topic: $statusTopic");
   }
@@ -211,11 +227,12 @@ class MqttClient {
     return _client!;
   }
 
-  /// Builds [StatusMessage]
-  Future<StatusMessage?> _buildStatusMessage(
+  /// Builds [MqttDeviceStatus]
+  Future<MqttDeviceStatus?> _buildStatusMessage(
     bool status,
   ) async {
     String? deviceId = _deviceId;
+    String softwareVersion = await DeviceInfo.getSoftwareVersion();
 
     if (deviceId == null) {
       SimpleLogger()
@@ -224,14 +241,16 @@ class MqttClient {
       return null;
     }
 
-    return StatusMessage(
-      status: status ? "ONLINE" : "OFFLINE",
-      deviceId: deviceId,
-    );
+    return MqttDeviceStatus((builder) async {
+      builder
+        ..deviceId = deviceId
+        ..status = status ? DeviceStatus.ONLINE : DeviceStatus.OFFLINE
+        ..version = softwareVersion;
+    });
   }
 
   /// Reconnects MQTT Client.
-  Future<void> _reconnect({failureCount = 0}) async {
+  Future<void> _reconnect({int failureCount = 0}) async {
     SimpleLogger().info("Attempting to reconnect MQTT Client...");
     try {
       await _client?.connect();

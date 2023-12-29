@@ -1,6 +1,8 @@
 import "dart:io";
 import "package:android_id/android_id.dart";
 import "package:device_info_plus/device_info_plus.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:package_info_plus/package_info_plus.dart";
 
 /// Device Info
 class DeviceInfo {
@@ -24,5 +26,25 @@ class DeviceInfo {
     }
 
     return serialNumber;
+  }
+
+  /// Gets devices softwares version
+  static Future<String> getSoftwareVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    return packageInfo.version;
+  }
+
+  /// Gets devices Noheva [DeviceType]
+  static DeviceType? getNohevaDeviceType() {
+    if (Platform.isAndroid) {
+      return DeviceType.NOHEVA_ANDROID;
+    }
+
+    if (Platform.isMacOS) {
+      return DeviceType.NOHEVA_MACOS;
+    }
+
+    return null;
   }
 }

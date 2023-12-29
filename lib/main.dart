@@ -1,16 +1,20 @@
 import "dart:async";
+import "dart:io";
+import "dart:ui";
 import "package:flutter/material.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
-import "package:noheva_visitor_ui/screens/default_screen.dart";
+import "package:noheva_visitor_ui/screens/startup_screen.dart";
+import "package:noheva_visitor_ui/theme/font_helper.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
+import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
+import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
 import "config/configuration.dart";
-import "database/dao/keys_dao.dart";
-import 'screens/device_setup_screen.dart';
+import "database/dao/key_dao.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
@@ -18,10 +22,25 @@ late final String environment;
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
+final StreamController<String?> pageStreamController =
+    StreamController.broadcast(sync: true);
+final StreamController<bool?> managementStreamController =
+    StreamController.broadcast(sync: true);
+final managementButtonTickCounter = TimedTickCounter(
+  ticksRequired: 10,
+  timeout: const Duration(seconds: 5),
+  onTicksReached: () => managementStreamController.sink.add(true),
+);
 
 void main() async {
   _configureLogger();
   SimpleLogger().info("Starting Noheva Visitor UI App...");
+  WidgetsFlutterBinding.ensureInitialized();
+  AppLifecycleListener(onExitRequested: _onAppExitRequested);
+
+  SimpleLogger().info("Setting up window manager...");
+  _setupWindowManager();
+
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
   SimpleLogger().info("Validating environment variables...");
@@ -29,8 +48,9 @@ void main() async {
 
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
+  FontHelper.loadOfflinedFonts();
 
-  deviceId = await keysDao.getDeviceId();
+  deviceId = await keyDao.getDeviceId();
 
   if (deviceId != null) {
     SimpleLogger().info("Device Id is: $deviceId");
@@ -41,7 +61,7 @@ void main() async {
   }
 
   SimpleLogger().info("Checking if device is approved...");
-  isDeviceApproved = await keysDao.checkIsDeviceApproved();
+  isDeviceApproved = await keyDao.checkIsDeviceApproved();
 
   if (isDeviceApproved) {
     SimpleLogger().info("Device is approved");
@@ -53,26 +73,49 @@ void main() async {
     );
   }
 
-  runApp(const MyApp());
+  runApp(const NohevaApp());
+}
+
+/// Sets up window manager for platforms where it is required and supported.
+void _setupWindowManager() async {
+  if (Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      windowButtonVisibility: false,
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+      fullScreen: true,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+      await windowManager.maximize();
+    });
+  } else {
+    SimpleLogger().info("Not running on macOS, skipping window manager setup!");
+  }
 }
 
 /// Polls device approval status and cancels [timer] when device is approved.
-Future _pollDeviceApprovalStatus(Timer timer) async {
+Future<void> _pollDeviceApprovalStatus(Timer timer) async {
   SimpleLogger().info("Polling device approval status...");
   DevicesApi devicesApi = await apiFactory.getDevicesApi();
 
   try {
-    deviceId = await keysDao.getDeviceId();
+    deviceId = await keyDao.getDeviceId();
     if (deviceId == null) {
       SimpleLogger().info(
-          "Device ID not found, cannot poll device status. Waiting for setup...");
+        "Device ID not found, cannot poll device status. Waiting for setup...",
+      );
     } else {
       String? deviceKey = await devicesApi
           .getDeviceKey(deviceId: deviceId!)
           .then((response) => response.data?.key);
       if (deviceKey != null) {
         SimpleLogger().info("Device is approved. Storing device key...");
-        await keysDao.storeDeviceKey(deviceKey);
+        await keyDao.storeDeviceKey(deviceKey);
         isDeviceApproved = true;
         SimpleLogger().info("Stored device key, stopping polling!");
         timer.cancel();
@@ -84,14 +127,50 @@ Future _pollDeviceApprovalStatus(Timer timer) async {
 }
 
 /// Configures logger to use [logLevel] and formats log messages to be cleaner than by default.
-void _configureLogger({logLevel = Level.INFO}) {
+void _configureLogger({Level logLevel = Level.INFO}) {
   SimpleLogger().setLevel(logLevel, includeCallerInfo: true);
   SimpleLogger().formatter = ((info) =>
       "[${info.time}] -- ${info.callerFrame ?? "NO CALLER INFO"} - ${info.message}");
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Callback function for when App exit is requested.
+///
+/// e.g. user clicks on close button
+/// Disconnects MQTT client and sends appropriate status message
+Future<AppExitResponse> _onAppExitRequested() async {
+  SimpleLogger().info("App exit requested, disconnecting MQTT...");
+  await mqttClient.disconnect();
+  return AppExitResponse.exit;
+}
+
+/// Handler for management button click
+void _addManagementButtonOverlay(BuildContext context) {
+  return Overlay.of(context).insert(
+    OverlayEntry(
+      builder: (context) => Positioned(
+        left: 0,
+        top: 0,
+        width: 200,
+        height: 100,
+        child: SizedBox(
+          width: 200,
+          height: 100,
+          child: TextButton(
+            onPressed: () => managementButtonTickCounter.tick(),
+            style: const ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll(Colors.transparent),
+              overlayColor: MaterialStatePropertyAll(Colors.transparent),
+            ),
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class NohevaApp extends StatelessWidget {
+  const NohevaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -99,16 +178,22 @@ class MyApp extends StatelessWidget {
       title: "Noheva visitor UI",
       theme: getApplicationTheme(),
       localizationsDelegates: const [AppLocalizations.delegate],
-      home:
-          deviceId == null ? const DeviceSetupScreen() : const DefaultScreen(),
+      home: Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _addManagementButtonOverlay(context));
+          return const StartupScreen();
+        },
+      ),
     );
   }
 }
 
 /// API Client generator config
 @Openapi(
-    additionalProperties: AdditionalProperties(pubName: "noheva_api"),
-    inputSpecFile: "noheva-api-spec/swagger.yaml",
-    generatorName: Generator.dio,
-    outputDirectory: "noheva-api")
+  additionalProperties: AdditionalProperties(pubName: "noheva_api"),
+  inputSpecFile: "noheva-api-spec/swagger.yaml",
+  generatorName: Generator.dio,
+  outputDirectory: "noheva-api",
+)
 class NohevaApi extends OpenapiGeneratorConfig {}
