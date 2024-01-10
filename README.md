@@ -18,4 +18,3 @@ For example run code generation with
   3. Append it into `@DriftDatabase` annotation within `lib/database/database.dart`
   4. Bump the schema version in `lib/database/database.dart`
   5. Create new migrations.
-
