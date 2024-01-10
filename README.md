@@ -19,4 +19,3 @@ For example run code generation with
   4. Bump the schema version in `lib/database/database.dart`
   5. Create new migrations.
 
-
