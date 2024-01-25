@@ -38,7 +38,7 @@
 	<key>SUPublicEDKey</key>
 	<string>Kpvb5F9SL32SjdJ79HCFKSJgIfm9oHAGOOp+ARukgWQ=</string>
 	<key>SUFeedURL</key>
-	<string>https://lhm-noheva-updates.s3.eu-north-1.amazonaws.com/staging/macos/appcast.xml</string>
+	<string>https://lhm-noheva-updates.s3.eu-north-1.amazonaws.com/production/macos/appcast.xml</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 			<key>UISceneConfigurations</key>
