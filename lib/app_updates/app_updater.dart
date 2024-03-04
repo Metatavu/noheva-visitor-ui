@@ -62,9 +62,8 @@ class Updater {
   /// Updates the Android app to [version]
   static Future<void> _updateAndroidApp(String version) async {
     SimpleLogger().info("Downloading new version...");
-    String architecture = configuration.getAndroidArchitecture();
     Int8Buffer fileContent =
-        await _doRequest("/android/$version/app-$architecture-release.apk");
+        await _doRequest("/android/$version/app-release.apk");
     String? storageDir = (await getExternalStorageDirectory())?.absolute.path;
     File apkFile = File("$storageDir/fi.metatavu.noheva_visitor_ui.apk");
 
