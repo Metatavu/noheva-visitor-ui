@@ -39,11 +39,7 @@ class Updater {
     Int8Buffer fileContent = await _doRequest("/android/output-metadata.json");
     OutputMetadata outputMetadata =
         OutputMetadata.fromJson(jsonDecode(utf8.decode(fileContent)));
-    String? foundVersion = outputMetadata.elements
-        .firstWhereOrNull((element) =>
-            element.filters.first.value ==
-            configuration.getAndroidArchitecture())
-        ?.versionName;
+    String? foundVersion = outputMetadata.elements.firstOrNull?.versionName;
 
     return foundVersion;
   }
