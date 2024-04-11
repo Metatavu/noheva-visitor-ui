@@ -26,6 +26,8 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
   Future<void> _createDevice(DeviceRequest deviceRequest) async {
     DevicesApi devicesApi = await apiFactory.getDevicesApi();
     try {
+      SimpleLogger().info(
+          "Creating device with serial number: ${deviceRequest.serialNumber}");
       Device createdDevice =
           (await devicesApi.createDevice(deviceRequest: deviceRequest)).data!;
       SimpleLogger().info("Created device: $createdDevice");
