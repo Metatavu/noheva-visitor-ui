@@ -9,13 +9,11 @@ import android.util.Log
  * Broadcast receiver that starts main activity when device boots
  */
 class NohevaVisitorUiBootReceiver: BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
-            Log.d(javaClass.name, "Received boot completed intent!")
-            val mainActivityIntent = Intent(context, MainActivity::class.java)
-            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            Log.d(javaClass.name, "Starting main activity...")
-            context.startActivity(mainActivityIntent)
-        }
+    override fun onReceive(context: Context, intent: Intent) {        
+        Log.d(javaClass.name, "Received boot completed intent!")
+        val mainActivityIntent = Intent(context, MainActivity::class.java)
+        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        Log.d(javaClass.name, "Starting main activity...")
+        context.startActivity(mainActivityIntent)
     }
 }
