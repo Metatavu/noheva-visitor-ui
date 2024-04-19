@@ -47,6 +47,37 @@ class HtmlWidgets {
         _ => null
       };
 
+  /// Extracts margin from HTML [element] styles and returns it as an [EdgeInsets]
+  static EdgeInsets? extractMargin(
+    dom.Element element,
+  ) {
+    final marginAttributes =
+        element.styles.where((style) => style.property.startsWith("margin-"));
+
+    return EdgeInsets.only(
+      top: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-top")
+            ?.value,
+      ),
+      right: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-right")
+            ?.value,
+      ),
+      bottom: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-bottom")
+            ?.value,
+      ),
+      left: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-left")
+            ?.value,
+      ),
+    );
+  }
+
   /// Extracts color from HTML [element] styles and returns it as an int
   static Color? extractColor(
     dom.Element element, {
