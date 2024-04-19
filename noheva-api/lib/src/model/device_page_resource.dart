@@ -35,7 +35,7 @@ abstract class DevicePageResource implements Built<DevicePageResource, DevicePag
 
   @BuiltValueField(wireName: r'type')
   ExhibitionPageResourceType get type;
-  // enum typeEnum {  text,  image,  video,  html,  svg,  };
+  // enum typeEnum {  text,  image,  video,  html,  svg,  color,  };
 
   /// Name of the layout component this resource is attached to.
   @BuiltValueField(wireName: r'component')

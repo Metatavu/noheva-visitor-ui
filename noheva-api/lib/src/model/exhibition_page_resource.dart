@@ -31,7 +31,7 @@ abstract class ExhibitionPageResource implements Built<ExhibitionPageResource, E
 
   @BuiltValueField(wireName: r'type')
   ExhibitionPageResourceType get type;
-  // enum typeEnum {  text,  image,  video,  html,  svg,  };
+  // enum typeEnum {  text,  image,  video,  html,  svg,  color,  };
 
   ExhibitionPageResource._();
 
