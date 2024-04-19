@@ -3,7 +3,7 @@ description: Noheva visitor UI project
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 0.1.14
+version: 0.1.15-develop.3
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -33,11 +33,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.1
-  flutter_widget_from_html_core:
-    git:
-      url: https://github.com/Metatavu/flutter_widget_from_html.git
-      ref: 7d88c2dc35981438ed4fa494b3513d8bc5404542
-      path: packages/core
+  flutter_widget_from_html_core: 0.14.11
   video_player: ^2.6.1
   video_player_macos: ^2.0.1
   collection: ^1.17.2
@@ -48,6 +44,7 @@ dependencies:
   window_manager: ^0.3.6
   flutter_app_installer: ^1.0.0
   flutter_sparkle: ^0.0.2
+  defer_pointer: ^0.0.2
 
 dev_dependencies:
   flutter_test:

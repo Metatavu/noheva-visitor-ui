@@ -27,7 +27,7 @@ class NavigationUtils {
     noheva_api.ExhibitionPageTransition? enterTransition,
     noheva_api.ExhibitionPageTransition? exitTransition,
   }) async =>
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           transitionDuration: Duration(

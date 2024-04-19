@@ -22,6 +22,7 @@ class DefaultScreen extends StatefulWidget {
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
   late StreamSubscription<String?> _pageStreamSubscription;
+  Timer? _deviceApprovalTimer;
 
   /// Navigates to [PageScreen] with [pageId]
   void _navigateToPageScreen(String pageId) {
@@ -46,16 +47,19 @@ class _DefaultScreenState extends State<DefaultScreen> {
   Future<void> _checkDeviceApproval() async {
     final deviceIsApproved = await keyDao.checkIsDeviceApproved();
     if (!deviceIsApproved) {
-      Timer.periodic(const Duration(seconds: 5), (timer) async {
-        SimpleLogger().info("Checking whether device has been approved...");
-        bool isApproved = await keyDao.checkIsDeviceApproved();
-        setState(() => _isDeviceApproved = isApproved);
-        if (isApproved) {
-          SimpleLogger().info("Device is approved, loading device data...");
-          await _loadDeviceData();
-          timer.cancel();
-        }
-      });
+      _deviceApprovalTimer = Timer.periodic(
+        const Duration(seconds: 5),
+        (timer) async {
+          SimpleLogger().info("Checking whether device has been approved...");
+          bool isApproved = await keyDao.checkIsDeviceApproved();
+          setState(() => _isDeviceApproved = isApproved);
+          if (isApproved) {
+            SimpleLogger().info("Device is approved, loading device data...");
+            await _loadDeviceData();
+            timer.cancel();
+          }
+        },
+      );
     } else {
       SimpleLogger().info("Device is approved, loading device data...");
       await _loadDeviceData();
@@ -109,6 +113,7 @@ class _DefaultScreenState extends State<DefaultScreen> {
   @override
   void dispose() {
     _pageStreamSubscription.cancel();
+    _deviceApprovalTimer?.cancel();
     super.dispose();
   }
 

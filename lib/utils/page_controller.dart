@@ -116,7 +116,7 @@ class PageController {
             styles[key] = value;
           }
         }
-        ;
+
         String? backgroundImage = styles["background-image"];
         if (backgroundImage != null && backgroundImage != "none") {
           styles["background-image"] = "url(\"file://$backgroundImage\")";

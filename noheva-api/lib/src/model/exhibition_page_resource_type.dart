@@ -21,6 +21,8 @@ class ExhibitionPageResourceType extends EnumClass {
   static const ExhibitionPageResourceType html = _$html;
   @BuiltValueEnumConst(wireName: r'svg')
   static const ExhibitionPageResourceType svg = _$svg;
+  @BuiltValueEnumConst(wireName: r'color')
+  static const ExhibitionPageResourceType color = _$color;
 
   static Serializer<ExhibitionPageResourceType> get serializer => _$exhibitionPageResourceTypeSerializer;
 
