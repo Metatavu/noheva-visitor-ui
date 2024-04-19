@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - feature-37-autostart-on-android
 jobs:
   bumpVersion:
     runs-on: ubuntu-latest
