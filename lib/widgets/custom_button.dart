@@ -1,4 +1,5 @@
 import "dart:io";
+import "package:defer_pointer/defer_pointer.dart";
 import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
@@ -30,6 +31,7 @@ class CustomButton extends StatelessWidget {
         HtmlWidgets.extractColor(element, property: "background-color");
     final size = HtmlWidgets.extractSize(element);
     final fontFamily = HtmlWidgets.extractFontFamily(element);
+    final margin = HtmlWidgets.extractMargin(element);
     final tapEvent = HtmlWidgets.handleTapEvent(
           element,
           eventTriggers,
@@ -59,17 +61,31 @@ class CustomButton extends StatelessWidget {
       );
     }
 
-    return TextButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStatePropertyAll(backgroundColor),
-        maximumSize: MaterialStatePropertyAll(size),
-        minimumSize: MaterialStatePropertyAll(size),
-        shape: MaterialStatePropertyAll(
-          HtmlWidgets.extractBorderRadius(element),
-        ),
+    return Container(
+      constraints: BoxConstraints.loose((size)),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: (margin?.vertical ?? 0) / 2,
+            left: (margin?.horizontal ?? 0) / 2,
+            child: DeferPointer(
+              child: TextButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(backgroundColor),
+                  maximumSize: MaterialStatePropertyAll(size),
+                  minimumSize: MaterialStatePropertyAll(size),
+                  shape: MaterialStatePropertyAll(
+                    HtmlWidgets.extractBorderRadius(element),
+                  ),
+                ),
+                onPressed: tapEvent,
+                child: child,
+              ),
+            ),
+          ),
+        ],
       ),
-      onPressed: tapEvent,
-      child: child,
     );
   }
 }
