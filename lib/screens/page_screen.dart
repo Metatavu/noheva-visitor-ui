@@ -1,4 +1,5 @@
 import "dart:async";
+import "package:defer_pointer/defer_pointer.dart";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:noheva_api/noheva_api.dart";
@@ -91,34 +92,42 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         backgroundColor: const Color(0xffffffff),
-        body: Container(
-          width: screenSize.width,
-          height: screenSize.height,
-          child: HtmlWidget(
-            _pageHtml ?? "",
-            customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-              element,
-              _pageResources,
-              _eventTriggers,
-              _enterTransitions,
-              _exitTransitions,
-              context,
-            ),
-            customStylesBuilder: (element) {
-              if (["h1", "h2", "h3", "h4", "h5", "h6"]
-                  .contains(element.localName)) {
-                return {
-                  "font-family": "Larken-Medium",
-                };
-              }
-              if (element.localName == "p") {
-                return {
-                  "font-family": "Source-Sans-Pro-Regular",
-                };
-              }
+        body: DeferredPointerHandler(
+          child: Container(
+            width: screenSize.width,
+            height: screenSize.height,
+            child: HtmlWidget(
+              _pageHtml ?? "",
+              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
+                element,
+                _pageResources,
+                _eventTriggers,
+                _enterTransitions,
+                _exitTransitions,
+                context,
+                {},
+              ),
+              customStylesBuilder: (element) {
+                if (element.localName == "div") {
+                  return {
+                    "padding": "0px",
+                  };
+                }
+                if (["h1", "h2", "h3", "h4", "h5", "h6"]
+                    .contains(element.localName)) {
+                  return {
+                    "font-family": "Larken-Medium",
+                  };
+                }
+                if (element.localName == "p") {
+                  return {
+                    "font-family": "Source-Sans-Pro-Regular",
+                  };
+                }
 
-              return null;
-            },
+                return null;
+              },
+            ),
           ),
         ),
       ),

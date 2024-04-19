@@ -6,9 +6,10 @@ import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
-import "package:noheva_visitor_ui/widgets/custom_button.dart";
+import "package:noheva_visitor_ui/widgets/noheva_button.dart";
 import "package:noheva_visitor_ui/widgets/custom_image.dart";
 import "package:noheva_visitor_ui/widgets/custom_video.dart";
+import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 import "package:simple_logger/simple_logger.dart";
 
 /// Html Widgets
@@ -25,6 +26,7 @@ class HtmlWidgets {
     List<ExhibitionPageTransition> enterTransitions,
     List<ExhibitionPageTransition> exitTransitions,
     BuildContext context,
+    Map<String, void Function(NohevaWidgetState widget)> customOnTapCallbacks,
   ) =>
       switch (element.localName) {
         CustomHtmlWidgets.IMAGE => CustomImage(
@@ -32,20 +34,56 @@ class HtmlWidgets {
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
+            customOnTapCallbacks: customOnTapCallbacks,
           ),
-        CustomHtmlWidgets.BUTTON => CustomButton(
+        CustomHtmlWidgets.BUTTON => NohevaButton(
             element: element,
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
+            customOnTapCallbacks: customOnTapCallbacks,
           ),
-        CustomHtmlWidgets.VIDEO => CustomVideo(
-            element: element,
-            resources: resources,
-            eventTriggers: eventTriggers,
-          ),
+        CustomHtmlWidgets.DIV =>
+          element.attributes["data-component-type"] == "video"
+              ? CustomVideo(
+                  element: element,
+                  resources: resources,
+                  eventTriggers: eventTriggers,
+                )
+              : null,
         _ => null
       };
+
+  /// Extracts margin from HTML [element] styles and returns it as an [EdgeInsets]
+  static EdgeInsets? extractMargin(
+    dom.Element element,
+  ) {
+    final marginAttributes =
+        element.styles.where((style) => style.property.startsWith("margin-"));
+
+    return EdgeInsets.only(
+      top: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-top")
+            ?.value,
+      ),
+      right: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-right")
+            ?.value,
+      ),
+      bottom: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-bottom")
+            ?.value,
+      ),
+      left: _parsePixelValueToDouble(
+        marginAttributes
+            .firstWhereOrNull((style) => style.property == "margin-left")
+            ?.value,
+      ),
+    );
+  }
 
   /// Extracts color from HTML [element] styles and returns it as an int
   static Color? extractColor(
@@ -246,6 +284,7 @@ class CustomHtmlWidgets {
   static const String BUTTON = "button";
   static const String VIDEO = "video";
   static const String SOURCE = "source";
+  static const String DIV = "div";
 
   static const String WIDTH = "width";
   static const String HEIGHT = "height";

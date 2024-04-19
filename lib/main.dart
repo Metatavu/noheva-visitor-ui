@@ -148,7 +148,7 @@ void _addManagementButtonOverlay(BuildContext context) {
   return Overlay.of(context).insert(
     OverlayEntry(
       builder: (context) => Positioned(
-        left: 0,
+        left: MediaQuery.of(context).size.width / 2 - 100,
         top: 0,
         width: 200,
         height: 100,

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
+import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 
 /// Custom Image Widget
 ///
@@ -12,6 +13,8 @@ class CustomImage extends StatelessWidget {
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
   final List<ExhibitionPageTransition> exitTransitions;
+  final Map<String, void Function(NohevaWidgetState widget)>
+      customOnTapCallbacks;
 
   const CustomImage({
     Key? key,
@@ -19,6 +22,7 @@ class CustomImage extends StatelessWidget {
     required this.eventTriggers,
     required this.enterTransitions,
     required this.exitTransitions,
+    required this.customOnTapCallbacks,
   }) : super(key: key);
 
   @override
