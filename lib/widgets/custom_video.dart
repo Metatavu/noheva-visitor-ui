@@ -7,6 +7,7 @@ import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import "package:html/dom.dart" as dom;
 import "package:indexed/indexed.dart";
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/utils/html_video_utils.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
 import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
@@ -37,28 +38,20 @@ class _CustomVideoState extends State<CustomVideo> {
   late VideoPlayerController _videoPlayerController;
   File? _videoThumbnail;
   bool _showVideoThumbnail = true;
+  late Size _videoSize;
+
+  dom.Element get parentElement => widget.element;
 
   @override
   void initState() {
     super.initState();
-    final videoChild = widget.element.children.firstWhereOrNull(
-        (element) => element.localName == CustomHtmlWidgets.VIDEO);
-    if (videoChild == null) {
-      return;
-    }
-    final sourceChild = videoChild.children.firstWhereOrNull(
-        (element) => element.localName == CustomHtmlWidgets.SOURCE);
+    _videoSize = HtmlWidgets.extractSize(widget.element);
+    final videoElement = HtmlVideoUtils.findVideoChild(parentElement);
+    if (videoElement == null) return;
 
-    if (sourceChild == null) {
-      return;
-    }
+    final source = HtmlVideoUtils.findVideoSource(videoElement);
+    if (source == null) return;
 
-    final source = HtmlWidgets.extractAttribute(sourceChild,
-        attribute: CustomHtmlWidgets.SRC);
-
-    if (source == null) {
-      return;
-    }
     _videoThumbnail = File(source.replaceAll(".mp4", ".thumbnail.mp4"));
 
     _videoPlayerController = VideoPlayerController.file(File(source))
@@ -98,41 +91,19 @@ class _CustomVideoState extends State<CustomVideo> {
     _videoPlayerController.dispose();
   }
 
-  dom.Element? _findChildByTypeAndRole(
-    dom.Element parentElement,
-    String type,
-    String role,
-  ) {
-    dom.Element? foundChild;
-    for (var child in parentElement.children) {
-      final elementDataComponentType = child.attributes["data-component-type"];
-      final elementRole = child.attributes["role"];
-      if (elementDataComponentType == type && elementRole == role) {
-        foundChild = child;
-      } else {
-        final foundChildInChildren = _findChildByTypeAndRole(child, type, role);
-        if (foundChildInChildren != null) {
-          foundChild = foundChildInChildren;
-        }
-      }
-    }
-
-    return foundChild;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final size = HtmlWidgets.extractSize(widget.element);
-
     final videoControlsChild = widget.element.children.firstWhereOrNull(
         (element) =>
-            element.attributes["data-component-type"] == "video-controls");
+            element.attributes[HtmlAttributes.DATA_COMPONENT_TYPE] ==
+            HtmlAttributeValues.VIDEO_CONTROLS);
     if (videoControlsChild == null) {
       SimpleLogger().info("No video controls found in video widget");
       return Container();
     }
-    final playButton = _findChildByTypeAndRole(
-        videoControlsChild, "image-button", "play-video");
+    final playButton = HtmlWidgets.findChildByTypeAndRole(videoControlsChild,
+        HtmlAttributeValues.IMAGE_BUTTON, HtmlAttributeValues.PLAY_VIDEO_ROLE);
+
     if (playButton == null) {
       SimpleLogger().info("No play button found in video widget");
       return Container();
@@ -151,8 +122,8 @@ class _CustomVideoState extends State<CustomVideo> {
         Indexed(
           index: 2,
           child: Container(
-            width: size.width,
-            height: size.height,
+            width: _videoSize.width,
+            height: _videoSize.height,
             child: Stack(
               children: [
                 Row(
@@ -188,8 +159,8 @@ class _CustomVideoState extends State<CustomVideo> {
         Indexed(
           index: 1,
           child: Container(
-            width: size.width,
-            height: size.height,
+            width: _videoSize.width,
+            height: _videoSize.height,
             child: Stack(
               children: [
                 _showVideoThumbnail
@@ -202,8 +173,8 @@ class _CustomVideoState extends State<CustomVideo> {
         Indexed(
           index: 0,
           child: Container(
-            width: size.width,
-            height: size.height,
+            width: _videoSize.width,
+            height: _videoSize.height,
             decoration: const BoxDecoration(
               color: Colors.black,
             ),

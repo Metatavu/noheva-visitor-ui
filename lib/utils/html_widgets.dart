@@ -29,28 +29,27 @@ class HtmlWidgets {
     Map<String, void Function(NohevaWidgetState widget)> customOnTapCallbacks,
   ) =>
       switch (element.localName) {
-        CustomHtmlWidgets.IMAGE => CustomImage(
+        HtmlTags.IMAGE => CustomImage(
             element: element,
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
             customOnTapCallbacks: customOnTapCallbacks,
           ),
-        CustomHtmlWidgets.BUTTON => NohevaButton(
+        HtmlTags.BUTTON => NohevaButton(
             element: element,
             eventTriggers: eventTriggers,
             enterTransitions: enterTransitions,
             exitTransitions: exitTransitions,
             customOnTapCallbacks: customOnTapCallbacks,
           ),
-        CustomHtmlWidgets.DIV =>
-          element.attributes["data-component-type"] == "video"
-              ? CustomVideo(
-                  element: element,
-                  resources: resources,
-                  eventTriggers: eventTriggers,
-                )
-              : null,
+        HtmlTags.DIV => element.attributes["data-component-type"] == "video"
+            ? CustomVideo(
+                element: element,
+                resources: resources,
+                eventTriggers: eventTriggers,
+              )
+            : null,
         _ => null
       };
 
@@ -211,20 +210,20 @@ class HtmlWidgets {
 
   /// Extracts elements width and height
   static Size extractSize(dom.Element element) {
-    if (element.localName == CustomHtmlWidgets.VIDEO) {
+    if (element.localName == HtmlTags.VIDEO) {
       final widthString = HtmlWidgets.extractAttribute(element,
-          attribute: CustomHtmlWidgets.WIDTH);
+          attribute: HtmlAttributes.WIDTH);
       final heightString = HtmlWidgets.extractAttribute(element,
-          attribute: CustomHtmlWidgets.HEIGHT);
+          attribute: HtmlAttributes.HEIGHT);
       final width = double.tryParse(widthString ?? "0");
       final height = double.tryParse(heightString ?? "0");
 
       return Size(width ?? 0, height ?? 0);
     } else {
       final width = _parsePixelValueToDouble(
-          _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH));
+          _extractStyleAttribute(element, HtmlAttributes.WIDTH));
       final height = _parsePixelValueToDouble(
-          _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT));
+          _extractStyleAttribute(element, HtmlAttributes.HEIGHT));
 
       return Size(width, height);
     }
@@ -277,16 +276,56 @@ class HtmlWidgets {
       element.styles
           .firstWhereOrNull((style) => style.property == attribute)
           ?.value;
+
+  /// Finds child element of [parentElement] with given [type] and [role]
+  static dom.Element? findChildByTypeAndRole(
+    dom.Element parentElement,
+    String type,
+    String role,
+  ) {
+    dom.Element? foundChild;
+    for (var child in parentElement.children) {
+      final elementDataComponentType =
+          child.attributes[HtmlAttributes.DATA_COMPONENT_TYPE];
+      final elementRole = child.attributes[HtmlAttributes.ROLE];
+      if (elementDataComponentType == type && elementRole == role) {
+        foundChild = child;
+      } else {
+        final foundChildInChildren = findChildByTypeAndRole(child, type, role);
+        if (foundChildInChildren != null) {
+          foundChild = foundChildInChildren;
+        }
+      }
+    }
+
+    return foundChild;
+  }
 }
 
-class CustomHtmlWidgets {
+/// HTML tags that are handled by [HtmlWidgets]
+class HtmlTags {
   static const String IMAGE = "img";
   static const String BUTTON = "button";
   static const String VIDEO = "video";
   static const String SOURCE = "source";
   static const String DIV = "div";
+}
 
+/// HTML attributes that are handled by [HtmlWidgets]
+class HtmlAttributes {
   static const String WIDTH = "width";
   static const String HEIGHT = "height";
   static const String SRC = "src";
+  static const String DATA_COMPONENT_TYPE = "data-component-type";
+  static const String AUTOPLAY = "autoplay";
+  static const String LOOP = "loop";
+  static const String ROLE = "role";
+}
+
+/// HTML attribute values that are handled by [HtmlWidgets]
+class HtmlAttributeValues {
+  static const String VIDEO_CONTROLS = "video-controls";
+  static const String PLAY_VIDEO_ROLE = "play-video";
+  static const String NAVIGATE_VIDEO_ROLE = "navigate-video";
+  static const String IMAGE_BUTTON = "image-button";
 }

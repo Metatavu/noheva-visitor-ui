@@ -32,8 +32,6 @@ PODS:
     - FlutterMacOS
   - video_player_macos (0.0.1):
     - FlutterMacOS
-  - wakelock_plus (0.0.1):
-    - FlutterMacOS
   - window_manager (0.2.0):
     - FlutterMacOS
 
@@ -47,7 +45,6 @@ DEPENDENCIES:
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
   - video_compress (from `Flutter/ephemeral/.symlinks/plugins/video_compress/macos`)
   - video_player_macos (from `Flutter/ephemeral/.symlinks/plugins/video_player_macos/macos`)
-  - wakelock_plus (from `Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 SPEC REPOS:
@@ -74,8 +71,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/video_compress/macos
   video_player_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/video_player_macos/macos
-  wakelock_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos
   window_manager:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
@@ -91,7 +86,6 @@ SPEC CHECKSUMS:
   sqlite3_flutter_libs: 00a50503d69f7ab0fe85a5ff25b33082f4df4ce9
   video_compress: c896234f100791b5fef7f049afa38f6d2ef7b42f
   video_player_macos: 7a50b407d775a45392851b1218a9cf4be395cf7f
-  wakelock_plus: 4783562c9a43d209c458cb9b30692134af456269
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: b04e51d1f3daf04b5be41e6e20ed0713437a4960
