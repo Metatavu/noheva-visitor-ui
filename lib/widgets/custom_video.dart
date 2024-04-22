@@ -37,6 +37,8 @@ class _CustomVideoState extends State<CustomVideo> {
   File? _videoThumbnail;
   bool _showVideoThumbnail = true;
   late Size _videoSize;
+  bool _autoPlay = false;
+  bool _looping = false;
   Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks = {};
 
   dom.Element get _parentElement => widget.element;
@@ -60,6 +62,9 @@ class _CustomVideoState extends State<CustomVideo> {
       setState(() {
         _showVideoThumbnail = false;
       });
+      if (_autoPlay) {
+        _videoPlayerController.play();
+      }
     });
     setState(() {});
   }
@@ -106,6 +111,8 @@ class _CustomVideoState extends State<CustomVideo> {
     _videoSize = HtmlWidgets.extractSize(widget.element);
     final videoElement = HtmlVideoUtils.findVideoChild(_parentElement);
     if (videoElement == null) return null;
+    _autoPlay = videoElement.attributes.containsKey(HtmlAttributes.AUTOPLAY);
+    _looping = videoElement.attributes.containsKey(HtmlAttributes.LOOP);
 
     return HtmlVideoUtils.findVideoSource(videoElement);
   }
@@ -114,7 +121,7 @@ class _CustomVideoState extends State<CustomVideo> {
   void _prepareVideoPlayerController(String source) {
     _videoPlayerController = VideoPlayerController.file(File(source))
       ..initialize().then(_correctControllerPositionAfterInitialization);
-
+    _videoPlayerController.setLooping(_looping);
     _videoPlayerController.addListener(_showPlayButton);
     _videoPlayerController.addListener(_correctControllerPositionAfterPlay);
   }
