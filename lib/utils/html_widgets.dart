@@ -183,7 +183,7 @@ class HtmlWidgets {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  static Function()? handleTapEvent(
+  static void Function()? handleTapEvent(
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
     List<ExhibitionPageTransition> enterTransition,

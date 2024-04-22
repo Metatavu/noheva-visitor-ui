@@ -6,6 +6,7 @@ import "package:path_provider/path_provider.dart";
 import "package:path/path.dart" as p;
 import "package:simple_logger/simple_logger.dart";
 import "package:typed_data/typed_data.dart";
+import "package:video_compress/video_compress.dart";
 
 /// Offline File Controller class
 class OfflineFileController {
@@ -174,6 +175,18 @@ class OfflineFileController {
     }
 
     File newFile = await filePart.rename(newFileName);
+
+    String extension = fileName.substring(fileName.lastIndexOf("."));
+    File? videoThumbnail;
+    print("EXTENSION: $extension");
+    if (extension == ".mp4") {
+      videoThumbnail =
+          await VideoCompress.getFileThumbnail(newFile.absolute.path);
+    }
+    if (videoThumbnail != null) {
+      await videoThumbnail
+          .rename(newFileName.replaceAll(extension, ".thumbnail.jpg"));
+    }
     await _writeMetaFile(existingFile, eTag);
     SimpleLogger().info("Downloaded $newFileName!");
 

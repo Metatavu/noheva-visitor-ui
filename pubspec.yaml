@@ -46,6 +46,7 @@ dependencies:
   flutter_sparkle: ^0.0.2
   defer_pointer: ^0.0.2
   indexed: ^0.0.8
+  video_compress: ^3.1.2
 
 dev_dependencies:
   flutter_test:

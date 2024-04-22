@@ -3,7 +3,7 @@ import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 
 abstract class NohevaWidget extends StatefulWidget {
-  bool? hidden;
+  final bool? hidden;
   final dom.Element element;
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
@@ -11,7 +11,7 @@ abstract class NohevaWidget extends StatefulWidget {
   final Map<String, void Function(NohevaWidgetState widget)>
       customOnTapCallbacks;
 
-  NohevaWidget({
+  const NohevaWidget({
     Key? key,
     required this.element,
     this.hidden,

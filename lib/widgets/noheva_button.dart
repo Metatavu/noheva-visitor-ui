@@ -10,7 +10,7 @@ import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 ///
 /// Used by [HtmlWidgets] to build custom button widget from HTML element
 class NohevaButton extends NohevaWidget {
-  NohevaButton({
+  const NohevaButton({
     Key? key,
     required dom.Element element,
     required List<ExhibitionPageEventTrigger> eventTriggers,
