@@ -18,4 +18,10 @@ class HtmlVideoUtils {
     return HtmlWidgets.extractAttribute(sourceElement,
         attribute: HtmlAttributes.SRC);
   }
+
+  /// Finds the video controls child element of the given parent element
+  static dom.Element? findVideoControlsChild(dom.Element parentElement) =>
+      parentElement.children.firstWhereOrNull((element) =>
+          element.attributes[HtmlAttributes.DATA_COMPONENT_TYPE] ==
+          HtmlAttributeValues.VIDEO_CONTROLS);
 }
