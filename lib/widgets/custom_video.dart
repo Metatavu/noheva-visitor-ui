@@ -5,6 +5,7 @@ import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import "package:html/dom.dart" as dom;
 import "package:indexed/indexed.dart";
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:noheva_visitor_ui/utils/html_video_utils.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
@@ -150,6 +151,7 @@ class _CustomVideoState extends State<CustomVideo> {
             height: _videoSize.height,
             child: HtmlWidget(
               _videoControlsChild!.outerHtml,
+              factoryBuilder: () => CustomWidgetFactory(),
               customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
                 element,
                 widget.resources,
