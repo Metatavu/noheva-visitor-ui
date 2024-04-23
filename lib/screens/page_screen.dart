@@ -9,7 +9,6 @@ import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/screens/noheva_screen.dart";
 import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 
@@ -99,15 +98,12 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
             height: screenSize.height,
             child: HtmlWidget(
               _pageHtml ?? "",
-              factoryBuilder: () => CustomWidgetFactory(),
-              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-                element,
-                _pageResources,
-                _eventTriggers,
-                _enterTransitions,
-                _exitTransitions,
-                context,
-                {},
+              factoryBuilder: () => CustomWidgetFactory(
+                context: context,
+                resources: _pageResources,
+                eventTriggers: _eventTriggers,
+                enterTransitions: _enterTransitions,
+                exitTransitions: _exitTransitions,
               ),
               customStylesBuilder: (element) {
                 if (element.localName == "div") {

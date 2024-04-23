@@ -6,53 +6,12 @@ import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
-import "package:noheva_visitor_ui/widgets/noheva_button.dart";
-import "package:noheva_visitor_ui/widgets/custom_image.dart";
-import "package:noheva_visitor_ui/widgets/custom_video.dart";
-import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 import "package:simple_logger/simple_logger.dart";
 
 /// Html Widgets
 ///
 /// This class is used to build custom widgets from HTML elements
 class HtmlWidgets {
-  /// Builds custom widget from HTML [element]
-  ///
-  /// Parses elements resource and event trigger data from [resources] and [eventTriggers]
-  static Widget? buildCustomWidget(
-    dom.Element element,
-    List<ExhibitionPageResource> resources,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-    List<ExhibitionPageTransition> enterTransitions,
-    List<ExhibitionPageTransition> exitTransitions,
-    BuildContext context,
-    Map<String, void Function(NohevaWidgetState widget)> customOnTapCallbacks,
-  ) =>
-      switch (element.localName) {
-        HtmlTags.IMAGE => CustomImage(
-            element: element,
-            eventTriggers: eventTriggers,
-            enterTransitions: enterTransitions,
-            exitTransitions: exitTransitions,
-            customOnTapCallbacks: customOnTapCallbacks,
-          ),
-        HtmlTags.BUTTON => NohevaButton(
-            element: element,
-            eventTriggers: eventTriggers,
-            enterTransitions: enterTransitions,
-            exitTransitions: exitTransitions,
-            customOnTapCallbacks: customOnTapCallbacks,
-          ),
-        HtmlTags.DIV => element.attributes["data-component-type"] == "video"
-            ? CustomVideo(
-                element: element,
-                resources: resources,
-                eventTriggers: eventTriggers,
-              )
-            : null,
-        _ => null
-      };
-
   /// Extracts margin from HTML [element] styles and returns it as an [EdgeInsets]
   static EdgeInsets? extractMargin(
     dom.Element element,
@@ -182,7 +141,7 @@ class HtmlWidgets {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  static void Function()? handleTapEvent(
+  static void Function() handleTapEvent(
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
     List<ExhibitionPageTransition> enterTransition,
@@ -197,7 +156,7 @@ class HtmlWidgets {
       final property = event?.properties.first;
       if (property == null) {
         SimpleLogger().info("No event property found!");
-        return null;
+        return;
       }
       NavigationUtils.navigateTo(
         PageScreen(pageId: property.value),
@@ -328,4 +287,6 @@ class HtmlAttributeValues {
   static const String PLAY_VIDEO_ROLE = "play-video";
   static const String NAVIGATE_VIDEO_ROLE = "navigate-video";
   static const String IMAGE_BUTTON = "image-button";
+  static const String BUTTON = "button";
+  static const String IMAGE = "image";
 }

@@ -2,7 +2,6 @@ import "dart:io";
 import "package:defer_pointer/defer_pointer.dart";
 import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
-import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 
@@ -12,19 +11,17 @@ import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 class NohevaButton extends NohevaWidget {
   const NohevaButton({
     Key? key,
+    bool? hidden,
     required dom.Element element,
-    required List<ExhibitionPageEventTrigger> eventTriggers,
-    required List<ExhibitionPageTransition> enterTransitions,
-    required List<ExhibitionPageTransition> exitTransitions,
-    required Map<String, void Function(NohevaWidgetState widget)>
-        customOnTapCallbacks,
+    void Function()? onTap,
+    Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks =
+        const {},
   }) : super(
           key: key,
+          hidden: hidden,
           element: element,
-          eventTriggers: eventTriggers,
-          enterTransitions: enterTransitions,
-          exitTransitions: exitTransitions,
-          customOnTapCallbacks: customOnTapCallbacks,
+          onTap: onTap,
+          onTapCallbacks: onTapCallbacks,
         );
 
   @override
@@ -34,24 +31,6 @@ class NohevaButton extends NohevaWidget {
 class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
   @override
   Widget build(BuildContext context) {
-    final fontColor =
-        HtmlWidgets.extractColor(element) ?? const Color(0xff000000);
-    final fontSize = HtmlWidgets.extractFontSize(element) ?? 16;
-    final backgroundColor =
-        HtmlWidgets.extractColor(element, property: "background-color");
-    final size = HtmlWidgets.extractSize(element);
-    final fontFamily = HtmlWidgets.extractFontFamily(element);
-    final margin = HtmlWidgets.extractMargin(element);
-
-    final tapEvent = HtmlWidgets.handleTapEvent(
-          element,
-          eventTriggers,
-          enterTransitions,
-          exitTransitions,
-          context,
-        ) ??
-        () {};
-
     String? imageButtonSource;
     for (var child in element.children) {
       if (child.localName == "img") {
@@ -97,7 +76,7 @@ class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
                   ),
                   onPressed: () {
                     customOnTapCallbacks[element.id]?.call(this);
-                    tapEvent();
+                    widget.onTap?.call();
                   },
                   child: child,
                 ),

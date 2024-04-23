@@ -1,37 +1,39 @@
 import "package:flutter/material.dart";
 import "package:html/dom.dart" as dom;
-import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/utils/html_widgets.dart";
 
 abstract class NohevaWidget extends StatefulWidget {
   final bool? hidden;
   final dom.Element element;
-  final List<ExhibitionPageEventTrigger> eventTriggers;
-  final List<ExhibitionPageTransition> enterTransitions;
-  final List<ExhibitionPageTransition> exitTransitions;
-  final Map<String, void Function(NohevaWidgetState widget)>
-      customOnTapCallbacks;
+  final List<Widget> children;
+  final void Function()? onTap;
+  final Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks;
 
   const NohevaWidget({
     Key? key,
     required this.element,
     this.hidden,
-    required this.eventTriggers,
-    required this.enterTransitions,
-    required this.exitTransitions,
-    required this.customOnTapCallbacks,
+    this.onTap,
+    this.children = const [],
+    this.onTapCallbacks = const {},
   }) : super(key: key);
 }
 
 abstract class NohevaWidgetState<T extends NohevaWidget> extends State<T> {
   dom.Element get element => widget.element;
-  List<ExhibitionPageEventTrigger> get eventTriggers => widget.eventTriggers;
-  List<ExhibitionPageTransition> get enterTransitions =>
-      widget.enterTransitions;
-  List<ExhibitionPageTransition> get exitTransitions => widget.exitTransitions;
   Map<String, void Function(NohevaWidgetState widget)>
-      get customOnTapCallbacks => widget.customOnTapCallbacks;
+      get customOnTapCallbacks => widget.onTapCallbacks;
 
   bool hidden = false;
+
+  Color get fontColor =>
+      HtmlWidgets.extractColor(element) ?? const Color(0xff000000);
+  double get fontSize => HtmlWidgets.extractFontSize(element) ?? 16;
+  Color? get backgroundColor =>
+      HtmlWidgets.extractColor(element, property: "background-color");
+  Size get size => HtmlWidgets.extractSize(element);
+  String? get fontFamily => HtmlWidgets.extractFontFamily(element);
+  EdgeInsets? get margin => HtmlWidgets.extractMargin(element);
 
   void toggleHidden() {
     setState(() {

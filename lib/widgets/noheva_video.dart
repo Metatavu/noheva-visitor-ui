@@ -4,8 +4,6 @@ import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:html/dom.dart" as dom;
 import "package:indexed/indexed.dart";
-import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:noheva_visitor_ui/utils/html_video_utils.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
@@ -15,23 +13,21 @@ import "package:video_player/video_player.dart";
 /// Custom Video Widget
 ///
 /// Used by [HtmlWidgets] to build custom video widget from HTML element
-class CustomVideo extends StatefulWidget {
+class NohevaVideo extends NohevaWidget {
   final dom.Element element;
-  final List<ExhibitionPageResource> resources;
-  final List<ExhibitionPageEventTrigger> eventTriggers;
+  final List<WidgetPlaceholder> children;
 
-  const CustomVideo({
+  const NohevaVideo({
     Key? key,
+    required this.children,
     required this.element,
-    required this.resources,
-    required this.eventTriggers,
-  }) : super(key: key);
+  }) : super(key: key, children: children, element: element);
 
   @override
-  State<CustomVideo> createState() => _CustomVideoState();
+  NohevaVideoState createState() => NohevaVideoState();
 }
 
-class _CustomVideoState extends State<CustomVideo> {
+class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   NohevaWidgetState? _playButton;
   late VideoPlayerController _videoPlayerController;
   File? _videoThumbnail;
@@ -153,22 +149,8 @@ class _CustomVideoState extends State<CustomVideo> {
       children: [
         Indexed(
           index: 2,
-          child: Container(
-            width: _videoSize.width,
-            height: _videoSize.height,
-            child: HtmlWidget(
-              _videoControlsChild!.outerHtml,
-              factoryBuilder: () => CustomWidgetFactory(),
-              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-                element,
-                widget.resources,
-                widget.eventTriggers,
-                [],
-                [],
-                context,
-                onTapCallbacks,
-              ),
-            ),
+          child: Stack(
+            children: widget.children,
           ),
         ),
         Indexed(
