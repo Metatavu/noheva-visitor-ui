@@ -15,7 +15,7 @@ class HtmlAttributes {
   static const String dataComponentType = "data-component-type";
   static const String autoplay = "autoplay";
   static const String loop = "loop";
-  static const String role = "role";
+  static const String dataRole = "data-role";
 }
 
 /// HTML attribute values that are handled by [HtmlUtils]

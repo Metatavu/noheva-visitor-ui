@@ -237,7 +237,7 @@ class HtmlUtils {
 
   /// Extracts the role attribte from HTML [element]
   static String? extractRole(dom.Element element) {
-    return element.attributes[HtmlAttributes.role];
+    return element.attributes[HtmlAttributes.dataRole];
   }
 
   /// Finds child element of [parentElement] with given [type] and [role]
@@ -250,7 +250,7 @@ class HtmlUtils {
     for (var child in parentElement.children) {
       final elementDataComponentType =
           child.attributes[HtmlAttributes.dataComponentType];
-      final elementRole = child.attributes[HtmlAttributes.role];
+      final elementRole = child.attributes[HtmlAttributes.dataRole];
       if (elementDataComponentType == type && elementRole == role) {
         foundChild = child;
       } else {
