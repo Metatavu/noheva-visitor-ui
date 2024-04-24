@@ -4,6 +4,8 @@ import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:html/dom.dart" as dom;
 import "package:indexed/indexed.dart";
+import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:noheva_visitor_ui/utils/html_video_utils.dart";
 import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
@@ -14,14 +16,19 @@ import "package:video_player/video_player.dart";
 ///
 /// Used by [HtmlWidgets] to build custom video widget from HTML element
 class NohevaVideo extends NohevaWidget {
-  final dom.Element element;
-  final List<WidgetPlaceholder> children;
-
+  final List<ExhibitionPageEventTrigger> eventTriggers;
+  final List<ExhibitionPageTransition> enterTransitions;
+  final List<ExhibitionPageTransition> exitTransitions;
   const NohevaVideo({
     Key? key,
-    required this.children,
-    required this.element,
-  }) : super(key: key, children: children, element: element);
+    required this.eventTriggers,
+    required this.enterTransitions,
+    required this.exitTransitions,
+    required dom.Element element,
+  }) : super(
+          key: key,
+          element: element,
+        );
 
   @override
   NohevaVideoState createState() => NohevaVideoState();
@@ -33,9 +40,9 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   File? _videoThumbnail;
   bool _showVideoThumbnail = true;
   late Size _videoSize;
-  bool _autoPlay = false;
   bool _looping = false;
   Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks = {};
+  Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks = {};
 
   dom.Element get _parentElement => widget.element;
   dom.Element? get _videoControlsChild =>
@@ -58,7 +65,7 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
       setState(() {
         _showVideoThumbnail = false;
       });
-      if (_autoPlay) {
+      if (_looping) {
         _videoPlayerController.play();
       }
     });
@@ -93,6 +100,10 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
       SimpleLogger().info("No play button found in video widget");
       return;
     }
+    onBuildCallbacks[playButton.id] = (NohevaWidgetState widget) {
+      _playButton ??= widget;
+      widget.setHidden(true);
+    };
     onTapCallbacks[playButton.id] = (NohevaWidgetState widget) {
       _playButton ??= widget;
       widget.toggleHidden();
@@ -107,7 +118,6 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
     _videoSize = HtmlWidgets.extractSize(widget.element);
     final videoElement = HtmlVideoUtils.findVideoChild(_parentElement);
     if (videoElement == null) return null;
-    _autoPlay = videoElement.attributes.containsKey(HtmlAttributes.AUTOPLAY);
     _looping = videoElement.attributes.containsKey(HtmlAttributes.LOOP);
 
     return HtmlVideoUtils.findVideoSource(videoElement);
@@ -150,7 +160,20 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
         Indexed(
           index: 2,
           child: Stack(
-            children: widget.children,
+            children: [
+              HtmlWidget(
+                _videoControlsChild?.outerHtml ?? "",
+                factoryBuilder: () => CustomWidgetFactory(
+                  context: context,
+                  resources: [],
+                  eventTriggers: widget.eventTriggers,
+                  enterTransitions: widget.enterTransitions,
+                  exitTransitions: widget.exitTransitions,
+                  onTapCallbacks: onTapCallbacks,
+                  onBuildCallbacks: onBuildCallbacks,
+                ),
+              )
+            ],
           ),
         ),
         Indexed(

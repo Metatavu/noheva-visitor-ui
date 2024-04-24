@@ -34,6 +34,7 @@ abstract class NohevaWidgetState<T extends NohevaWidget> extends State<T> {
   Size get size => HtmlWidgets.extractSize(element);
   String? get fontFamily => HtmlWidgets.extractFontFamily(element);
   EdgeInsets? get margin => HtmlWidgets.extractMargin(element);
+  String? get role => HtmlWidgets.extractRole(element);
 
   void toggleHidden() {
     setState(() {

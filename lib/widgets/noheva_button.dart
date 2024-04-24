@@ -9,10 +9,12 @@ import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 ///
 /// Used by [HtmlWidgets] to build custom button widget from HTML element
 class NohevaButton extends NohevaWidget {
+  final Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks;
   const NohevaButton({
     Key? key,
     bool? hidden,
     required dom.Element element,
+    this.onBuildCallbacks = const {},
     void Function()? onTap,
     Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks =
         const {},
@@ -31,6 +33,7 @@ class NohevaButton extends NohevaWidget {
 class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
   @override
   Widget build(BuildContext context) {
+    widget.onBuildCallbacks[widget.element.id]?.call(this);
     String? imageButtonSource;
     for (var child in element.children) {
       if (child.localName == "img") {
@@ -75,7 +78,7 @@ class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
                     ),
                   ),
                   onPressed: () {
-                    customOnTapCallbacks[element.id]?.call(this);
+                    widget.onTapCallbacks[widget.element.id]?.call(this);
                     widget.onTap?.call();
                   },
                   child: child,

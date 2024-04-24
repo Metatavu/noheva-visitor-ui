@@ -236,6 +236,11 @@ class HtmlWidgets {
           .firstWhereOrNull((style) => style.property == attribute)
           ?.value;
 
+  /// Extracts the role attribte from HTML [element]
+  static String? extractRole(dom.Element element) {
+    return element.attributes[HtmlAttributes.ROLE];
+  }
+
   /// Finds child element of [parentElement] with given [type] and [role]
   static dom.Element? findChildByTypeAndRole(
     dom.Element parentElement,

@@ -178,7 +178,7 @@ class OfflineFileController {
 
     String extension = fileName.substring(fileName.lastIndexOf("."));
     File? videoThumbnail;
-    print("EXTENSION: $extension");
+
     if (extension == ".mp4") {
       videoThumbnail =
           await VideoCompress.getFileThumbnail(newFile.absolute.path);

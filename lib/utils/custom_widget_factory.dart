@@ -8,6 +8,7 @@ import "package:noheva_visitor_ui/utils/html_widgets.dart";
 import "package:noheva_visitor_ui/widgets/noheva_video.dart";
 import "package:noheva_visitor_ui/widgets/noheva_image.dart";
 import "package:noheva_visitor_ui/widgets/noheva_button.dart";
+import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
 
 /// Custom widget factory for extending support for CSS letter-spacing
 class CustomWidgetFactory extends WidgetFactory {
@@ -16,6 +17,8 @@ class CustomWidgetFactory extends WidgetFactory {
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
   final List<ExhibitionPageTransition> exitTransitions;
+  final Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks;
+  final Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks;
 
   CustomWidgetFactory({
     required this.context,
@@ -23,6 +26,8 @@ class CustomWidgetFactory extends WidgetFactory {
     required this.eventTriggers,
     required this.enterTransitions,
     required this.exitTransitions,
+    this.onBuildCallbacks = const {},
+    this.onTapCallbacks = const {},
     bool hidePlayButton = false,
   });
 
@@ -73,6 +78,8 @@ class CustomWidgetFactory extends WidgetFactory {
           hidden: false,
           element: tree.element,
           onTap: onTap,
+          onTapCallbacks: onTapCallbacks,
+          onBuildCallbacks: onBuildCallbacks,
         ),
       ),
     );
@@ -100,8 +107,12 @@ class CustomWidgetFactory extends WidgetFactory {
   void _registerNohevaVideoBuildOp(BuildTree tree) {
     tree.register(
       BuildOp.v2(
-        onRenderBlock: (tree, children) =>
-            NohevaVideo(element: tree.element, children: [children]),
+        onRenderBlock: (tree, _) => NohevaVideo(
+          element: tree.element,
+          eventTriggers: eventTriggers,
+          enterTransitions: enterTransitions,
+          exitTransitions: exitTransitions,
+        ),
       ),
     );
   }
