@@ -4,11 +4,9 @@ import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
-import "package:noheva_visitor_ui/widgets/noheva_video.dart";
-import "package:noheva_visitor_ui/widgets/noheva_image.dart";
-import "package:noheva_visitor_ui/widgets/noheva_button.dart";
-import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
+import "package:noheva_visitor_ui/html/html_constants.dart";
+import "package:noheva_visitor_ui/html/html_utils.dart";
+import "package:noheva_visitor_ui/widgets/noheva_widgets.dart";
 
 /// Custom widget factory for extending support for CSS letter-spacing
 class CustomWidgetFactory extends WidgetFactory {
@@ -44,7 +42,7 @@ class CustomWidgetFactory extends WidgetFactory {
   @override
   void parseStyle(BuildTree tree, css.Declaration style) {
     final tagName = tree.element.localName;
-    final customTags = [HtmlTags.BUTTON, HtmlTags.IMAGE, HtmlTags.VIDEO];
+    final customTags = [HtmlTags.button, HtmlTags.image, HtmlTags.video];
     if (customTags.contains(tagName)) {
       return;
     }
@@ -72,14 +70,14 @@ class CustomWidgetFactory extends WidgetFactory {
 
   /// Registers custom [BuildOp] for button widgets
   void _registerNohevaButtonBuildOp(BuildTree tree, void Function() onTap) {
+    final role = HtmlUtils.extractRole(tree.element);
+
     tree.register(
       BuildOp.v2(
         onRenderBlock: (tree, _) => NohevaButton(
-          hidden: false,
+          hidden: role == HtmlAttributeValues.playVideoRole,
           element: tree.element,
           onTap: onTap,
-          onTapCallbacks: onTapCallbacks,
-          onBuildCallbacks: onBuildCallbacks,
         ),
       ),
     );
@@ -107,11 +105,9 @@ class CustomWidgetFactory extends WidgetFactory {
   void _registerNohevaVideoBuildOp(BuildTree tree) {
     tree.register(
       BuildOp.v2(
-        onRenderBlock: (tree, _) => NohevaVideo(
+        onRenderBlock: (tree, children) => NohevaVideo(
           element: tree.element,
-          eventTriggers: eventTriggers,
-          enterTransitions: enterTransitions,
-          exitTransitions: exitTransitions,
+          children: [children],
         ),
       ),
     );
@@ -119,19 +115,19 @@ class CustomWidgetFactory extends WidgetFactory {
 
   /// Registers custom build ops for custom widgets
   void _registerBuildOps(BuildTree tree) {
-    final tapEvent = HtmlWidgets.handleTapEvent(tree.element, eventTriggers,
+    final tapEvent = HtmlUtils.handleTapEvent(tree.element, eventTriggers,
         enterTransitions, exitTransitions, context);
-    final dataComponentType = HtmlWidgets.extractAttribute(tree.element,
-        attribute: HtmlAttributes.DATA_COMPONENT_TYPE);
+    final dataComponentType = HtmlUtils.extractAttribute(tree.element,
+        attribute: HtmlAttributes.dataComponentType);
     switch (dataComponentType) {
-      case HtmlAttributeValues.IMAGE_BUTTON:
-      case HtmlAttributeValues.BUTTON:
+      case HtmlAttributeValues.imageButton:
+      case HtmlAttributeValues.button:
         {
           _registerNohevaButtonBuildOp(tree, tapEvent);
         }
-      case HtmlAttributeValues.IMAGE:
+      case HtmlAttributeValues.image:
         _registerNohevaImageBuildOp(tree, tapEvent);
-      case HtmlTags.VIDEO:
+      case HtmlTags.video:
         _registerNohevaVideoBuildOp(tree);
     }
   }

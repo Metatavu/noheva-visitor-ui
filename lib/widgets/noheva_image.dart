@@ -1,12 +1,8 @@
-import "dart:io";
-import "package:flutter/material.dart";
-import "package:html/dom.dart" as dom;
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
-import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
+part of "noheva_widgets.dart";
 
 /// Custom Image Widget
 ///
-/// Used by [HtmlWidgets] to build custom image widget from HTML element
+/// Used by [HtmlUtils] to build custom image widget from HTML element
 class NohevaImage extends NohevaWidget {
   const NohevaImage({
     Key? key,
@@ -28,7 +24,7 @@ class NohevaImageState extends NohevaWidgetState<NohevaImage> {
   @override
   Widget build(BuildContext context) {
     final imageSource =
-        HtmlWidgets.extractAttribute(element, attribute: "src") ?? "";
+        HtmlUtils.extractAttribute(element, attribute: "src") ?? "";
 
     final imageWidget = Image.file(
       File(imageSource),

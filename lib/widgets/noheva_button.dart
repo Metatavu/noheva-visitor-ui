@@ -1,29 +1,19 @@
-import "dart:io";
-import "package:defer_pointer/defer_pointer.dart";
-import "package:flutter/material.dart";
-import "package:html/dom.dart" as dom;
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
-import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
+part of "noheva_widgets.dart";
 
 /// Custom Button Widget
 ///
-/// Used by [HtmlWidgets] to build custom button widget from HTML element
+/// Used by [HtmlUtils] to build custom button widget from HTML element
 class NohevaButton extends NohevaWidget {
-  final Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks;
   const NohevaButton({
     Key? key,
     bool? hidden,
     required dom.Element element,
-    this.onBuildCallbacks = const {},
     void Function()? onTap,
-    Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks =
-        const {},
   }) : super(
           key: key,
           hidden: hidden,
           element: element,
           onTap: onTap,
-          onTapCallbacks: onTapCallbacks,
         );
 
   @override
@@ -31,9 +21,30 @@ class NohevaButton extends NohevaWidget {
 }
 
 class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
+  StreamSubscription<HidePlayButtonEvent>? _hidePlayButtonStream;
+
+  /// Setups the video play button if this button is a video play button
+  void _setupVideoPlayButton() {
+    if (role != HtmlAttributeValues.playVideoRole) return;
+    _hidePlayButtonStream = eventBus.on<HidePlayButtonEvent>().listen((event) {
+      if (context.mounted) setHidden(event.hide);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setupVideoPlayButton();
+  }
+
+  @override
+  void dispose() {
+    _hidePlayButtonStream?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    widget.onBuildCallbacks[widget.element.id]?.call(this);
     String? imageButtonSource;
     for (var child in element.children) {
       if (child.localName == "img") {
@@ -74,11 +85,14 @@ class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
                     maximumSize: MaterialStatePropertyAll(size),
                     minimumSize: MaterialStatePropertyAll(size),
                     shape: MaterialStatePropertyAll(
-                      HtmlWidgets.extractBorderRadius(element),
+                      HtmlUtils.extractBorderRadius(element),
                     ),
                   ),
                   onPressed: () {
-                    widget.onTapCallbacks[widget.element.id]?.call(this);
+                    if (role == HtmlAttributeValues.playVideoRole) {
+                      eventBus.fire(PlayVideoEvent());
+                      setHidden(true);
+                    }
                     widget.onTap?.call();
                   },
                   child: child,

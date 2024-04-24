@@ -1,13 +1,14 @@
-import "package:flutter/material.dart";
-import "package:html/dom.dart" as dom;
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
+part of "noheva_widgets.dart";
 
+/// Abstract Noheva Widget
+///
+/// All custom widgets (Widgets not parsed and built by [HtmlWidget]) should extend this class
+/// e.g. [NohevaButton], [NohevaImage], [NohevaVideo]
 abstract class NohevaWidget extends StatefulWidget {
   final bool? hidden;
   final dom.Element element;
   final List<Widget> children;
   final void Function()? onTap;
-  final Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks;
 
   const NohevaWidget({
     Key? key,
@@ -15,26 +16,22 @@ abstract class NohevaWidget extends StatefulWidget {
     this.hidden,
     this.onTap,
     this.children = const [],
-    this.onTapCallbacks = const {},
   }) : super(key: key);
 }
 
 abstract class NohevaWidgetState<T extends NohevaWidget> extends State<T> {
-  dom.Element get element => widget.element;
-  Map<String, void Function(NohevaWidgetState widget)>
-      get customOnTapCallbacks => widget.onTapCallbacks;
-
   bool hidden = false;
 
+  dom.Element get element => widget.element;
+  double get fontSize => HtmlUtils.extractFontSize(element) ?? 16;
+  Size get size => HtmlUtils.extractSize(element);
+  String? get fontFamily => HtmlUtils.extractFontFamily(element);
+  EdgeInsets? get margin => HtmlUtils.extractMargin(element);
+  String? get role => HtmlUtils.extractRole(element);
   Color get fontColor =>
-      HtmlWidgets.extractColor(element) ?? const Color(0xff000000);
-  double get fontSize => HtmlWidgets.extractFontSize(element) ?? 16;
+      HtmlUtils.extractColor(element) ?? const Color(0xff000000);
   Color? get backgroundColor =>
-      HtmlWidgets.extractColor(element, property: "background-color");
-  Size get size => HtmlWidgets.extractSize(element);
-  String? get fontFamily => HtmlWidgets.extractFontFamily(element);
-  EdgeInsets? get margin => HtmlWidgets.extractMargin(element);
-  String? get role => HtmlWidgets.extractRole(element);
+      HtmlUtils.extractColor(element, property: "background-color");
 
   void toggleHidden() {
     setState(() {

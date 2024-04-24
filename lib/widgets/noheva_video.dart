@@ -1,33 +1,17 @@
-import "dart:async";
-import "dart:io";
-import "package:flutter/material.dart";
-import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
-import "package:html/dom.dart" as dom;
-import "package:indexed/indexed.dart";
-import "package:noheva_api/noheva_api.dart";
-import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
-import "package:noheva_visitor_ui/utils/html_video_utils.dart";
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
-import "package:noheva_visitor_ui/widgets/noheva_widget.dart";
-import "package:simple_logger/simple_logger.dart";
-import "package:video_player/video_player.dart";
+part of "noheva_widgets.dart";
 
 /// Custom Video Widget
 ///
-/// Used by [HtmlWidgets] to build custom video widget from HTML element
+/// Used by [HtmlUtils] to build custom video widget from HTML element
 class NohevaVideo extends NohevaWidget {
-  final List<ExhibitionPageEventTrigger> eventTriggers;
-  final List<ExhibitionPageTransition> enterTransitions;
-  final List<ExhibitionPageTransition> exitTransitions;
   const NohevaVideo({
     Key? key,
-    required this.eventTriggers,
-    required this.enterTransitions,
-    required this.exitTransitions,
+    required List<Widget> children,
     required dom.Element element,
   }) : super(
           key: key,
           element: element,
+          children: children,
         );
 
   @override
@@ -43,10 +27,11 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   bool _looping = false;
   Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks = {};
   Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks = {};
+  late StreamSubscription<PlayVideoEvent> _playVideoStream;
 
   dom.Element get _parentElement => widget.element;
   dom.Element? get _videoControlsChild =>
-      HtmlVideoUtils.findVideoControlsChild(widget.element);
+      HtmlUtils.findVideoControlsChild(widget.element);
 
   /// Shows the play button on the video player
   void _showPlayButton() {
@@ -60,6 +45,9 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   /// There's a bug with the video player controller where it doesn't show the first frame of the video before played once
   /// and therefore a thumbnail image is displayed on top of it instead.
   void _correctControllerPositionAfterInitialization(dynamic args) {
+    _playVideoStream = eventBus.on<PlayVideoEvent>().listen((_) {
+      if (context.mounted) _videoPlayerController.play();
+    });
     Future.delayed(const Duration(milliseconds: 100), () {
       _videoPlayerController.seekTo(const Duration(milliseconds: 100));
       setState(() {
@@ -68,8 +56,8 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
       if (_looping) {
         _videoPlayerController.play();
       }
+      eventBus.fire(HidePlayButtonEvent(_looping));
     });
-    setState(() {});
   }
 
   /// Corrects the video player controller position after the video has been played
@@ -79,6 +67,7 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
     if (_videoPlayerController.value.position >=
         _videoPlayerController.value.duration) {
       _videoPlayerController.seekTo(const Duration(milliseconds: 100));
+      eventBus.fire(HidePlayButtonEvent(_looping));
     }
   }
 
@@ -87,14 +76,13 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   /// Video controls are rendered in an overlay on top of the video player
   /// they are represented as elements within an absolute positioned DIV element in the HTML
   void _prepareVideoControlsOverlay() {
-    final videoControlsChild =
-        HtmlVideoUtils.findVideoControlsChild(_parentElement);
+    final videoControlsChild = HtmlUtils.findVideoControlsChild(_parentElement);
     if (videoControlsChild == null) {
       SimpleLogger().info("No video controls found in video widget");
       return;
     }
-    final playButton = HtmlWidgets.findChildByTypeAndRole(videoControlsChild,
-        HtmlAttributeValues.IMAGE_BUTTON, HtmlAttributeValues.PLAY_VIDEO_ROLE);
+    final playButton = HtmlUtils.findChildByTypeAndRole(videoControlsChild,
+        HtmlAttributeValues.imageButton, HtmlAttributeValues.playVideoRole);
 
     if (playButton == null) {
       SimpleLogger().info("No play button found in video widget");
@@ -115,12 +103,12 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   ///
   /// Returns the video source URI if found, otherwise returns null
   String? _prepareVideoElement() {
-    _videoSize = HtmlWidgets.extractSize(widget.element);
-    final videoElement = HtmlVideoUtils.findVideoChild(_parentElement);
+    _videoSize = HtmlUtils.extractSize(widget.element);
+    final videoElement = HtmlUtils.findVideoChild(_parentElement);
     if (videoElement == null) return null;
-    _looping = videoElement.attributes.containsKey(HtmlAttributes.LOOP);
+    _looping = videoElement.attributes.containsKey(HtmlAttributes.loop);
 
-    return HtmlVideoUtils.findVideoSource(videoElement);
+    return HtmlUtils.findVideoSource(videoElement);
   }
 
   /// Prepares the video player controller for [source] file
@@ -146,6 +134,7 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   void dispose() {
     super.dispose();
     _videoPlayerController.dispose();
+    _playVideoStream.cancel();
   }
 
   @override
@@ -160,25 +149,12 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
         Indexed(
           index: 2,
           child: Stack(
-            children: [
-              HtmlWidget(
-                _videoControlsChild?.outerHtml ?? "",
-                factoryBuilder: () => CustomWidgetFactory(
-                  context: context,
-                  resources: [],
-                  eventTriggers: widget.eventTriggers,
-                  enterTransitions: widget.enterTransitions,
-                  exitTransitions: widget.exitTransitions,
-                  onTapCallbacks: onTapCallbacks,
-                  onBuildCallbacks: onBuildCallbacks,
-                ),
-              )
-            ],
+            children: widget.children,
           ),
         ),
         Indexed(
           index: 1,
-          child: Container(
+          child: SizedBox(
             width: _videoSize.width,
             height: _videoSize.height,
             child: Stack(
