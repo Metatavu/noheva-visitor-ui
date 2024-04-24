@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:io";
 import "dart:ui";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
@@ -32,6 +33,12 @@ final managementButtonTickCounter = TimedTickCounter(
   onTicksReached: () => managementStreamController.sink.add(true),
 );
 
+Future<void> _setAndroidImmersiveMode() async {
+  if (Platform.isAndroid) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
+}
+
 void main() async {
   _configureLogger();
   SimpleLogger().info("Starting Noheva Visitor UI App...");
@@ -40,6 +47,11 @@ void main() async {
 
   SimpleLogger().info("Setting up window manager...");
   _setupWindowManager();
+  _setAndroidImmersiveMode();
+  SystemChrome.setSystemUIChangeCallback(
+    (bool visible) async =>
+        Timer(const Duration(seconds: 3), _setAndroidImmersiveMode),
+  );
 
   SimpleLogger().info("Loading .env file...");
   await dotenv.load(fileName: ".env");
