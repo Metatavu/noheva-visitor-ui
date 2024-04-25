@@ -19,6 +19,10 @@ abstract class NohevaWidget extends StatefulWidget {
   }) : super(key: key);
 }
 
+/// Abstract Noheva Widget State
+///
+/// All custom widgets states should extend this class
+/// e.g. [NohevaButtonState], [NohevaImageState], [NohevaVideoState]
 abstract class NohevaWidgetState<T extends NohevaWidget> extends State<T> {
   bool hidden = false;
 
