@@ -274,7 +274,7 @@ packages:
     source: hosted
     version: "2.0.5"
   event_bus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: event_bus
       sha256: "44baa799834f4c803921873e7446a2add0f3efa45e101a054b1f0ab9b95f8edc"
@@ -429,6 +429,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  indexed:
+    dependency: "direct main"
+    description:
+      name: indexed
+      sha256: "3509a2a7ad1dbd7280da377661129e0b0a2f5e8d6d75f10400f07397f95324df"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
   intl:
     dependency: "direct main"
     description:
@@ -881,6 +889,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  video_compress:
+    dependency: "direct main"
+    description:
+      name: video_compress
+      sha256: "407693726e674a1e1958801deb2d9daf5a5297707ba6d03375007012dae7389a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   video_player:
     dependency: "direct main"
     description:

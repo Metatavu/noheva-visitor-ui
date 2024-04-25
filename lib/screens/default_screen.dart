@@ -64,7 +64,9 @@ class _DefaultScreenState extends State<DefaultScreen> {
       SimpleLogger().info("Device is approved, loading device data...");
       await _loadDeviceData();
     }
-    setState(() => _isDeviceApproved = deviceIsApproved);
+    if (mounted) {
+      setState(() => _isDeviceApproved = deviceIsApproved);
+    }
   }
 
   /// Loads device data from API and updates local database

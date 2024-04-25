@@ -8,7 +8,7 @@ import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/screens/noheva_screen.dart";
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 
@@ -98,23 +98,29 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
             height: screenSize.height,
             child: HtmlWidget(
               _pageHtml ?? "",
-              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-                element,
-                _pageResources,
-                _eventTriggers,
-                _enterTransitions,
-                _exitTransitions,
-                context,
+              factoryBuilder: () => CustomWidgetFactory(
+                context: context,
+                resources: _pageResources,
+                eventTriggers: _eventTriggers,
+                enterTransitions: _enterTransitions,
+                exitTransitions: _exitTransitions,
               ),
               customStylesBuilder: (element) {
+                if (element.localName == "div") {
+                  return {
+                    "padding": "0px",
+                  };
+                }
                 if (["h1", "h2", "h3", "h4", "h5", "h6"]
                     .contains(element.localName)) {
                   return {
+                    "margin": "0px",
                     "font-family": "Larken-Medium",
                   };
                 }
                 if (element.localName == "p") {
                   return {
+                    "margin": "0px",
                     "font-family": "Source-Sans-Pro-Regular",
                   };
                 }
