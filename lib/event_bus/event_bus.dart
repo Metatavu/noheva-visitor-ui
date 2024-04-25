@@ -10,3 +10,17 @@ class HidePlayButtonEvent {
   final bool hide;
   HidePlayButtonEvent(this.hide);
 }
+
+class RequestAchiveExhibitionPageIdEvent {}
+
+class ActiveExhibitionPageIdEvent {
+  final String? pageId;
+  ActiveExhibitionPageIdEvent(this.pageId);
+}
+
+class LoadExhibitionPageByIdEvent {
+  final String? pageId;
+  LoadExhibitionPageByIdEvent(this.pageId);
+}
+
+class OpenManagementScreenEvent {}

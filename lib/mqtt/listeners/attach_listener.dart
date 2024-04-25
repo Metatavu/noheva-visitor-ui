@@ -3,6 +3,7 @@ import "package:noheva_visitor_ui/database/dao/device_exhibition_detail_dao.dart
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/database/database.dart";
+import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/abstract_listener.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
@@ -58,7 +59,7 @@ class AttachListener {
     SimpleLogger().info("Successfully loaded pages!");
     final firstPage =
         await pageDao.findPageByOrderNumber(attachedMessage.exhibitionId!, 0);
-    pageStreamController.sink.add(firstPage?.id);
+    eventBus.fire(LoadExhibitionPageByIdEvent(firstPage?.id));
   }
 
   /// Callback function for handling detach messages
@@ -86,6 +87,6 @@ class AttachListener {
     SimpleLogger().info("Deleted layouts!");
     await deviceExhitionDetailDao.deleteDeviceExhibitionDetails();
     SimpleLogger().info("Deleted exhibitions!");
-    pageStreamController.sink.add(null);
+    eventBus.fire(LoadExhibitionPageByIdEvent(null));
   }
 }
