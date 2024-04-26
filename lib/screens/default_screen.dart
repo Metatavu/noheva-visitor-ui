@@ -4,6 +4,7 @@ import "package:flutter_gen/gen_l10n/app_localizations.dart";
 import "package:noheva_visitor_ui/database/dao/device_exhibition_detail_dao.dart";
 import "package:noheva_visitor_ui/database/dao/key_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
+import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
@@ -21,7 +22,8 @@ class DefaultScreen extends StatefulWidget {
 /// Default Screen State
 class _DefaultScreenState extends State<DefaultScreen> {
   bool _isDeviceApproved = false;
-  late StreamSubscription<String?> _pageStreamSubscription;
+  late StreamSubscription<LoadExhibitionPageByIdEvent>
+      _loadExhibitionPageByIdEventSubscription;
   Timer? _deviceApprovalTimer;
 
   /// Navigates to [PageScreen] with [pageId]
@@ -37,9 +39,10 @@ class _DefaultScreenState extends State<DefaultScreen> {
   /// Handles stream events
   ///
   /// If event is not null, navigates to [PageScreen] with [event] as [pageId]
-  void _handleStreamEvent(dynamic event) {
-    if (event != null) {
-      _navigateToPageScreen(event);
+  void _handleStreamEvent(LoadExhibitionPageByIdEvent event) {
+    final eventPageId = event.pageId;
+    if (eventPageId != null) {
+      _navigateToPageScreen(eventPageId);
     }
   }
 
@@ -64,7 +67,9 @@ class _DefaultScreenState extends State<DefaultScreen> {
       SimpleLogger().info("Device is approved, loading device data...");
       await _loadDeviceData();
     }
-    setState(() => _isDeviceApproved = deviceIsApproved);
+    if (mounted) {
+      setState(() => _isDeviceApproved = deviceIsApproved);
+    }
   }
 
   /// Loads device data from API and updates local database
@@ -105,14 +110,14 @@ class _DefaultScreenState extends State<DefaultScreen> {
   @override
   void initState() {
     super.initState();
-    _pageStreamSubscription =
-        pageStreamController.stream.listen(_handleStreamEvent);
+    _loadExhibitionPageByIdEventSubscription =
+        eventBus.on<LoadExhibitionPageByIdEvent>().listen(_handleStreamEvent);
     _checkDeviceApproval();
   }
 
   @override
   void dispose() {
-    _pageStreamSubscription.cancel();
+    _loadExhibitionPageByIdEventSubscription.cancel();
     _deviceApprovalTimer?.cancel();
     super.dispose();
   }

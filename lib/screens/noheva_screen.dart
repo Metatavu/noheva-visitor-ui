@@ -1,12 +1,11 @@
 import "dart:async";
-
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:noheva_api/noheva_api.dart";
 import 'package:noheva_visitor_ui/actions/key_event_listener.dart';
 import "package:noheva_visitor_ui/actions/page_action_provider_factory.dart";
-import "package:noheva_visitor_ui/main.dart";
+import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/screens/management_screen.dart";
 
 /// Abstract Noheva Screen
@@ -21,30 +20,29 @@ abstract class NohevaScreen extends StatefulWidget {
 /// All screens states should extend this class.
 /// Provides a stream subscription for navigating to management screen when required.
 abstract class NohevaScreenState<T extends NohevaScreen> extends State<T> {
-  late StreamSubscription<bool?> _managementButtonStreamSubscription;
+  late StreamSubscription<OpenManagementScreenEvent>
+      _managementButtonEventSubscription;
   final List<KeyEventListener> _keyDownListeners = [];
   final List<KeyEventListener> _keyUpListeners = [];
 
   @override
   void initState() {
     super.initState();
-    _managementButtonStreamSubscription =
-        managementStreamController.stream.listen((event) {
-      if (event != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute<NohevaScreen>(
-            builder: (_) => const ManagementScreen(),
-          ),
-        );
-      }
+    _managementButtonEventSubscription =
+        eventBus.on<OpenManagementScreenEvent>().listen((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<NohevaScreen>(
+          builder: (_) => const ManagementScreen(),
+        ),
+      );
     });
     ServicesBinding.instance.keyboard.addHandler(_keyEventHandler);
   }
 
   @override
   void dispose() {
-    _managementButtonStreamSubscription.cancel();
+    _managementButtonEventSubscription.cancel();
     ServicesBinding.instance.keyboard.removeHandler(_keyEventHandler);
     super.dispose();
   }

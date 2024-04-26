@@ -1,52 +1,16 @@
 import "package:collection/collection.dart";
+import "package:html/dom.dart" as dom;
+import "package:noheva_visitor_ui/html/html_constants.dart";
 import "package:csslib/visitor.dart";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
-import "package:html/dom.dart" as dom;
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
-import "package:noheva_visitor_ui/widgets/custom_button.dart";
-import "package:noheva_visitor_ui/widgets/custom_image.dart";
-import "package:noheva_visitor_ui/widgets/custom_video.dart";
 import "package:simple_logger/simple_logger.dart";
 
-/// Html Widgets
-///
-/// This class is used to build custom widgets from HTML elements
-class HtmlWidgets {
-  /// Builds custom widget from HTML [element]
-  ///
-  /// Parses elements resource and event trigger data from [resources] and [eventTriggers]
-  static Widget? buildCustomWidget(
-    dom.Element element,
-    List<ExhibitionPageResource> resources,
-    List<ExhibitionPageEventTrigger> eventTriggers,
-    List<ExhibitionPageTransition> enterTransitions,
-    List<ExhibitionPageTransition> exitTransitions,
-    BuildContext context,
-  ) =>
-      switch (element.localName) {
-        CustomHtmlWidgets.IMAGE => CustomImage(
-            element: element,
-            eventTriggers: eventTriggers,
-            enterTransitions: enterTransitions,
-            exitTransitions: exitTransitions,
-          ),
-        CustomHtmlWidgets.BUTTON => CustomButton(
-            element: element,
-            eventTriggers: eventTriggers,
-            enterTransitions: enterTransitions,
-            exitTransitions: exitTransitions,
-          ),
-        CustomHtmlWidgets.VIDEO => CustomVideo(
-            element: element,
-            resources: resources,
-            eventTriggers: eventTriggers,
-          ),
-        _ => null
-      };
-
+/// Utilities for parsing HTML elements for custom widgets
+class HtmlUtils {
   /// Extracts margin from HTML [element] styles and returns it as an [EdgeInsets]
   static EdgeInsets? extractMargin(
     dom.Element element,
@@ -176,7 +140,7 @@ class HtmlWidgets {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  static Function()? handleTapEvent(
+  static void Function() handleTapEvent(
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
     List<ExhibitionPageTransition> enterTransition,
@@ -191,7 +155,7 @@ class HtmlWidgets {
       final property = event?.properties.first;
       if (property == null) {
         SimpleLogger().info("No event property found!");
-        return null;
+        return;
       }
       NavigationUtils.navigateTo(
         PageScreen(pageId: property.value),
@@ -204,20 +168,20 @@ class HtmlWidgets {
 
   /// Extracts elements width and height
   static Size extractSize(dom.Element element) {
-    if (element.localName == CustomHtmlWidgets.VIDEO) {
-      final widthString = HtmlWidgets.extractAttribute(element,
-          attribute: CustomHtmlWidgets.WIDTH);
-      final heightString = HtmlWidgets.extractAttribute(element,
-          attribute: CustomHtmlWidgets.HEIGHT);
+    if (element.localName == HtmlTags.video) {
+      final widthString =
+          HtmlUtils.extractAttribute(element, attribute: HtmlAttributes.width);
+      final heightString =
+          HtmlUtils.extractAttribute(element, attribute: HtmlAttributes.height);
       final width = double.tryParse(widthString ?? "0");
       final height = double.tryParse(heightString ?? "0");
 
       return Size(width ?? 0, height ?? 0);
     } else {
       final width = _parsePixelValueToDouble(
-          _extractStyleAttribute(element, CustomHtmlWidgets.WIDTH));
+          _extractStyleAttribute(element, HtmlAttributes.width));
       final height = _parsePixelValueToDouble(
-          _extractStyleAttribute(element, CustomHtmlWidgets.HEIGHT));
+          _extractStyleAttribute(element, HtmlAttributes.height));
 
       return Size(width, height);
     }
@@ -270,15 +234,54 @@ class HtmlWidgets {
       element.styles
           .firstWhereOrNull((style) => style.property == attribute)
           ?.value;
-}
 
-class CustomHtmlWidgets {
-  static const String IMAGE = "img";
-  static const String BUTTON = "button";
-  static const String VIDEO = "video";
-  static const String SOURCE = "source";
+  /// Extracts the role attribte from HTML [element]
+  static String? extractRole(dom.Element element) {
+    return element.attributes[HtmlAttributes.dataRole];
+  }
 
-  static const String WIDTH = "width";
-  static const String HEIGHT = "height";
-  static const String SRC = "src";
+  /// Finds child element of [parentElement] with given [type] and [role]
+  static dom.Element? findChildByTypeAndRole(
+    dom.Element parentElement,
+    String type,
+    String role,
+  ) {
+    dom.Element? foundChild;
+    for (var child in parentElement.children) {
+      final elementDataComponentType =
+          child.attributes[HtmlAttributes.dataComponentType];
+      final elementRole = child.attributes[HtmlAttributes.dataRole];
+      if (elementDataComponentType == type && elementRole == role) {
+        foundChild = child;
+      } else {
+        final foundChildInChildren = findChildByTypeAndRole(child, type, role);
+        if (foundChildInChildren != null) {
+          foundChild = foundChildInChildren;
+        }
+      }
+    }
+
+    return foundChild;
+  }
+
+  /// Find the first video child element of the given parent element
+  static dom.Element? findVideoChild(dom.Element parentElement) =>
+      parentElement.children
+          .firstWhereOrNull((element) => element.localName == HtmlTags.video);
+
+  /// Find the video source URI from the given video element
+  static String? findVideoSource(dom.Element videoElement) {
+    final sourceElement = videoElement.children
+        .firstWhereOrNull((element) => element.localName == HtmlTags.source);
+    if (sourceElement == null) return null;
+
+    return HtmlUtils.extractAttribute(sourceElement,
+        attribute: HtmlAttributes.src);
+  }
+
+  /// Finds the video controls child element of the given parent element
+  static dom.Element? findVideoControlsChild(dom.Element parentElement) =>
+      parentElement.children.firstWhereOrNull((element) =>
+          element.attributes[HtmlAttributes.dataComponentType] ==
+          HtmlAttributeValues.videoControls);
 }

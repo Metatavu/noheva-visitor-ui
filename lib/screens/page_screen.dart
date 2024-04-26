@@ -5,10 +5,10 @@ import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
-import "package:noheva_visitor_ui/main.dart";
+import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/screens/default_screen.dart";
 import "package:noheva_visitor_ui/screens/noheva_screen.dart";
-import "package:noheva_visitor_ui/utils/html_widgets.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 
@@ -31,7 +31,10 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
   final List<ExhibitionPageEventTrigger> _eventTriggers = [];
   final List<ExhibitionPageTransition> _enterTransitions = [];
   final List<ExhibitionPageTransition> _exitTransitions = [];
-  late StreamSubscription<String?> _streamSubscription;
+  late StreamSubscription<LoadExhibitionPageByIdEvent>
+      _loadExhibitionPageByIdEventSubscription;
+  late StreamSubscription<RequestAchiveExhibitionPageIdEvent>
+      _activeExhibitionPageIdEventStreamSubscription;
 
   /// Loads page and its content by [pageId]
   Future<void> _loadPage(String pageId) async {
@@ -64,9 +67,11 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
   void initState() {
     super.initState();
     _loadPage(widget.pageId);
-    _streamSubscription = pageStreamController.stream.listen((event) {
-      if (event != null) {
-        _loadPage(event);
+    _loadExhibitionPageByIdEventSubscription =
+        eventBus.on<LoadExhibitionPageByIdEvent>().listen((event) {
+      final eventPageId = event.pageId;
+      if (eventPageId != null) {
+        _loadPage(eventPageId);
       } else {
         Navigator.pushReplacement(
           context,
@@ -76,11 +81,18 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
         );
       }
     });
+    _activeExhibitionPageIdEventStreamSubscription =
+        eventBus.on<RequestAchiveExhibitionPageIdEvent>().listen(
+              (_) => eventBus.fire(
+                ActiveExhibitionPageIdEvent(widget.pageId),
+              ),
+            );
   }
 
   @override
   void dispose() {
-    _streamSubscription.cancel();
+    _loadExhibitionPageByIdEventSubscription.cancel();
+    _activeExhibitionPageIdEventStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -98,23 +110,29 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
             height: screenSize.height,
             child: HtmlWidget(
               _pageHtml ?? "",
-              customWidgetBuilder: (element) => HtmlWidgets.buildCustomWidget(
-                element,
-                _pageResources,
-                _eventTriggers,
-                _enterTransitions,
-                _exitTransitions,
-                context,
+              factoryBuilder: () => CustomWidgetFactory(
+                context: context,
+                resources: _pageResources,
+                eventTriggers: _eventTriggers,
+                enterTransitions: _enterTransitions,
+                exitTransitions: _exitTransitions,
               ),
               customStylesBuilder: (element) {
+                if (element.localName == "div") {
+                  return {
+                    "padding": "0px",
+                  };
+                }
                 if (["h1", "h2", "h3", "h4", "h5", "h6"]
                     .contains(element.localName)) {
                   return {
+                    "margin": "0px",
                     "font-family": "Larken-Medium",
                   };
                 }
                 if (element.localName == "p") {
                   return {
+                    "margin": "0px",
                     "font-family": "Source-Sans-Pro-Regular",
                   };
                 }

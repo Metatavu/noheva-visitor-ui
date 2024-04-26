@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:noheva_api/noheva_api.dart";
+import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/startup_screen.dart";
 import "package:noheva_visitor_ui/theme/font_helper.dart";
@@ -23,14 +24,10 @@ late final String environment;
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
-final StreamController<String?> pageStreamController =
-    StreamController.broadcast(sync: true);
-final StreamController<bool?> managementStreamController =
-    StreamController.broadcast(sync: true);
 final managementButtonTickCounter = TimedTickCounter(
   ticksRequired: 10,
   timeout: const Duration(seconds: 5),
-  onTicksReached: () => managementStreamController.sink.add(true),
+  onTicksReached: () => eventBus.fire(OpenManagementScreenEvent()),
 );
 
 Future<void> _setAndroidImmersiveMode() async {
@@ -160,7 +157,7 @@ void _addManagementButtonOverlay(BuildContext context) {
   return Overlay.of(context).insert(
     OverlayEntry(
       builder: (context) => Positioned(
-        left: 0,
+        left: MediaQuery.of(context).size.width / 3,
         top: 0,
         width: 200,
         height: 100,

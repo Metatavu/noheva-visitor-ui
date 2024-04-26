@@ -28,6 +28,8 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
+  - video_compress (0.3.0):
+    - FlutterMacOS
   - video_player_macos (0.0.1):
     - FlutterMacOS
   - window_manager (0.2.0):
@@ -41,6 +43,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
+  - video_compress (from `Flutter/ephemeral/.symlinks/plugins/video_compress/macos`)
   - video_player_macos (from `Flutter/ephemeral/.symlinks/plugins/video_player_macos/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
@@ -64,6 +67,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
+  video_compress:
+    :path: Flutter/ephemeral/.symlinks/plugins/video_compress/macos
   video_player_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/video_player_macos/macos
   window_manager:
@@ -79,6 +84,7 @@ SPEC CHECKSUMS:
   Sparkle: ce9957501a2655dd4c8264312c6134ff478a777c
   sqlite3: fd89671d969f3e73efe503ce203e28b016b58f68
   sqlite3_flutter_libs: 00a50503d69f7ab0fe85a5ff25b33082f4df4ce9
+  video_compress: c896234f100791b5fef7f049afa38f6d2ef7b42f
   video_player_macos: 7a50b407d775a45392851b1218a9cf4be395cf7f
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
