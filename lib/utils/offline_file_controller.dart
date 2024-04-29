@@ -178,12 +178,15 @@ class OfflineFileController {
 
     String extension = fileName.substring(fileName.lastIndexOf("."));
     File? videoThumbnail;
+    File? existingVideoThumbnailFileName =
+        File(newFileName.replaceAll(extension, ".thumbnail.jpg"));
 
     if (extension == ".mp4") {
       videoThumbnail =
           await VideoCompress.getFileThumbnail(newFile.absolute.path);
     }
-    if (videoThumbnail != null) {
+    if (videoThumbnail != null &&
+        !await existingVideoThumbnailFileName.exists()) {
       await videoThumbnail
           .rename(newFileName.replaceAll(extension, ".thumbnail.jpg"));
     }

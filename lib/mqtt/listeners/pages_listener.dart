@@ -6,6 +6,7 @@ import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/mqtt/listeners/abstract_listener.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
+import "package:noheva_visitor_ui/utils/offline_file_controller.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart";
 import "package:simple_logger/simple_logger.dart";
 
@@ -59,6 +60,19 @@ class PagesListener extends AbstractListener {
     if (existingPage == null) {
       SimpleLogger().info("Page does not exist, ignoring...");
       return;
+    }
+    for (var resource in existingPage.resources) {
+      final pagesWithResource =
+          await pageDao.listPagesWithResource(resource.data);
+      if (PageController.offlineMediaTypes.contains(resource.type)) {
+        if (pagesWithResource.length == 1) {
+          await offlineFileController.deleteOfflineFile(resource.data);
+        } else {
+          SimpleLogger().info(
+            "Resource with data ${resource.data} is used in multiple pages, not deleting!",
+          );
+        }
+      }
     }
     await pageDao.deletePage(deletedPageId);
     SimpleLogger().info("Deleted page: $deletedPageId");
