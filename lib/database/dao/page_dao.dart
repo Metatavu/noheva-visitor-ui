@@ -54,6 +54,11 @@ class PageDao extends DatabaseAccessor<Database> with _$PageDaoMixin {
           ..where((row) => row.exhibitionId.equals(exhibitionId)))
         .get();
   }
+
+  /// Lists all Pages where resource with [data] is used
+  Future<List<Page>> listPagesWithResource(String data) async {
+    return (select(pages)..where((row) => row.resources.contains(data))).get();
+  }
 }
 
 final pageDao = PageDao(database);

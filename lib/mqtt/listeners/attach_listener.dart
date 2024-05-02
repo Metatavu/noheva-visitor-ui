@@ -75,8 +75,16 @@ class AttachListener {
     final pages = await pageDao.listPages(detachedMessage.exhibitionId!);
     for (var page in pages) {
       for (var resource in page.resources) {
+        final pagesWithResource =
+            await pageDao.listPagesWithResource(resource.data);
         if (PageController.offlineMediaTypes.contains(resource.type)) {
-          await offlineFileController.deleteOfflineFile(resource.data);
+          if (pagesWithResource.length == 1) {
+            await offlineFileController.deleteOfflineFile(resource.data);
+          } else {
+            SimpleLogger().info(
+              "Resource with data ${resource.data} is used in multiple pages, not deleting!",
+            );
+          }
         }
       }
       SimpleLogger().info("Deleted page ${page.id} offlined resources!");
