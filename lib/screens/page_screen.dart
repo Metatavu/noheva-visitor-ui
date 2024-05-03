@@ -17,8 +17,10 @@ import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 /// Displays Page [pageId] content
 class PageScreen extends NohevaScreen {
   final String pageId;
+  final Widget pageWidget;
 
-  const PageScreen({Key? key, required this.pageId}) : super(key: key);
+  const PageScreen({Key? key, required this.pageId, required this.pageWidget})
+      : super(key: key);
 
   @override
   State<PageScreen> createState() => PageScreenState();
@@ -61,6 +63,10 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
       _enterTransitions.addAll(page.enterTransitions);
       _exitTransitions.addAll(page.exitTransitions);
     });
+    print("Page enter transitions");
+    print(page.enterTransitions);
+    print("Page exit transitions");
+    print(page.exitTransitions);
   }
 
   @override
@@ -106,41 +112,42 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
         backgroundColor: const Color(0xffffffff),
         body: DeferredPointerHandler(
           child: Container(
-            width: screenSize.width,
-            height: screenSize.height,
-            child: HtmlWidget(
-              _pageHtml ?? "",
-              factoryBuilder: () => CustomWidgetFactory(
-                context: context,
-                resources: _pageResources,
-                eventTriggers: _eventTriggers,
-                enterTransitions: _enterTransitions,
-                exitTransitions: _exitTransitions,
-              ),
-              customStylesBuilder: (element) {
-                if (element.localName == "div") {
-                  return {
-                    "padding": "0px",
-                  };
-                }
-                if (["h1", "h2", "h3", "h4", "h5", "h6"]
-                    .contains(element.localName)) {
-                  return {
-                    "margin": "0px",
-                    "font-family": "Larken-Medium",
-                  };
-                }
-                if (element.localName == "p") {
-                  return {
-                    "margin": "0px",
-                    "font-family": "Source-Sans-Pro-Regular",
-                  };
-                }
+              width: screenSize.width,
+              height: screenSize.height,
+              child: widget.pageWidget
+              // HtmlWidget(
+              //   _pageHtml ?? "",
+              //   factoryBuilder: () => CustomWidgetFactory(
+              //     context: context,
+              //     resources: _pageResources,
+              //     eventTriggers: _eventTriggers,
+              //     enterTransitions: _enterTransitions,
+              //     exitTransitions: _exitTransitions,
+              //   ),
+              //   customStylesBuilder: (element) {
+              //     if (element.localName == "div") {
+              //       return {
+              //         "padding": "0px",
+              //       };
+              //     }
+              //     if (["h1", "h2", "h3", "h4", "h5", "h6"]
+              //         .contains(element.localName)) {
+              //       return {
+              //         "margin": "0px",
+              //         "font-family": "Larken-Medium",
+              //       };
+              //     }
+              //     if (element.localName == "p") {
+              //       return {
+              //         "margin": "0px",
+              //         "font-family": "Source-Sans-Pro-Regular",
+              //       };
+              //     }
 
-                return null;
-              },
-            ),
-          ),
+              //     return null;
+              //   },
+              // ),
+              ),
         ),
       ),
     );

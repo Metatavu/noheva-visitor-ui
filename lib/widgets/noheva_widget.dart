@@ -8,7 +8,7 @@ abstract class NohevaWidget extends StatefulWidget {
   final bool? hidden;
   final dom.Element element;
   final List<Widget> children;
-  final void Function()? onTap;
+  final Future<void Function()>? onTap;
 
   const NohevaWidget({
     Key? key,

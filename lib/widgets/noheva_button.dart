@@ -8,7 +8,7 @@ class NohevaButton extends NohevaWidget {
     Key? key,
     bool? hidden,
     required dom.Element element,
-    void Function()? onTap,
+    Future<void Function()>? onTap,
   }) : super(
           key: key,
           hidden: hidden,
@@ -88,12 +88,12 @@ class NohevaButtonState extends NohevaWidgetState<NohevaButton> {
                       HtmlUtils.extractBorderRadius(element),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (role == HtmlAttributeValues.playVideoRole) {
                       eventBus.fire(PlayVideoEvent());
                       setHidden(true);
                     }
-                    widget.onTap?.call();
+                    (await widget.onTap)?.call();
                   },
                   child: child,
                 ),

@@ -8,7 +8,7 @@ class NohevaImage extends NohevaWidget {
     Key? key,
     bool? hidden,
     required dom.Element element,
-    void Function()? onTap,
+    Future<void Function()>? onTap,
   }) : super(
           key: key,
           hidden: hidden,
@@ -35,7 +35,9 @@ class NohevaImageState extends NohevaWidgetState<NohevaImage> {
 
     if (widget.onTap != null) {
       return GestureDetector(
-        onTap: widget.onTap,
+        onTap: () async {
+          (await widget.onTap)?.call();
+        },
         child: imageWidget,
       );
     }

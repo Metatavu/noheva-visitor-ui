@@ -1,13 +1,17 @@
 import "package:collection/collection.dart";
 import "package:html/dom.dart" as dom;
+import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
+import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/html/html_constants.dart";
 import "package:csslib/visitor.dart";
 import "package:flutter/material.dart";
 import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:noheva_api/noheva_api.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:noheva_visitor_ui/utils/navigation_utils.dart";
 import "package:simple_logger/simple_logger.dart";
+import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
 
 /// Utilities for parsing HTML elements for custom widgets
 class HtmlUtils {
@@ -140,14 +144,25 @@ class HtmlUtils {
   }
 
   /// Event handler for tap events on custom widgets per [eventTrigger]
-  static void Function() handleTapEvent(
+  static Future<Future<void> Function()> handleTapEvent(
+    String pageId,
     dom.Element element,
     List<ExhibitionPageEventTrigger> eventTriggers,
     List<ExhibitionPageTransition> enterTransition,
     List<ExhibitionPageTransition> exitTransition,
     BuildContext context,
-  ) {
-    return () {
+  ) async {
+    return () async {
+      final page = await pageDao.findPage(pageId);
+      if (page == null) {
+        SimpleLogger().shout("Page $pageId not found!");
+        return;
+      }
+      final layout = await layoutDao.findLayout(page.layoutId);
+      if (layout == null) {
+        SimpleLogger().shout("Layout ${page.layoutId} not found!");
+        return;
+      }
       ExhibitionPageEventTrigger? clickViewEventTrigger =
           _findClickViewEventTrigger(element, eventTriggers);
       SimpleLogger().info("Handling tap event...");
@@ -157,8 +172,45 @@ class HtmlUtils {
         SimpleLogger().info("No event property found!");
         return;
       }
+      final pageHtml = pc.PageController.substitutePageResources(
+          layout.data, page.resources);
       NavigationUtils.navigateTo(
-        PageScreen(pageId: property.value),
+        PageScreen(
+          pageId: property.value,
+          pageWidget: HtmlWidget(
+            pageHtml,
+            factoryBuilder: () => CustomWidgetFactory(
+              pageId: pageId,
+              context: context,
+              resources: page.resources,
+              eventTriggers: page.eventTriggers,
+              enterTransitions: page.enterTransitions,
+              exitTransitions: page.exitTransitions,
+            ),
+            customStylesBuilder: (element) {
+              if (element.localName == "div") {
+                return {
+                  "padding": "0px",
+                };
+              }
+              if (["h1", "h2", "h3", "h4", "h5", "h6"]
+                  .contains(element.localName)) {
+                return {
+                  "margin": "0px",
+                  "font-family": "Larken-Medium",
+                };
+              }
+              if (element.localName == "p") {
+                return {
+                  "margin": "0px",
+                  "font-family": "Source-Sans-Pro-Regular",
+                };
+              }
+
+              return null;
+            },
+          ),
+        ),
         context,
         enterTransition: enterTransition.firstOrNull,
         exitTransition: exitTransition.firstOrNull,

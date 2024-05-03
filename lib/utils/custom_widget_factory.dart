@@ -15,8 +15,7 @@ class CustomWidgetFactory extends WidgetFactory {
   final List<ExhibitionPageEventTrigger> eventTriggers;
   final List<ExhibitionPageTransition> enterTransitions;
   final List<ExhibitionPageTransition> exitTransitions;
-  final Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks;
-  final Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks;
+  final String pageId;
 
   CustomWidgetFactory({
     required this.context,
@@ -24,8 +23,7 @@ class CustomWidgetFactory extends WidgetFactory {
     required this.eventTriggers,
     required this.enterTransitions,
     required this.exitTransitions,
-    this.onBuildCallbacks = const {},
-    this.onTapCallbacks = const {},
+    required this.pageId,
     bool hidePlayButton = false,
   });
 
@@ -69,7 +67,8 @@ class CustomWidgetFactory extends WidgetFactory {
   }
 
   /// Registers custom [BuildOp] for button widgets
-  void _registerNohevaButtonBuildOp(BuildTree tree, void Function() onTap) {
+  void _registerNohevaButtonBuildOp(
+      BuildTree tree, Future<Future<void> Function()> onTap) {
     final role = HtmlUtils.extractRole(tree.element);
 
     tree.register(
@@ -86,7 +85,8 @@ class CustomWidgetFactory extends WidgetFactory {
   /// Registers custom [BuildOp] for image widgets
   ///
   /// This method also checks if the image is a child of a button element as those cases are handled via the button widget
-  void _registerNohevaImageBuildOp(BuildTree tree, void Function() onTap) {
+  void _registerNohevaImageBuildOp(
+      BuildTree tree, Future<Future<void> Function()> onTap) {
     if (tree.element.parent?.localName == "button") {
       return;
     }
@@ -115,8 +115,14 @@ class CustomWidgetFactory extends WidgetFactory {
 
   /// Registers custom build ops for custom widgets
   void _registerBuildOps(BuildTree tree) {
-    final tapEvent = HtmlUtils.handleTapEvent(tree.element, eventTriggers,
-        enterTransitions, exitTransitions, context);
+    final tapEvent = HtmlUtils.handleTapEvent(
+      pageId,
+      tree.element,
+      eventTriggers,
+      enterTransitions,
+      exitTransitions,
+      context,
+    );
     final dataComponentType = HtmlUtils.extractAttribute(tree.element,
         attribute: HtmlAttributes.dataComponentType);
     switch (dataComponentType) {

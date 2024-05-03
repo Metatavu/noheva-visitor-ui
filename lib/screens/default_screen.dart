@@ -1,12 +1,15 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_gen/gen_l10n/app_localizations.dart";
+import "package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart";
 import "package:noheva_visitor_ui/database/dao/device_exhibition_detail_dao.dart";
 import "package:noheva_visitor_ui/database/dao/key_dao.dart";
+import "package:noheva_visitor_ui/database/dao/layout_dao.dart";
 import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
+import "package:noheva_visitor_ui/utils/custom_widget_factory.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
@@ -27,11 +30,58 @@ class _DefaultScreenState extends State<DefaultScreen> {
   Timer? _deviceApprovalTimer;
 
   /// Navigates to [PageScreen] with [pageId]
-  void _navigateToPageScreen(String pageId) {
+  void _navigateToPageScreen(String pageId) async {
+    final page = await pageDao.findPage(pageId);
+    if (page == null) {
+      SimpleLogger().shout("Page $pageId not found!");
+      return;
+    }
+    final layout = await layoutDao.findLayout(page.layoutId);
+    if (layout == null) {
+      SimpleLogger().shout("Layout ${page.layoutId} not found!");
+      return;
+    }
+    final pageHtml =
+        pc.PageController.substitutePageResources(layout.data, page.resources);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute<PageScreen>(
-        builder: (context) => PageScreen(pageId: pageId),
+        builder: (context) => PageScreen(
+          pageId: pageId,
+          pageWidget: HtmlWidget(
+            pageHtml,
+            factoryBuilder: () => CustomWidgetFactory(
+              pageId: pageId,
+              context: context,
+              resources: page.resources,
+              eventTriggers: page.eventTriggers,
+              enterTransitions: page.enterTransitions,
+              exitTransitions: page.exitTransitions,
+            ),
+            customStylesBuilder: (element) {
+              if (element.localName == "div") {
+                return {
+                  "padding": "0px",
+                };
+              }
+              if (["h1", "h2", "h3", "h4", "h5", "h6"]
+                  .contains(element.localName)) {
+                return {
+                  "margin": "0px",
+                  "font-family": "Larken-Medium",
+                };
+              }
+              if (element.localName == "p") {
+                return {
+                  "margin": "0px",
+                  "font-family": "Source-Sans-Pro-Regular",
+                };
+              }
+
+              return null;
+            },
+          ),
+        ),
       ),
     );
   }
