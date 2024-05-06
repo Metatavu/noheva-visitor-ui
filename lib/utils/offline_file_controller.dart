@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
+import "dart:typed_data";
 import "package:crypto/crypto.dart";
 import "package:path_provider/path_provider.dart";
 import "package:path/path.dart" as p;
@@ -177,18 +178,19 @@ class OfflineFileController {
     File newFile = await filePart.rename(newFileName);
 
     String extension = fileName.substring(fileName.lastIndexOf("."));
-    File? videoThumbnail;
+    Uint8List? videoThumbnail;
     File? existingVideoThumbnailFileName =
         File(newFileName.replaceAll(extension, ".thumbnail.jpg"));
 
     if (extension == ".mp4") {
       videoThumbnail =
-          await VideoCompress.getFileThumbnail(newFile.absolute.path);
+          await VideoCompress.getByteThumbnail(newFile.absolute.path);
     }
     if (videoThumbnail != null &&
         !await existingVideoThumbnailFileName.exists()) {
-      await videoThumbnail
-          .rename(newFileName.replaceAll(extension, ".thumbnail.jpg"));
+      File videoThumbnailFile =
+          File(newFileName.replaceAll(extension, ".thumbnail.jpg"));
+      await videoThumbnailFile.writeAsBytes(videoThumbnail);
     }
     await _writeMetaFile(existingFile, eTag);
     SimpleLogger().info("Downloaded $newFileName!");

@@ -103,7 +103,7 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: const Color(0xffffffff),
+        backgroundColor: const Color(0xff000000),
         body: DeferredPointerHandler(
           child: Container(
             width: screenSize.width,
