@@ -12,6 +12,7 @@ import "package:noheva_visitor_ui/theme/font_helper.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
 import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
+import "package:restart_app/restart_app.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
@@ -104,6 +105,9 @@ void _setupWindowManager() async {
     });
   } else {
     SimpleLogger().info("Not running on macOS, skipping window manager setup!");
+    // await PlatformService.setVMDensity(75);
+    // await Restart.restartApp();
+    SimpleLogger().info("Set screen density to 10");
   }
 }
 
@@ -206,3 +210,16 @@ class NohevaApp extends StatelessWidget {
   outputDirectory: "noheva-api",
 )
 class NohevaApi extends OpenapiGeneratorConfig {}
+
+class PlatformService {
+  static const MethodChannel _channel =
+      MethodChannel('fi.metatavu.noheva_visitor_ui/vm_density');
+
+  static Future<void> setVMDensity(double density) async {
+    try {
+      await _channel.invokeMethod('setVMDensity', {'density': density});
+    } on PlatformException catch (e) {
+      print("Failed to set VM density: '${e.message}'.");
+    }
+  }
+}

@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.DisplayMetrics
 import io.flutter.embedding.android.FlutterActivity
+
 
 class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,7 +18,17 @@ class MainActivity: FlutterActivity() {
             startActivityForResult(intent, REQUEST_OVERLAY_PERMISSIONS)
 
             return
+
         }
+
+        val currentDpi = resources.configuration.densityDpi
+        val newDpi = 162
+        println("DPI: $currentDpi")
+        val configuration = resources.configuration
+        configuration.densityDpi = (75).toInt() // Converts to dpi
+        windowManager
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+
     }
 
     companion object {
