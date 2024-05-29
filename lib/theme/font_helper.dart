@@ -6,7 +6,6 @@ import "package:noheva_visitor_ui/utils/offline_file_controller.dart";
 import "package:path_provider/path_provider.dart";
 import "package:path/path.dart" as p;
 import "package:simple_logger/simple_logger.dart";
-import "package:typed_data/typed_data.dart";
 
 /// Font Helper
 ///
@@ -66,23 +65,26 @@ class FontHelper {
     if (await offlinedFont.exists()) {
       SimpleLogger().info("Using already offlined font!");
 
-      return await offlinedFont.readAsBytes().then(
-            (bytes) => ByteData.view(
-              Uint8List.fromList(bytes).buffer,
-            ),
-          );
+      return _readOfflinedFontFile(offlinedFont);
     }
     SimpleLogger().info("Didn't find offlined font, downloading...");
     Uri uri = Uri.parse("${configuration.getCdnBaseUrl()}/fonts/$font");
     HttpClientResponse response = await _httpClient.getUrl(uri).then(
           (request) => request.close(),
         );
-    Int8Buffer byteBuffer =
-        await offlineFileController.readResponseToBytes(response);
 
-    await offlinedFont.writeAsBytes(byteBuffer);
+    await offlineFileController.readResponseToFile(offlinedFont, response);
 
-    return ByteData.view(byteBuffer.buffer);
+    return _readOfflinedFontFile(offlinedFont);
+  }
+
+  /// Reads offlined [fontFile] into [ByteData]
+  static Future<ByteData> _readOfflinedFontFile(File fontFile) async {
+    return await fontFile.readAsBytes().then(
+          (bytes) => ByteData.view(
+            Uint8List.fromList(bytes).buffer,
+          ),
+        );
   }
 
   /// Returns fonts directory path

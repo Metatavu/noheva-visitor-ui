@@ -169,11 +169,11 @@ class OfflineFileController {
       await filePart.delete();
     }
 
-    await filePart.writeAsBytes(await readResponseToBytes(response));
-
     if (await existingFile.exists()) {
       await existingFile.delete();
     }
+
+    await readResponseToFile(filePart, response);
 
     File newFile = await filePart.rename(newFileName);
 
@@ -183,6 +183,8 @@ class OfflineFileController {
         File(newFileName.replaceAll(extension, ".thumbnail.jpg"));
 
     if (extension == ".mp4") {
+      SimpleLogger()
+          .info("Creating video thumbnail to ${newFile.absolute.path}");
       videoThumbnail =
           await VideoCompress.getByteThumbnail(newFile.absolute.path);
     }
@@ -196,6 +198,14 @@ class OfflineFileController {
     SimpleLogger().info("Downloaded $newFileName!");
 
     return newFile;
+  }
+
+  /// Reads [response] to [file] and awaits for it to be ready.
+  Future<void> readResponseToFile(
+      File file, HttpClientResponse response) async {
+    final fileStream = file.openWrite();
+    await response.pipe(fileStream);
+    await fileStream.close();
   }
 
   /// Reads [response] to bytes and awaits for it to be ready.
