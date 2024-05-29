@@ -3,7 +3,7 @@ description: Noheva visitor UI project
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 0.1.20
+version: 0.1.21-develop.0
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
