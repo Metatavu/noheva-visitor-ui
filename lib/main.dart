@@ -10,6 +10,7 @@ import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/startup_screen.dart";
 import "package:noheva_visitor_ui/theme/font_helper.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
+import "package:noheva_visitor_ui/utils/device_info.dart";
 import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
 import "package:simple_logger/simple_logger.dart";
@@ -38,7 +39,9 @@ Future<void> _setAndroidImmersiveMode() async {
 
 void main() async {
   _configureLogger();
+
   SimpleLogger().info("Starting Noheva Visitor UI App...");
+
   WidgetsFlutterBinding.ensureInitialized();
   AppLifecycleListener(onExitRequested: _onAppExitRequested);
 
@@ -58,6 +61,9 @@ void main() async {
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
   FontHelper.loadOfflinedFonts();
+
+  final serialNumber = await DeviceInfo.getSerialNumber();
+  SimpleLogger().info("Device serial number: $serialNumber");
 
   deviceId = await keyDao.getDeviceId();
 
@@ -183,6 +189,11 @@ class NohevaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+
+    SimpleLogger().info(
+        "Building main with size (width: ${screenSize.width}, height: ${screenSize.height})...");
+
     return MaterialApp(
       title: "Noheva visitor UI",
       theme: getApplicationTheme(),

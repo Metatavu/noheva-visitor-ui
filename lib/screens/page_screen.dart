@@ -100,14 +100,20 @@ class PageScreenState extends NohevaScreenState<PageScreen> {
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
 
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+
+    SimpleLogger().info(
+        "Building PageScreen with size (width: $screenWidth, height: $screenHeight)...");
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
         backgroundColor: const Color(0xff000000),
         body: DeferredPointerHandler(
           child: Container(
-            width: screenSize.width,
-            height: screenSize.height,
+            width: screenWidth,
+            height: screenHeight,
             child: HtmlWidget(
               _pageHtml ?? "",
               factoryBuilder: () => CustomWidgetFactory(
