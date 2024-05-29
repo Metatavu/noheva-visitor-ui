@@ -139,6 +139,14 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
           "No video controls found in video widget. Returning an empty container");
       return Container();
     }
+
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final videoWidth = _videoSize.width / devicePixelRatio;
+    final videoHeight = _videoSize.height / devicePixelRatio;
+
+    SimpleLogger().info(
+        "Video widget built with size (width: $videoWidth, height: $videoHeight, devicePixelRatio $devicePixelRatio)...");
+
     return Indexer(
       children: [
         Indexed(
@@ -156,8 +164,8 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
         Indexed(
           index: 0,
           child: Container(
-            width: _videoSize.width,
-            height: _videoSize.height,
+            width: videoWidth,
+            height: videoHeight,
             decoration: const BoxDecoration(
               color: Colors.black,
             ),
