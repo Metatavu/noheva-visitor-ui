@@ -10,9 +10,9 @@ import "package:noheva_visitor_ui/mqtt/mqtt_client.dart";
 import "package:noheva_visitor_ui/screens/startup_screen.dart";
 import "package:noheva_visitor_ui/theme/font_helper.dart";
 import "package:noheva_visitor_ui/theme/theme.dart";
+import "package:noheva_visitor_ui/utils/platform_service.dart";
 import "package:noheva_visitor_ui/utils/timed_tick_counter.dart";
 import "package:openapi_generator_annotations/openapi_generator_annotations.dart";
-import "package:restart_app/restart_app.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:window_manager/window_manager.dart";
 import "api/api_factory.dart";
@@ -66,6 +66,7 @@ void main() async {
     SimpleLogger().info("Device Id is: $deviceId");
     SimpleLogger().info("Connecting to MQTT broker...");
     await mqttClient.connect(deviceId!);
+    // await applyDeviceSettings(deviceId!);
   } else {
     SimpleLogger().info("Device ID not found, cannot connect to MQTT.");
   }
@@ -105,9 +106,41 @@ void _setupWindowManager() async {
     });
   } else {
     SimpleLogger().info("Not running on macOS, skipping window manager setup!");
-    // await PlatformService.setVMDensity(75);
-    // await Restart.restartApp();
-    SimpleLogger().info("Set screen density to 10");
+  }
+}
+
+Future<void> applyDeviceSettings(String deviceId) async {
+  try {
+    SimpleLogger().info("Applying device settings...");
+    final deviceDataApi = await apiFactory.getDeviceDataApi();
+    final deviceSettings = await deviceDataApi
+        .listDeviceDataSettings(deviceId: deviceId)
+        .then((value) => value.data);
+    if (deviceSettings == null) {
+      SimpleLogger().info("No device settings to apply");
+      return;
+    }
+    print("Device settings: $deviceSettings");
+    for (final setting in deviceSettings) {
+      SimpleLogger().info("Applying setting: ${setting.key}");
+      switch (setting.key) {
+        case DeviceSettingKey.SCREEN_DENSITY:
+          {
+            final newDensity = double.parse(setting.value);
+            final currentDensity = await PlatformService.getVMDensity();
+            SimpleLogger().info("Current density: $currentDensity");
+            if (currentDensity != newDensity) {
+              await PlatformService.setVMDensity(newDensity);
+              await PlatformService.restartApp();
+            }
+            break;
+          }
+        default:
+          SimpleLogger().info("Unknown setting: ${setting.key}");
+      }
+    }
+  } catch (e) {
+    SimpleLogger().info("Failed to apply device settings: $e");
   }
 }
 
@@ -187,6 +220,11 @@ class NohevaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    SimpleLogger().info("Screen size: $size");
+    SimpleLogger().info("Device pixel ratio: $devicePixelRatio");
     return MaterialApp(
       title: "Noheva visitor UI",
       theme: getApplicationTheme(),
@@ -210,16 +248,3 @@ class NohevaApp extends StatelessWidget {
   outputDirectory: "noheva-api",
 )
 class NohevaApi extends OpenapiGeneratorConfig {}
-
-class PlatformService {
-  static const MethodChannel _channel =
-      MethodChannel('fi.metatavu.noheva_visitor_ui/vm_density');
-
-  static Future<void> setVMDensity(double density) async {
-    try {
-      await _channel.invokeMethod('setVMDensity', {'density': density});
-    } on PlatformException catch (e) {
-      print("Failed to set VM density: '${e.message}'.");
-    }
-  }
-}

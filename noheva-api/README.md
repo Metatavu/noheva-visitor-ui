@@ -72,6 +72,7 @@ Class | Method | HTTP request | Description
 [*ContentVersionsApi*](doc/ContentVersionsApi.md) | [**updateContentVersion**](doc/ContentVersionsApi.md#updatecontentversion) | **PUT** /v1/exhibitions/{exhibitionId}/contentVersions/{contentVersionId} | Updates content version.
 [*DeviceDataApi*](doc/DeviceDataApi.md) | [**listDeviceDataLayouts**](doc/DeviceDataApi.md#listdevicedatalayouts) | **GET** /v1/deviceData/{deviceId}/layouts | List layouts for this device.
 [*DeviceDataApi*](doc/DeviceDataApi.md) | [**listDeviceDataPages**](doc/DeviceDataApi.md#listdevicedatapages) | **GET** /v1/deviceData/{deviceId}/pages | List pages for this device.
+[*DeviceDataApi*](doc/DeviceDataApi.md) | [**listDeviceDataSettings**](doc/DeviceDataApi.md#listdevicedatasettings) | **GET** /v1/deviceData/{deviceId}/settings | List device settings for this device
 [*DeviceModelsApi*](doc/DeviceModelsApi.md) | [**createDeviceModel**](doc/DeviceModelsApi.md#createdevicemodel) | **POST** /v1/deviceModels | Create a device model
 [*DeviceModelsApi*](doc/DeviceModelsApi.md) | [**deleteDeviceModel**](doc/DeviceModelsApi.md#deletedevicemodel) | **DELETE** /v1/deviceModels/{deviceModelId} | Deletes device model.
 [*DeviceModelsApi*](doc/DeviceModelsApi.md) | [**findDeviceModel**](doc/DeviceModelsApi.md#finddevicemodel) | **GET** /v1/deviceModels/{deviceModelId} | Find a device model
@@ -179,6 +180,8 @@ Class | Method | HTTP request | Description
  - [DevicePage](doc/DevicePage.md)
  - [DevicePageResource](doc/DevicePageResource.md)
  - [DeviceRequest](doc/DeviceRequest.md)
+ - [DeviceSetting](doc/DeviceSetting.md)
+ - [DeviceSettingKey](doc/DeviceSettingKey.md)
  - [DeviceStatus](doc/DeviceStatus.md)
  - [DeviceType](doc/DeviceType.md)
  - [DynamicPageResource](doc/DynamicPageResource.md)

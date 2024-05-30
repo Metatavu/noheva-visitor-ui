@@ -24,6 +24,8 @@ doc/DeviceModelsApi.md
 doc/DevicePage.md
 doc/DevicePageResource.md
 doc/DeviceRequest.md
+doc/DeviceSetting.md
+doc/DeviceSettingKey.md
 doc/DeviceStatus.md
 doc/DeviceType.md
 doc/DevicesApi.md
@@ -167,6 +169,8 @@ lib/src/model/device_model_display_metrics.dart
 lib/src/model/device_page.dart
 lib/src/model/device_page_resource.dart
 lib/src/model/device_request.dart
+lib/src/model/device_setting.dart
+lib/src/model/device_setting_key.dart
 lib/src/model/device_status.dart
 lib/src/model/device_type.dart
 lib/src/model/dynamic_page_resource.dart

@@ -48,6 +48,8 @@ export 'package:noheva_api/src/model/device_model_display_metrics.dart';
 export 'package:noheva_api/src/model/device_page.dart';
 export 'package:noheva_api/src/model/device_page_resource.dart';
 export 'package:noheva_api/src/model/device_request.dart';
+export 'package:noheva_api/src/model/device_setting.dart';
+export 'package:noheva_api/src/model/device_setting_key.dart';
 export 'package:noheva_api/src/model/device_status.dart';
 export 'package:noheva_api/src/model/device_type.dart';
 export 'package:noheva_api/src/model/dynamic_page_resource.dart';
