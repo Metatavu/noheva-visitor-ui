@@ -35,7 +35,6 @@ class _DeviceSetupState extends State<DeviceSetupScreen> {
       SimpleLogger().info("Connecting MQTT client...");
       deviceId = createdDevice.id!;
       await mqttClient.connect(createdDevice.id!);
-      await applyDeviceSettings(createdDevice.id!);
       await NavigationUtils.navigateToDefaultScreen(context);
     } catch (exception) {
       SimpleLogger().shout("Error creating device: $exception");

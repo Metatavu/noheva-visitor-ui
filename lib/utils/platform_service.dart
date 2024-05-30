@@ -1,38 +1,62 @@
+import "dart:io";
 import "package:flutter/services.dart";
 import "package:simple_logger/simple_logger.dart";
 
+/// Platform Service
+///
+/// This class provides a set of platform specific services.
+///
+/// At the moment only Android is supported.
 class PlatformService {
-  static const _channel =
-      MethodChannel("fi.metatavu.noheva_visitor_ui/platform_service");
+  static const _methodChannelName =
+      "fi.metatavu.noheva_visitor_ui/platform_service";
+  static const _setWMDensityMethod = "setWMDensity";
+  static const _getWMDensityMethod = "getWMDensity";
+  static const _restartActivityMethod = "restartActivity";
+  static const _setWMDensityArgument = "density";
+  static const _channel = MethodChannel(_methodChannelName);
 
-  static Future<void> setVMDensity(double density) async {
+  /// Sets VM density to [density]
+  static Future<void> setWMDensity(double density) async {
+    if (!Platform.isAndroid) {
+      SimpleLogger()
+          .warning("Attempted to set WM density on non-Android platform");
+      return;
+    }
     try {
-      SimpleLogger().info("Setting VM density to $density...");
-      await _channel.invokeMethod("setVMDensity", {"density": density.round()});
-      SimpleLogger().info("VM density set to $density");
+      await _channel.invokeMethod(
+          _setWMDensityMethod, {_setWMDensityArgument: density.round()});
     } on PlatformException catch (e) {
-      SimpleLogger().shout("Failed to set VM density: ${e.message}");
+      SimpleLogger().shout("Failed to set WM density: ${e.message}");
     }
   }
 
-  static Future<int?> getVMDensity() async {
+  /// Gets the current WM density
+  static Future<int?> getWMDensity() async {
+    if (!Platform.isAndroid) {
+      SimpleLogger()
+          .warning("Attempted to get WM density on non-Android platform");
+      return null;
+    }
     try {
-      SimpleLogger().info("Getting VM density...");
-      int result = await _channel.invokeMethod("getVMDensity");
-      SimpleLogger().info("VM density is $result");
-      return result;
+      return await _channel.invokeMethod(_getWMDensityMethod);
     } on PlatformException catch (e) {
-      SimpleLogger().shout("Failed to get VM density: ${e.message}");
+      SimpleLogger().shout("Failed to get current WM density: ${e.message}");
       return null;
     }
   }
 
-  static Future<void> restartApp() async {
+  /// Restarts the activity
+  static Future<void> restartActivity() async {
+    if (!Platform.isAndroid) {
+      SimpleLogger()
+          .warning("Attempted to restart activity on non-Android platform");
+      return;
+    }
     try {
-      SimpleLogger().info("Restarting Activity...");
-      await _channel.invokeMethod("restartAcitivity");
+      await _channel.invokeMethod(_restartActivityMethod);
     } on PlatformException catch (e) {
-      SimpleLogger().shout("Failed to restart App: ${e.message}");
+      SimpleLogger().shout("Failed to restart activity: ${e.message}");
     }
   }
 }
