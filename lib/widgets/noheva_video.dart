@@ -25,8 +25,6 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
   late Size _videoSize;
   bool _looping = false;
   bool _autoplay = false;
-  Map<String, void Function(NohevaWidgetState widget)> onTapCallbacks = {};
-  Map<String, void Function(NohevaWidgetState widget)> onBuildCallbacks = {};
   late StreamSubscription<PlayVideoEvent> _playVideoStream;
 
   dom.Element get _parentElement => widget.element;
@@ -82,10 +80,40 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
 
   /// Prepares the video player controller for [source] file
   void _prepareVideoPlayerController(String source) {
-    _videoPlayerController = VideoPlayerController.file(File(source))
-      ..initialize().then(_correctControllerPositionAfterInitialization);
+    _videoPlayerController = VideoPlayerController.file(
+      File(source),
+    )..initialize().then(_correctControllerPositionAfterInitialization);
     _videoPlayerController.setLooping(_looping);
     _videoPlayerController.addListener(_correctControllerPositionAfterPlay);
+  }
+
+  /// Builds video thumbnail widget
+  Widget _buildVideoThumbnail() {
+    if (_videoThumbnail == null) {
+      SimpleLogger().info(
+        "No video thumbnail found. Returning an empty container",
+      );
+      return const SizedBox();
+    }
+    if (_videoThumbnail?.existsSync() == false) {
+      SimpleLogger().info(
+        "Video thumbnail file does not exist. Returning an empty container",
+      );
+      return const SizedBox();
+    }
+    if (!_showVideoThumbnail) {
+      SimpleLogger().info(
+        "Video thumbnail is not shown. Returning an empty container",
+      );
+      return const SizedBox();
+    }
+
+    return Image.file(
+      _videoThumbnail!,
+      fit: BoxFit.fill,
+      width: _videoSize.width,
+      height: _videoSize.height,
+    );
   }
 
   @override
@@ -111,6 +139,14 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
           "No video controls found in video widget. Returning an empty container");
       return Container();
     }
+
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final videoWidth = _videoSize.width / devicePixelRatio;
+    final videoHeight = _videoSize.height / devicePixelRatio;
+
+    SimpleLogger().info(
+        "Video widget built with size (width: $videoWidth, height: $videoHeight, devicePixelRatio $devicePixelRatio)...");
+
     return Indexer(
       children: [
         Indexed(
@@ -121,23 +157,15 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
         ),
         Indexed(
           index: 1,
-          child: SizedBox(
-            width: _videoSize.width,
-            height: _videoSize.height,
-            child: Stack(
-              children: [
-                _showVideoThumbnail
-                    ? Image.file(_videoThumbnail!)
-                    : const SizedBox(),
-              ],
-            ),
+          child: Stack(
+            children: [_buildVideoThumbnail()],
           ),
         ),
         Indexed(
           index: 0,
           child: Container(
-            width: _videoSize.width,
-            height: _videoSize.height,
+            width: videoWidth,
+            height: videoHeight,
             decoration: const BoxDecoration(
               color: Colors.black,
             ),
@@ -146,7 +174,7 @@ class NohevaVideoState extends NohevaWidgetState<NohevaVideo> {
                     aspectRatio: _videoPlayerController.value.aspectRatio,
                     child: VideoPlayer(_videoPlayerController),
                   )
-                : const CircularProgressIndicator(),
+                : const SizedBox(),
           ),
         ),
       ],
