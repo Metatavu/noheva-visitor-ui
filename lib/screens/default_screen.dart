@@ -7,6 +7,7 @@ import "package:noheva_visitor_ui/database/dao/page_dao.dart";
 import "package:noheva_visitor_ui/event_bus/event_bus.dart";
 import "package:noheva_visitor_ui/main.dart";
 import "package:noheva_visitor_ui/screens/page_screen.dart";
+import "package:noheva_visitor_ui/utils/device_settings.dart";
 import "package:noheva_visitor_ui/utils/layout_controller.dart";
 import "package:simple_logger/simple_logger.dart";
 import "package:noheva_visitor_ui/utils/page_controller.dart" as pc;
@@ -109,6 +110,7 @@ class _DefaultScreenState extends State<DefaultScreen> {
 
   @override
   void initState() {
+    DeviceSettings.applyDeviceSettings();
     super.initState();
     _loadExhibitionPageByIdEventSubscription =
         eventBus.on<LoadExhibitionPageByIdEvent>().listen(_handleStreamEvent);

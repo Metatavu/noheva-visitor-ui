@@ -34,6 +34,8 @@ import 'package:noheva_api/src/model/device_model_display_metrics.dart';
 import 'package:noheva_api/src/model/device_page.dart';
 import 'package:noheva_api/src/model/device_page_resource.dart';
 import 'package:noheva_api/src/model/device_request.dart';
+import 'package:noheva_api/src/model/device_setting.dart';
+import 'package:noheva_api/src/model/device_setting_key.dart';
 import 'package:noheva_api/src/model/device_status.dart';
 import 'package:noheva_api/src/model/device_type.dart';
 import 'package:noheva_api/src/model/dynamic_page_resource.dart';
@@ -138,6 +140,8 @@ part 'serializers.g.dart';
   DevicePage,
   DevicePageResource,
   DeviceRequest,
+  DeviceSetting,
+  DeviceSettingKey,
   DeviceStatus,
   DeviceType,
   DynamicPageResource,
@@ -279,6 +283,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(SubLayout)]),
         () => ListBuilder<SubLayout>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(DeviceSetting)]),
+        () => ListBuilder<DeviceSetting>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(DeviceModel)]),
