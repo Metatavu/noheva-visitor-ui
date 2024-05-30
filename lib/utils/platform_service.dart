@@ -17,7 +17,7 @@ class PlatformService {
   static const _channel = MethodChannel(_methodChannelName);
 
   /// Sets VM density to [density]
-  static Future<void> setWMDensity(double density) async {
+  static Future<void> setWMDensity(int density) async {
     if (!Platform.isAndroid) {
       SimpleLogger()
           .warning("Attempted to set WM density on non-Android platform");
@@ -25,7 +25,9 @@ class PlatformService {
     }
     try {
       await _channel.invokeMethod(
-          _setWMDensityMethod, {_setWMDensityArgument: density.round()});
+        _setWMDensityMethod,
+        {_setWMDensityArgument: density},
+      );
     } on PlatformException catch (e) {
       SimpleLogger().shout("Failed to set WM density: ${e.message}");
     }

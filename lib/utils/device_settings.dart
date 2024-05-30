@@ -55,7 +55,7 @@ class DeviceSettings {
 
   /// Applies screen density [setting]
   static Future<void> _applyScreenDensitySetting(DeviceSetting setting) async {
-    final newDensity = double.parse(setting.value);
+    final newDensity = double.parse(setting.value).toInt();
     SimpleLogger().info("Getting current WM density...");
     final currentDensity = await PlatformService.getWMDensity();
     SimpleLogger().info("Current WM density is $currentDensity");
