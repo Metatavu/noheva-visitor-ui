@@ -64,7 +64,7 @@ class DeviceSettings {
       await PlatformService.setWMDensity(newDensity);
       SimpleLogger().info("WM density set to $newDensity");
       SimpleLogger().info("Restarting activity...");
-      await PlatformService.restartActivity();
+      await PlatformService.restartApp();
     } else {
       SimpleLogger().info("WM density is already set to $newDensity");
     }

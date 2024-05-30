@@ -46,8 +46,11 @@ class PlatformService {
     }
   }
 
-  /// Restarts the activity
-  static Future<void> restartActivity() async {
+  /// Restarts the app
+  ///
+  /// This method restarts the app by restarting the activity.
+  /// It is necessary to restart the activity after changing the WM density.
+  static Future<void> restartApp() async {
     if (!Platform.isAndroid) {
       SimpleLogger()
           .warning("Attempted to restart activity on non-Android platform");
