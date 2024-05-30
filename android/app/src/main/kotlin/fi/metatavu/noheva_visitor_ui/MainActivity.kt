@@ -49,9 +49,7 @@ class MainActivity: FlutterActivity() {
      * Restarts the activity
      */
     private fun restartActivity() {
-        val intent = Intent(this, this::class.java)
-        finishAffinity()
-        startActivity(intent)
+        this.recreate()
     }
 
     /**
