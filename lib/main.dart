@@ -60,12 +60,16 @@ void main() async {
 
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
-  FontHelper.loadOfflinedFonts();
 
   final serialNumber = await DeviceInfo.getSerialNumber();
   SimpleLogger().info("Device serial number: $serialNumber");
 
   deviceId = await keyDao.getDeviceId();
+
+  await _checkInternetConnection();
+  await _pingNohevaApi();
+
+  FontHelper.loadOfflinedFonts();
 
   if (deviceId != null) {
     SimpleLogger().info("Device Id is: $deviceId");
@@ -89,6 +93,62 @@ void main() async {
   }
 
   runApp(const NohevaApp());
+}
+
+/// Checks if internet connection is available.
+///
+/// If not, waits for 5 seconds and retries.
+/// This essentially halts the app until internet connection is available.
+Future<void> _checkInternetConnection() async {
+  SimpleLogger().info("Checking internet connection...");
+  try {
+    final apiHost = configuration.getApiBasePath().replaceAll("https://", "");
+    final lookup = await InternetAddress.lookup(apiHost);
+    if (lookup.isNotEmpty && lookup[0].rawAddress.isNotEmpty) {
+      SimpleLogger().info("Internet connection is available!");
+
+      return;
+    } else {
+      SimpleLogger().info("No internet connection!");
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await _checkInternetConnection();
+    }
+  } on SocketException catch (exception) {
+    SimpleLogger().info("No internet connection: $exception");
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await _checkInternetConnection();
+  } catch (exception) {
+    SimpleLogger().info("Error checking internet connection: $exception");
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await _checkInternetConnection();
+  }
+}
+
+/// Checks if Noheva API ping endpoint responds correctly
+///
+/// If not, waits for 5 seconds and retries.
+/// This essentially halts the app until the API is available.
+Future<void> _pingNohevaApi() async {
+  SimpleLogger().info("Pinging Noheva API...");
+  try {
+    final systemApi = await apiFactory.getSystemApi();
+
+    final pingResponse =
+        await systemApi.ping().then((response) => response.data);
+    if (pingResponse != null && pingResponse.asString == "pong") {
+      SimpleLogger().info("Noheva API is available!");
+
+      return;
+    } else {
+      SimpleLogger().info("Noheva API is not available!");
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await _pingNohevaApi();
+    }
+  } catch (exception) {
+    SimpleLogger().info("Error pinging Noheva API: $exception");
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await _pingNohevaApi();
+  }
 }
 
 /// Sets up window manager for platforms where it is required and supported.
