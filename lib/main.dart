@@ -67,6 +67,7 @@ void main() async {
   deviceId = await keyDao.getDeviceId();
 
   await _checkInternetConnection();
+  await _pingNohevaApi();
 
   FontHelper.loadOfflinedFonts();
 
@@ -118,8 +119,35 @@ Future<void> _checkInternetConnection() async {
     await _checkInternetConnection();
   } catch (exception) {
     SimpleLogger().info("Error checking internet connection: $exception");
-    await _checkInternetConnection();
     await Future<void>.delayed(const Duration(seconds: 5));
+    await _checkInternetConnection();
+  }
+}
+
+/// Checks if Noheva API ping endpoint responds correctly
+///
+/// If not, waits for 5 seconds and retries.
+/// This essentially halts the app until the API is available.
+Future<void> _pingNohevaApi() async {
+  SimpleLogger().info("Pinging Noheva API...");
+  try {
+    final systemApi = await apiFactory.getSystemApi();
+
+    final pingResponse =
+        await systemApi.ping().then((response) => response.data);
+    if (pingResponse != null && pingResponse.asString == "pong") {
+      SimpleLogger().info("Noheva API is available!");
+
+      return;
+    } else {
+      SimpleLogger().info("Noheva API is not available!");
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await _pingNohevaApi();
+    }
+  } catch (exception) {
+    SimpleLogger().info("Error pinging Noheva API: $exception");
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await _pingNohevaApi();
   }
 }
 
