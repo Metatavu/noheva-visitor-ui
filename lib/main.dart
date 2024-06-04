@@ -60,12 +60,15 @@ void main() async {
 
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
-  FontHelper.loadOfflinedFonts();
 
   final serialNumber = await DeviceInfo.getSerialNumber();
   SimpleLogger().info("Device serial number: $serialNumber");
 
   deviceId = await keyDao.getDeviceId();
+
+  await _checkInternetConnection();
+
+  FontHelper.loadOfflinedFonts();
 
   if (deviceId != null) {
     SimpleLogger().info("Device Id is: $deviceId");
@@ -89,6 +92,35 @@ void main() async {
   }
 
   runApp(const NohevaApp());
+}
+
+/// Checks if internet connection is available.
+///
+/// If not, waits for 5 seconds and retries.
+/// This essentially halts the app until internet connection is available.
+Future<void> _checkInternetConnection() async {
+  SimpleLogger().info("Checking internet connection...");
+  try {
+    final apiHost = configuration.getApiBasePath().replaceAll("https://", "");
+    final lookup = await InternetAddress.lookup(apiHost);
+    if (lookup.isNotEmpty && lookup[0].rawAddress.isNotEmpty) {
+      SimpleLogger().info("Internet connection is available!");
+
+      return;
+    } else {
+      SimpleLogger().info("No internet connection!");
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await _checkInternetConnection();
+    }
+  } on SocketException catch (exception) {
+    SimpleLogger().info("No internet connection: $exception");
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await _checkInternetConnection();
+  } catch (exception) {
+    SimpleLogger().info("Error checking internet connection: $exception");
+    await _checkInternetConnection();
+    await Future<void>.delayed(const Duration(seconds: 5));
+  }
 }
 
 /// Sets up window manager for platforms where it is required and supported.
