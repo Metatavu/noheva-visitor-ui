@@ -19,7 +19,8 @@ class ApiFactory {
     if (deviceKey != null) {
       api.dio.options.headers.addAll({"X-DEVICE-KEY": deviceKey});
     }
-    api.dio.options.connectTimeout = null;
+    api.dio.options.connectTimeout = const Duration(minutes: 30);
+    api.dio.options.receiveTimeout = const Duration(minutes: 30);
 
     return api;
   }
