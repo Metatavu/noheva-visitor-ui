@@ -86,6 +86,7 @@ jobs:
             ${{ secrets.VAULT_PATH }} AWS_ACCESS_KEY_ID | AWS_ACCESS_KEY_ID ;
             ${{ secrets.VAULT_PATH }} AWS_SECRET_ACCESS_KEY | AWS_SECRET_ACCESS_KEY ;
             ${{ secrets.VAULT_PATH }} UPDATES_BUCKET | UPDATES_BUCKET ;
+            ${{ secrets.VAULT_PATH }} UPDATES_DIR | UPDATES_DIR ;
 
       - name: Build APK
         uses: subosito/flutter-action@v2
@@ -119,7 +120,7 @@ jobs:
           aws_secret_access_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ env.UPDATES_BUCKET }}
           source_dir: update
-          destination_dir: "staging/"
+          destination_dir: ${{ env.UPDATES_DIR }}
 
   ## MacOS build is currently handled manually outside of the CI/CD pipeline.
   # buildMacOS:
