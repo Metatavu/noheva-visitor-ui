@@ -22,6 +22,8 @@ import "package:flutter_gen/gen_l10n/app_localizations.dart";
 
 late final Configuration configuration;
 late final String environment;
+late final String mqttBaseTopic;
+
 final apiFactory = ApiFactory();
 late bool isDeviceApproved;
 String? deviceId;
@@ -60,6 +62,9 @@ void main() async {
 
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
+
+  mqttBaseTopic = configuration.getMqttBaseTopic();
+  SimpleLogger().info("Using MQTT base topic $mqttBaseTopic");
 
   final serialNumber = await DeviceInfo.getSerialNumber();
   SimpleLogger().info("Device serial number: $serialNumber");
