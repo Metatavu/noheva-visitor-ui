@@ -1,0 +1,44 @@
+name: Build app (develop)
+on:
+  push:
+    branches:
+      - feature-71-add-fonts
+jobs:
+  bumpVersion:
+    runs-on: ubuntu-latest
+    environment: develop
+    steps:
+      - name: Parse Comment
+        id: options
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          echo "Comment: $COMMENT"
+
+          # Extract switches
+          if [[ "$COMMENT" =~ android ]]; then
+            echo "android=true" >> $GITHUB_OUTPUT
+          elif [[ "$COMMENT" =~ macos ]]; then
+            echo "macos=true" >> $GITHUB_OUTPUT
+          else
+            echo "android=true" >> $GITHUB_OUTPUT
+            echo "macos=true" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$COMMENT" =~ skip-metadata ]]; then
+            echo "skip_metadata=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_metadata=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Simulate build android
+        if: ${{ steps.options.outputs.android == 'true' }}
+        run: echo "Simulating Android build..."
+      - name: Simulate build macOS
+        if: ${{ steps.options.outputs.macos == 'true' }}
+        run: echo "Simulating macOS build..."
+      - name: Skip metadata
+        run: |
+          if [[ "${{ steps.options.outputs.skip_metadata }}" == "true" ]]; then
+            echo "Skipping metadata update."
+          else
+            echo "Updating metadata..."
+          fi
