@@ -41,6 +41,22 @@ class FontHelper {
       name: "Larken-Medium",
       fileName: "Larken-Medium.ttf",
     ),
+    const Font(
+      name: "Libre-Baskerville-Regular",
+      fileName: "LibreBaskerville-Regular.ttf",
+    ),
+    const Font(
+      name: "Libre-Baskerville-Italic",
+      fileName: "LibreBaskerville-Italic.ttf",
+    ),
+    const Font(
+      name: "Noto-Sans-Regular",
+      fileName: "NotoSans-Regular.ttf",
+    ),
+    const Font(
+      name: "Noto-Sans-Bold",
+      fileName: "NotoSans-Bold.ttf",
+    )
   ];
 
   /// Loads offlined fonts into Flutter Engine
