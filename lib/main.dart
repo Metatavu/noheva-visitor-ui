@@ -63,7 +63,10 @@ void main() async {
   environment = configuration.getEnvironment();
   SimpleLogger().info("Running in $environment environment");
 
-  mqttBaseTopic = configuration.getMqttBaseTopic();
+  mqttBaseTopic = configuration.getMqttBaseTopic().isNotEmpty
+      ? "${configuration.getMqttBaseTopic()}/"
+      : "";
+
   SimpleLogger().info("Using MQTT base topic $mqttBaseTopic");
 
   final serialNumber = await DeviceInfo.getSerialNumber();
