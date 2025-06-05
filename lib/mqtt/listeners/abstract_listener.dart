@@ -36,5 +36,5 @@ abstract class AbstractListener {
   static T decodeMessage<T>(String message, Type specifiedType) =>
       SerializationUtils.deserializeObject(jsonDecode(message), specifiedType);
 
-  static final String BASE_TOPIC = "$mqttBaseTopic/$environment";
+  static final String BASE_TOPIC = "$mqttBaseTopic$environment";
 }

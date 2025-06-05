@@ -41,6 +41,22 @@ class FontHelper {
       name: "Larken-Medium",
       fileName: "Larken-Medium.ttf",
     ),
+    const Font(
+      name: "Libre-Baskerville-Regular",
+      fileName: "LibreBaskerville-Regular.ttf",
+    ),
+    const Font(
+      name: "Libre-Baskerville-Italic",
+      fileName: "LibreBaskerville-Italic.ttf",
+    ),
+    const Font(
+      name: "Noto-Sans-Regular",
+      fileName: "NotoSans-Regular.ttf",
+    ),
+    const Font(
+      name: "Noto-Sans-Bold",
+      fileName: "NotoSans-Bold.ttf",
+    )
   ];
 
   /// Loads offlined fonts into Flutter Engine
@@ -73,7 +89,14 @@ class FontHelper {
           (request) => request.close(),
         );
 
-    await offlineFileController.readResponseToFile(offlinedFont, response);
+    final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+    if (isSuccess) {
+      await offlineFileController.readResponseToFile(offlinedFont, response);
+    } else {
+      SimpleLogger().warning(
+          "message: Failed to download font $font from $uri. Status code: ${response.statusCode}");
+    }
 
     return _readOfflinedFontFile(offlinedFont);
   }
