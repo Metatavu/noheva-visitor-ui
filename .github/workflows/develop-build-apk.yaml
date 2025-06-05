@@ -79,8 +79,7 @@ jobs:
             ${{ secrets.VAULT_PATH }} MQTT_USERNAME | MQTT_USERNAME ;
             ${{ secrets.VAULT_PATH }} MQTT_PASSWORD | MQTT_PASSWORD ;
             ${{ secrets.VAULT_PATH }} MQTT_URLS | MQTT_URLS ;
-            ${{ secrets.VAULT_PATH }} MQTT_URL | MQTT_URL ;
-            ${{ secrets.VAULT_PATH }} MQTT_PORT | MQTT_PORT ;
+            ${{ secrets.VAULT_PATH }} MQTT_BASE_TOPIC | MQTT_BASE_TOPIC ;
             ${{ secrets.VAULT_PATH }} APP_UPDATES_BASE_URL | APP_UPDATES_BASE_URL ;
             ${{ secrets.VAULT_PATH }} CDN_BASE_URL | CDN_BASE_URL ;
             ${{ secrets.VAULT_PATH }} AWS_ACCESS_KEY_ID | AWS_ACCESS_KEY_ID ;
@@ -102,9 +101,9 @@ jobs:
           echo API_BASE_PATH=${{ env.API_BASE_PATH }} >> .env
           echo ENVIRONMENT=${{ env.ENVIRONMENT }} >> .env
           echo MQTT_PASSWORD=${{ env.MQTT_PASSWORD }} >> .env
-          echo MQTT_PORT=${{ env.MQTT_PORT }} >> .env
-          echo MQTT_URL=${{ env.MQTT_URL }} >> .env
           echo MQTT_USERNAME=${{ env.MQTT_USERNAME }} >> .env
+          echo MQTT_URLS=${{ env.MQTT_URLS }} >> .env
+          echo MQTT_BASE_TOPIC=${{ env.MQTT_BASE_TOPIC }} >> .env
           echo APP_UPDATES_BASE_URL=${{ env.APP_UPDATES_BASE_URL }} >> .env
           echo CDN_BASE_URL=${{ env.CDN_BASE_URL }} >> .env
           flutter pub get

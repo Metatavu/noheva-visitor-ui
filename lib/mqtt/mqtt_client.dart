@@ -19,7 +19,7 @@ class MqttClient {
 
   Future<String> get _statusTopic async {
     var deviceId = _deviceId;
-    var mqttBaseTopic = configuration.getMqttBaseTopic();
+    var mqttBaseTopic = "${configuration.getMqttBaseTopic()}/";
 
     if (deviceId == null) {
       SimpleLogger().warning("Device ID not found, cannot get status topic.");
@@ -27,7 +27,7 @@ class MqttClient {
       return "";
     }
 
-    return "$mqttBaseTopic/$environment/$deviceId/status";
+    return "$mqttBaseTopic$environment/$deviceId/status";
   }
 
   bool get isConnected =>
