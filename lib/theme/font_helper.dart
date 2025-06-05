@@ -89,7 +89,14 @@ class FontHelper {
           (request) => request.close(),
         );
 
-    await offlineFileController.readResponseToFile(offlinedFont, response);
+    final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+    if (isSuccess) {
+      await offlineFileController.readResponseToFile(offlinedFont, response);
+    } else {
+      SimpleLogger().warning(
+          "message: Failed to download font $font from $uri. Status code: ${response.statusCode}");
+    }
 
     return _readOfflinedFontFile(offlinedFont);
   }
