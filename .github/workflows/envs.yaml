@@ -1,4 +1,4 @@
-name: Env transfer (develop)
+name: Env transfer (master)
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: develop
+    environment: master
     steps:
       - uses: actions/checkout@v3
         with:
@@ -15,7 +15,6 @@ jobs:
       - name: Build ENVS
         run: |
           mkdir ENV &&
-          echo ANDROID_ARCHITECTURE=${{ secrets.ANDROID_ARCHITECTURE }} >> ENV/envs
           echo API_BASE_PATH=${{ secrets.API_BASE_PATH }} >> ENV/envs
           echo APP_UPDATES_BASE_URL=${{ secrets.APP_UPDATES_BASE_URL }} >> ENV/envs
           echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> ENV/envs
@@ -29,7 +28,6 @@ jobs:
           echo SIGN_KEYSTORE=${{ secrets.SIGN_KEYSTORE }} >> ENV/envs
           echo SIGN_KEY_PASSWORD=${{ secrets.SIGN_KEY_PASSWORD }} >> ENV/envs
           echo SIGN_STORE_PASSWORD=${{ secrets.SIGN_STORE_PASSWORD }} >> ENV/envs
-          echo SPARKLE_SIGN_KEY=${{ secrets.SPARKLE_SIGN_KEY }} >> ENV/envs
           echo UPDATES_BUCKET=${{ secrets.UPDATES_BUCKET }} >> ENV/envs
       - name: Upload ENV
         uses: shallwefootball/s3-upload-action@master
@@ -38,4 +36,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ secrets.UPDATES_BUCKET }}
           source_dir: ENV
-          destination_dir: "staging"
+          destination_dir: "master"
