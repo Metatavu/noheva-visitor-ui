@@ -10,8 +10,8 @@ class Configuration {
   static const String ENVIRONMENT = "ENVIRONMENT";
   static const String MQTT_USERNAME = "MQTT_USERNAME";
   static const String MQTT_PASSWORD = "MQTT_PASSWORD";
-  static const String MQTT_URL = "MQTT_URL";
-  static const String MQTT_PORT = "MQTT_PORT";
+  static const String MQTT_URLS = "MQTT_URLS";
+  static const String MQTT_BASE_TOPIC = "MQTT_BASE_TOPIC";
   static const String APP_UPDATES_BASE_URL = "APP_UPDATES_BASE_URL";
   static const String CDN_BASE_URL = "CDN_BASE_URL";
 
@@ -30,8 +30,7 @@ class Configuration {
       ENVIRONMENT,
       MQTT_USERNAME,
       MQTT_PASSWORD,
-      MQTT_URL,
-      MQTT_PORT,
+      MQTT_URLS,
       APP_UPDATES_BASE_URL,
       CDN_BASE_URL,
     ];
@@ -55,8 +54,8 @@ class Configuration {
   String getEnvironment() => get(ENVIRONMENT);
   String getMqttUsername() => get(MQTT_USERNAME);
   String getMqttPassword() => get(MQTT_PASSWORD);
-  String getMqttUrl() => get(MQTT_URL);
-  String getMqttPort() => get(MQTT_PORT);
+  List<String> getMqttUrls() => get(MQTT_URLS).split(",");
+  String getMqttBaseTopic() => get(MQTT_BASE_TOPIC);
   String getAppUpdatesBaseUrl() => get(APP_UPDATES_BASE_URL);
   String getCdnBaseUrl() => get(CDN_BASE_URL);
 }
