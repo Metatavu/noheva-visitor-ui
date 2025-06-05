@@ -23,3 +23,11 @@ For example run code generation with
 ## Silent Master Branch
 
 This repository includes a `master-silent` branch, used to publish APKs **without** uploading the `output-metadata.json` file. This prevents automated device updates from being triggered, allowing for silent or internal distribution of builds when needed.
+
+## Synchronize environment variables
+
+Proceed with the following steps to get started:
+
+1. Install Hashicorp vault CLI by referencing the official documentation here: [Hashicorp Vault CLI Install](https://developer.hashicorp.com/vault/install)
+2. Install withhcv helper script (https://github.com/Metatavu/development-scripts/blob/master/hcv/withhcv.sh)
+3. Run `withhcv vault kv get -format json -mount="digimatka/noheva/local/kv" "build-noheva-visitor-ui"|jq -r '.data.data | to_entries[] | "\(.key)=\(.value)"' > .env`
