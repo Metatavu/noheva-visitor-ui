@@ -29,22 +29,47 @@ class _StartupScreenState extends State<StartupScreen> {
     String currentVersion = await Updater.getCurrentVersion();
     String? serverVersion = await Updater.getServerVersion();
     if (serverVersion != null) {
+      int currentVersionCode = _parseVersion(currentVersion);
+      int serverVersionCode = _parseVersion(serverVersion);
+
       SimpleLogger().info("Server version: $serverVersion");
-      if (currentVersion != serverVersion) {
-        SimpleLogger().info("Update available!");
+      if (serverVersionCode > currentVersionCode) {
+        SimpleLogger().info("Update available! "
+            "Current: $currentVersion ($currentVersionCode), "
+            "Server: $serverVersion ($serverVersionCode)");
+
         setState(() {
           _updateAvailable = true;
           _serverVersion = serverVersion;
         });
       } else {
-        SimpleLogger().info(
-          "No update available. Navigating to Default Screen.",
-        );
+        SimpleLogger()
+            .info("No update available. Navigating to Default Screen. "
+                "Current: $currentVersion ($currentVersionCode), "
+                "Server: $serverVersion ($serverVersionCode)");
         _navigateForward();
       }
     } else {
       SimpleLogger().warning("Couldn't get server version.");
     }
+  }
+
+  int _parseVersion(String version) {
+    // Match the version prefix: up to three dot-separated numbers at the beginning
+    final match = RegExp(r'^(\d+)\.(\d+)\.(\d+)').firstMatch(version);
+
+    if (match == null) {
+      throw FormatException('Invalid version format: $version');
+    }
+
+    // Extract and pad each numeric component
+    final major = match.group(1)!.padLeft(2, '0');
+    final minor = match.group(2)!.padLeft(2, '0');
+    final patch = match.group(3)!.padLeft(2, '0');
+
+    final combined = '$major$minor$patch';
+
+    return int.parse(combined);
   }
 
   /// Navigates to default screen
